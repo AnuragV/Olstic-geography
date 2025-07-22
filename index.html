@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Word Search Puzzle</title>
+  <title>Word Search Game</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -39,32 +39,42 @@
       background-color: #81c784;
       color: white;
     }
-    #word-list {
+    #info {
       margin-top: 1rem;
-    }
-    #word-list span {
-      margin: 0 10px;
-      font-weight: bold;
+      font-size: 1.1rem;
     }
   </style>
 </head>
 <body>
-  <h1>🔤 Word Search Game</h1>
-  <p>Find the hidden words by clicking and dragging through the grid.</p>
+  <h1>🔤 Word Search Challenge</h1>
+  <p>Click and drag to select hidden words. Find all 5!</p>
   <div id="grid"></div>
-  <div id="word-list"></div>
+  <div id="info">
+    <div id="words-remaining">Words Remaining: 5</div>
+    <div id="timer">Time: 0s</div>
+  </div>
 
   <script>
     const wordsToFind = ["TRAIN", "CLOUD", "SPICE", "MANGO", "TIGER"];
+    const originalWordCount = wordsToFind.length;
     const size = 8;
     let grid = [];
     let selectedCells = [];
     let isMouseDown = false;
+    let seconds = 0;
+    let timerInterval;
 
     const directions = [
       [0, 1], [1, 0], [1, 1], [-1, 1],
       [0, -1], [-1, 0], [-1, -1], [1, -1]
     ];
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        seconds++;
+        document.getElementById("timer").innerText = `Time: ${seconds}s`;
+      }, 1000);
+    }
 
     function createGrid() {
       const container = document.getElementById("grid");
@@ -98,7 +108,8 @@
         }
       }
 
-      updateWordList();
+      document.getElementById("words-remaining").innerText =
+        `Words Remaining: ${wordsToFind.length}`;
     }
 
     function placeWord(word) {
@@ -145,34 +156,35 @@
     function handleMouseUp() {
       isMouseDown = false;
       const selectedWord = selectedCells.map(cell => cell.innerText).join("");
+
       if (wordsToFind.includes(selectedWord)) {
         selectedCells.forEach(cell => {
           cell.classList.remove("selected");
           cell.classList.add("found");
         });
         wordsToFind.splice(wordsToFind.indexOf(selectedWord), 1);
-        updateWordList();
+        document.getElementById("words-remaining").innerText =
+          `Words Remaining: ${wordsToFind.length}`;
+
+        if (wordsToFind.length === 0) {
+          clearInterval(timerInterval);
+          alert(`🎉 You found all the words in ${seconds} seconds!`);
+        }
       } else {
         selectedCells.forEach(cell => cell.classList.remove("selected"));
       }
-      selectedCells = [];
-    }
 
-    function updateWordList() {
-      const container = document.getElementById("word-list");
-      container.innerHTML = "<h3>Words to Find:</h3>";
-      wordsToFind.forEach(word => {
-        const span = document.createElement("span");
-        span.innerText = word;
-        container.appendChild(span);
-      });
+      selectedCells = [];
     }
 
     document.body.addEventListener("mouseup", () => {
       if (isMouseDown) handleMouseUp();
     });
 
-    createGrid();
+    window.onload = () => {
+      createGrid();
+      startTimer();
+    };
   </script>
 </body>
 </html>
