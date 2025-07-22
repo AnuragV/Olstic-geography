@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connections India Edition</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f6f6f6;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: #222;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      max-width: 600px;
+      margin: 2rem auto;
+    }
+    .word {
+      background: white;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      font-size: 1rem;
+      user-select: none;
+      transition: 0.2s;
+    }
+    .word.selected {
+      background-color: #cce5ff;
+      border-color: #3399ff;
+    }
+    .grouped {
+      background-color: #d4edda;
+      border-color: #28a745;
+      color: #155724;
+    }
+    .result {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧩 Connections: India Edition</h1>
+  <p>Select 4 related words to find a group.</p>
+  <div class="grid" id="grid"></div>
+  <div class="result" id="result"></div>
+
+  <script>
+    const categories = {
+      "Indian Movies (1-word)": ["Dangal", "Lagaan", "Kahaani", "Tamasha"],
+      "Indian Rulers": ["Ashoka", "Akbar", "Shivaji", "Ranjit"],
+      "Things You Can Eat": ["Samosa", "Paneer", "Ladoo", "Biryani"],
+      "Indian Cities": ["Mumbai", "Delhi", "Chennai", "Jaipur"]
+    };
+
+    const allWords = Object.values(categories).flat();
+    const shuffledWords = allWords.sort(() => Math.random() - 0.5);
+
+    const grid = document.getElementById("grid");
+    const result = document.getElementById("result");
+
+    let selected = [];
+    let foundGroups = [];
+
+    function renderGrid() {
+      grid.innerHTML = "";
+      shuffledWords.forEach(word => {
+        const div = document.createElement("div");
+        div.className = "word";
+        div.innerText = word;
+        div.addEventListener("click", () => toggleSelect(div, word));
+        grid.appendChild(div);
+      });
+    }
+
+    function toggleSelect(div, word) {
+      if (div.classList.contains("grouped")) return;
+
+      if (div.classList.contains("selected")) {
+        div.classList.remove("selected");
+        selected = selected.filter(w => w !== word);
+      } else {
+        if (selected.length === 4) return;
+        div.classList.add("selected");
+        selected.push(word);
+
+        if (selected.length === 4) {
+          checkGroup();
+        }
+      }
+    }
+
+    function checkGroup() {
+      for (const [category, words] of Object.entries(categories)) {
+        if (selected.every(w => words.includes(w))) {
+          document.querySelectorAll(".selected").forEach(div => {
+            div.classList.remove("selected");
+            div.classList.add("grouped");
+          });
+          foundGroups.push(category);
+          result.innerText = `✅ Correct! Category: ${category}`;
+          selected = [];
+          return;
+        }
+      }
+
+      result.innerText = "❌ Incorrect group. Try again.";
+      setTimeout(() => {
+        document.querySelectorAll(".selected").forEach(div => div.classList.remove("selected"));
+        selected = [];
+        result.innerText = "";
+      }, 1000);
+    }
+
+    renderGrid();
+  </script>
+</body>
+</html>
