@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Country Scrabble Challenge</title>
+<style>
+  body { margin: 0; font-family: sans-serif; background: #f0e6d6; display: flex; flex-direction: column; align-items: center; }
+  header { padding: 10px 0; font-size: 1.4rem; font-weight: bold; }
+  #game-area { display: flex; flex-wrap: wrap; justify-content: center; }
+  .panel { margin: 10px; text-align: center; }
+  #letter-panel { display: grid; grid-template-columns: repeat(13, 32px); gap: 4px; margin-bottom: 10px; }
+  .letter-btn { background: #fff; border: 1px solid #ccc; cursor: pointer; font-weight: bold; }
+  .letter-btn.selected { background: #ffe680; }
+  #board { display: grid; grid-template-columns: repeat(15, 36px); gap: 1px; background: #333; }
+  .tile { width: 36px; height: 36px; background: #f8f1e7; display: flex; align-items: center;
+         justify-content: center; font-size: 1rem; position: relative; cursor: pointer; }
+  .tile[data-mult="DL"]::after { content: "DL"; position: absolute; top:2px; right:2px; font-size:0.6rem; color:#006; }
+  .tile[data-mult="TL"]::after { content: "TL"; position:absolute; top:2px; right:2px; font-size:0.6rem; color:#006; }
+  .tile[data-mult="DW"]::after { content: "DW"; position:absolute; top:2px; right:2px; font-size:0.6rem; color:#600; }
+  .tile[data-mult="TW"]::after { content: "TW"; position:absolute; top:2px; right:2px; font-size:0.6rem; color:#600; }
+  .placed { background: #ffe; }
+  .tile.placed { cursor: default; }
+  footer { margin:20px; font-size:1.1rem; }
+  @media(max-width:800px){ #letter-panel { grid-template-columns: repeat(7,32px);} }
+</style>
+</head>
+<body>
+
+<header>🧩 Country Word Scrabble – Score words that are valid country names!</header>
+
+<div id="game-area">
+  <div class="panel" id="letter-selector">
+    <div id="letter-panel"></div>
+    <button id="clear-letter">Clear Selection</button>
+  </div>
+  <div class="panel">
+    <div id="board"></div>
+    <button id="submit-word">Submit Word</button>
+  </div>
+</div>
+
+<footer>
+  <div>Score: <span id="score">0</span></div>
+  <div>Time Left: <span id="timer">10:00</span></div>
+</footer>
+
+<script>
+// 🧠 Data & Helpers
+const tileScore = {A:1, B:3, C:3, D:2, E:1,F:4,G:2,H:4,I:1,J:8,K:5,L:1,M:3,N:1,O:1,P:3,
+                   Q:10,R:1,S:1,T:1,U:1,V:4,W:4,X:8,Y:4,Z:10};
+const countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia",
+  "Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus",
+  "Belgium","Belize","Benin","Bhutan","Bolivia","Botswana","Brazil","Brunei","Bulgaria",
+  "Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Chad","Chile","China",
+  "Colombia","Comoros","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark",
+  "Dominica","Ecuador","Egypt","El Salvador","Estonia","Eswatini","Ethiopia","Fiji","Finland",
+  "France","Gabon","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea",
+  "Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland",
+  "Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo",
+  "Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein",
+  "Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta",
+  "Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Morocco",
+  "Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua",
+  "Niger","Nigeria","Norway","Oman","Pakistan","Palau","Panama","Paraguay","Peru","Philippines",
+  "Poland","Portugal","Qatar","Romania","Russia","Rwanda","Samoa","Senegal","Serbia","Seychelles",
+  "Sierra Leone","Singapore","Slovakia","Slovenia","Somalia","South Africa","South Korea",
+  "Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan",
+  "Tanzania","Thailand","Togo","Tonga","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda",
+  "Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan",
+  "Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+let board = [], currentLetter = null, placedTiles = [], score = 0;
+
+// 🕹️ Initialize letter panel
+const letterPanel = document.getElementById('letter-panel');
+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(l => {
+  const btn = document.createElement('button');
+  btn.innerText = l; btn.className='letter-btn';
+  btn.onclick = () => {
+    document.querySelectorAll('.letter-btn.selected').forEach(b=>b.classList.remove('selected'));
+    currentLetter = l; btn.classList.add('selected');
+  };
+  letterPanel.appendChild(btn);
+});
+
+// ⌫ Clear letter
+document.getElementById('clear-letter').onclick = () => {
+  currentLetter = null;
+  document.querySelectorAll('.letter-btn.selected').forEach(b=>b.classList.remove('selected'));
+};
+
+// 🎲 Board Setup
+const multMap = {
+  "0,0": "TW", "0,3": "DL", "0,7": "TW", "0,11": "DL", "0,14": "TW",
+  "1,1": "DW", "1,5": "TL", "1,9": "TL", "1,13": "DW",
+  "2,2": "DW", "2,6": "DL", "2,8": "DL", "2,12": "DW",
+  "3,0": "DL", "3,3": "DW", "3,7": "DL", "3,11": "DW", "3,14": "DL",
+  "4,4": "DW", "4,10": "DW",
+  "5,1": "TL", "5,5": "TL", "5,9": "TL", "5,13": "TL",
+  "6,2": "DL", "6,6": "DL", "6,8": "DL", "6,12": "DL",
+  "7,0": "TW", "7,3": "DL", "7,7": "★",  "7,11": "DL", "7,14": "TW",
+  "8,2": "DL", "8,6": "DL", "8,8": "DL", "8,12": "DL",
+  "9,1": "TL", "9,5": "TL", "9,9": "TL", "9,13": "TL",
+  "10,4": "DW", "10,10": "DW",
+  "11,0": "DL", "11,3": "DW", "11,7": "DL", "11,11": "DW", "11,14": "DL",
+  "12,2": "DW", "12,6": "DL", "12,8": "DL", "12,12": "DW",
+  "13,1": "DW", "13,5": "TL", "13,9": "TL", "13,13": "DW",
+  "14,0": "TW", "14,3": "DL", "14,7": "TW", "14,11": "DL", "14,14": "TW"
+};
+const b = document.getElementById('board');
+for(let r=0;r<15;r++){
+  for(let c=0;c<15;c++){
+    board[r] = board[r]||[];
+    const tile = document.createElement('div');
+    const key = (multMap[r]==='TW'||multMap[c]==='TW') ? 'TW'
+               : (multMap[r]==='DW'||multMap[c]==='DW') ? 'DW'
+               : (multMap[r]==='TL'||multMap[c]==='TL') ? 'TL'
+               : (multMap[r]==='DL'||multMap[c]==='DL') ? 'DL':'';
+    tile.className='tile'; tile.dataset.mult = key;
+    tile.dataset.row=r; tile.dataset.col=c;
+    tile.onclick = () => {
+      if(currentLetter && !tile.classList.contains('placed')){
+        tile.innerText = currentLetter;
+        tile.classList.add('placed');
+        placedTiles.push(tile);
+      }
+    };
+    board[r][c]=tile;
+    b.appendChild(tile);
+  }
+}
+
+// ✅ Submit word
+document.getElementById('submit-word').onclick = ()=>{
+  if(!placedTiles.length)return;
+  const word = placedTiles.map(t=>t.innerText).join('');
+  if(!countries.some(c=>c.toUpperCase()===word)){
+    alert('Not a valid country name!');
+    return;
+  }
+  // Score calculation:
+  let wordScore = placedTiles.reduce((s,t)=>{
+    const l = t.innerText;
+    const pts = tileScore[l]||0;
+    return s + pts * (t.dataset.mult==='DL'?2:t.dataset.mult==='TL'?3:1);
+  }, 0);
+  const wordMult = placedTiles.reduce((m,t)=> t.dataset.mult==='DW'?m*2:t.dataset.mult==='TW'?m*3:m,1);
+  score += wordScore * wordMult;
+  document.getElementById('score').innerText = score;
+  placedTiles.forEach(t=>t.classList.remove('placed'));
+  placedTiles=[];
+};
+
+// ⏱️ Timer
+let timeLeft = 600; // 10 min
+const timerEl = document.getElementById('timer');
+const interval = setInterval(()=>{
+  const m = Math.floor(timeLeft/60), s = timeLeft%60;
+  timerEl.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  if(timeLeft-- <= 0){
+    clearInterval(interval);
+    alert(`⏰ Time's up! Final score: ${score}`);
+    document.querySelectorAll('.tile').forEach(t=>t.onclick=null);
+  }
+},1000);
+</script>
+</body>
+</html>
