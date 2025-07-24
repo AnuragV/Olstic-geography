@@ -3,26 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Country Scrabble Game</title>
+  <title>Scrabble: Country Edition</title>
   <style>
     body {
       font-family: sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 1rem;
+      background-color: #121212;
+      color: #f0f0f0;
       text-align: center;
+      padding: 1rem;
     }
     #game { display: flex; flex-direction: column; align-items: center; }
+
     #board {
       display: grid;
       grid-template: repeat(15, 40px) / repeat(15, 40px);
-      border: 2px solid #555;
+      border: 2px solid #444;
       margin-bottom: 1rem;
     }
     .cell {
       width: 40px;
       height: 40px;
-      border: 1px solid #aaa;
+      border: 1px solid #666;
       box-sizing: border-box;
       border-radius: 5px;
       font-weight: bold;
@@ -31,12 +32,13 @@
       align-items: center;
       justify-content: center;
       position: relative;
+      color: white;
     }
-    .mult-NORMAL { background: #eee; }
-    .mult-DL { background: #cceeff; }
-    .mult-TL { background: #66ccff; }
-    .mult-DW { background: #ffcccc; }
-    .mult-TW { background: #cc0000; color: white; }
+    .mult-NORMAL { background: #2c2c2c; }
+    .mult-DL { background: #3498db; }
+    .mult-TL { background: #21618c; }
+    .mult-DW { background: #e74c3c; }
+    .mult-TW { background: #922b21; }
     .cell.mult-DL::after,
     .cell.mult-TL::after,
     .cell.mult-DW::after,
@@ -44,6 +46,7 @@
       content: attr(data-label);
       position: absolute;
       font-size: 0.7em;
+      color: white;
     }
 
     #rack {
@@ -65,6 +68,11 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      transition: transform 0.2s ease;
+    }
+    .tile.dragging {
+      transform: scale(1.3);
+      z-index: 1000;
     }
     .tile span.points {
       font-size: 0.7em;
@@ -88,13 +96,13 @@
     }
 
     .highlighted {
-      outline: 2px solid darkblue;
+      outline: 2px solid gold;
     }
   </style>
 </head>
 <body>
   <div id="game">
-    <h1>🌍 Country Scrabble Game</h1>
+    <h1>🌍 Country Scrabble Game (Dark Mode)</h1>
     <div id="board"></div>
 
     <div id="controls">
@@ -120,16 +128,11 @@ const tilePoints = {
   N:1,O:1,P:3,Q:10,R:1,S:1,T:1,U:1,V:4,W:4,X:8,Y:4,Z:10
 };
 
-const multiplierMap = {}; // Fill this with TW/DW/TL/DL positions
-const TW = ["0,0","0,7","0,14","7,0","7,14","14,0","14,7","14,14"];
-const DW = ["1,1","2,2","3,3","4,4","7,7","10,10","11,11","12,12","13,13"];
-const TL = ["1,5","5,1","5,5","5,9","9,5","9,9","13,9","9,13"];
-const DL = ["0,3","2,6","3,0","3,7","6,2","6,6","6,8","7,3","8,6","11,0","11,7","14,3"];
-
-TW.forEach(pos => multiplierMap[pos] = "TW");
-DW.forEach(pos => multiplierMap[pos] = "DW");
-TL.forEach(pos => multiplierMap[pos] = "TL");
-DL.forEach(pos => multiplierMap[pos] = "DL");
+const multiplierMap = {};
+["0,0","0,7","0,14","7,0","7,14","14,0","14,7","14,14"].forEach(p => multiplierMap[p]="TW");
+["1,1","2,2","3,3","4,4","7,7","10,10","11,11","12,12","13,13"].forEach(p => multiplierMap[p]="DW");
+["1,5","5,1","5,5","5,9","9,5","9,9","13,9","9,13"].forEach(p => multiplierMap[p]="TL");
+["0,3","2,6","3,0","3,7","6,2","6,6","6,8","7,3","8,6","11,0","11,7","14,3"].forEach(p => multiplierMap[p]="DL");
 
 let placedTiles = [];
 let totalScore = 0;
@@ -155,36 +158,49 @@ function buildBoard() {
 function buildRack() {
   for (let i = 65; i <= 90; i++) {
     const ch = String.fromCharCode(i);
-    const tile = document.createElement("div");
-    tile.className = "tile";
-    tile.draggable = true;
-    tile.textContent = ch;
-    tile.dataset.letter = ch;
-    tile.innerHTML = `${ch}<br><span class="points">(${tilePoints[ch]})</span>`;
-    tile.ondragstart = e => e.dataTransfer.setData("text/plain", ch);
+    const tile = createTile(ch);
     rack.appendChild(tile);
   }
 }
 
-function handleDrop(e) {
-  const letter = e.dataTransfer.getData("text/plain");
+function createTile(letter) {
   const tile = document.createElement("div");
   tile.className = "tile";
-  tile.textContent = letter;
+  tile.innerHTML = `${letter}<br><span class="points">(${tilePoints[letter]})</span>`;
   tile.dataset.letter = letter;
   tile.draggable = true;
-  tile.ondragstart = e => {
-    e.dataTransfer.setData("text/plain", letter);
-    e.target.remove(); // allow redrag
-  };
 
-  if (e.target.innerHTML.trim() === "") {
-    e.target.appendChild(tile);
-    placedTiles.push(e.target);
-  }
+  tile.addEventListener("dragstart", e => {
+    tile.classList.add("dragging");
+    e.dataTransfer.setData("text/plain", letter);
+  });
+  tile.addEventListener("dragend", () => tile.classList.remove("dragging"));
+
+  return tile;
+}
+
+function handleDrop(e) {
+  const letter = e.dataTransfer.getData("text/plain");
+  if (!letter) return;
+
+  const existing = e.target.querySelector(".tile");
+  if (existing) return;
+
+  const tile = createTile(letter);
+  tile.addEventListener("dragstart", e => {
+    tile.classList.add("dragging");
+    e.dataTransfer.setData("text/plain", letter);
+    placedTiles = placedTiles.filter(c => c !== e.target);
+    tile.remove();
+  });
+  tile.addEventListener("dragend", () => tile.classList.remove("dragging"));
+
+  e.target.appendChild(tile);
+  placedTiles.push(e.target);
 }
 
 function getWordFromPlacedTiles() {
+  if (placedTiles.length === 0) return "";
   placedTiles.sort((a, b) => {
     const r1 = +a.dataset.row, c1 = +a.dataset.col;
     const r2 = +b.dataset.row, c2 = +b.dataset.col;
@@ -209,7 +225,7 @@ function scoreWord(word, tiles) {
 }
 
 const validCountries = [
-  "AFGHANISTAN","ALBANIA","ALGERIA","ANDORRA","ANGOLA","ANTIGUA","ARGENTINA","ARMENIA",
+   "AFGHANISTAN","ALBANIA","ALGERIA","ANDORRA","ANGOLA","ANTIGUA","ARGENTINA","ARMENIA",
   "AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHAMAS","BAHRAIN","BANGLADESH","BARBADOS","BELARUS",
   "BELGIUM","BELIZE","BENIN","BHUTAN","BOLIVIA","BOSNIA","BOTSWANA","BRAZIL","BRUNEI",
   "BULGARIA","BURKINA","BURUNDI","CABOVERDE","CAMBODIA","CAMEROON","CANADA","CENTRALAFRICANREPUBLIC",
@@ -234,8 +250,6 @@ const validCountries = [
   "VANUATU","VATICANCITY","VENEZUELA","VIETNAM","YEMEN","ZAMBIA","ZIMBABWE"
 ];
 
-let firstMove = true;
-
 document.getElementById("submitBtn").onclick = () => {
   const word = getWordFromPlacedTiles().toUpperCase();
   if (!validCountries.includes(word)) {
@@ -243,8 +257,10 @@ document.getElementById("submitBtn").onclick = () => {
     return;
   }
 
-  if (!firstMove && !placedTiles.some(cell => usedCoords.has(`${cell.dataset.row},${cell.dataset.col}`))) {
-    alert("❌ Must connect to previous words.");
+  // must connect with previous tiles (at least 1)
+  if (usedCoords.size > 0 &&
+    !placedTiles.some(cell => usedCoords.has(`${cell.dataset.row},${cell.dataset.col}`))) {
+    alert("❌ Word must connect with existing words.");
     return;
   }
 
@@ -257,7 +273,6 @@ document.getElementById("submitBtn").onclick = () => {
   });
 
   placedTiles = [];
-  rack.querySelectorAll(".tile").forEach(tile => tile.draggable = true);
 };
 
 document.getElementById("undoBtn").onclick = () => {
