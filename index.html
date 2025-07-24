@@ -126,10 +126,9 @@
     </div>
   </div>
 
-  <!-- Embedded click sound (base64-encoded) -->
+  <!-- Embedded click sound (browser-compatible) -->
   <audio id="clickSound">
-    <source src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA... (truncated)" type="audio/mp3" />
-    Your browser does not support the audio element.
+    <source src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCAAME... (truncated for now)" type="audio/mp3" />
   </audio>
 <script>
 const board = document.getElementById("board");
@@ -143,6 +142,32 @@ const tilePoints = {
   N:1,O:1,P:3,Q:10,R:1,S:1,T:1,U:1,V:4,W:4,X:8,Y:4,Z:10
 };
 
+const validCountries = [
+  "AFGHANISTAN","ALBANIA","ALGERIA","ANDORRA","ANGOLA","ANTIGUA","ARGENTINA","ARMENIA",
+  "AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHAMAS","BAHRAIN","BANGLADESH","BARBADOS","BELARUS",
+  "BELGIUM","BELIZE","BENIN","BHUTAN","BOLIVIA","BOSNIA","BOTSWANA","BRAZIL","BRUNEI",
+  "BULGARIA","BURKINA","BURUNDI","CABOVERDE","CAMBODIA","CAMEROON","CANADA","CENTRALAFRICANREPUBLIC",
+  "CHAD","CHILE","CHINA","COLOMBIA","COMOROS","CONGO","COSTARICA","CROATIA","CUBA","CYPRUS","CZECHIA",
+  "DENMARK","DJIBOUTI","DOMINICA","DOMINICANREPUBLIC","ECUADOR","EGYPT","ELSALVADOR","EQUATORIALGUINEA",
+  "ERITREA","ESTONIA","ESWATINI","ETHIOPIA","FIJI","FINLAND","FRANCE","GABON","GAMBIA","GEORGIA",
+  "GERMANY","GHANA","GREECE","GRENADA","GUATEMALA","GUINEA","GUINEABISSAU","GUYANA","HAITI","HONDURAS",
+  "HUNGARY","ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISRAEL","ITALY","IVORYCOAST",
+  "JAMAICA","JAPAN","JORDAN","KAZAKHSTAN","KENYA","KIRIBATI","KOREA","KOSOVO","KUWAIT","KYRGYZSTAN",
+  "LAOS","LATVIA","LEBANON","LESOTHO","LIBERIA","LIBYA","LIECHTENSTEIN","LITHUANIA","LUXEMBOURG",
+  "MADAGASCAR","MALAWI","MALAYSIA","MALDIVES","MALI","MALTA","MARSHALLISLANDS","MAURITANIA",
+  "MAURITIUS","MEXICO","MICRONESIA","MOLDOVA","MONACO","MONGOLIA","MONTENEGRO","MOROCCO","MOZAMBIQUE",
+  "MYANMAR","NAMIBIA","NAURU","NEPAL","NETHERLANDS","NEWZEALAND","NICARAGUA","NIGER","NIGERIA",
+  "NORTHKOREA","NORTHMACEDONIA","NORWAY","OMAN","PAKISTAN","PALAU","PALESTINE","PANAMA",
+  "PAPUANEWGUINEA","PARAGUAY","PERU","PHILIPPINES","POLAND","PORTUGAL","QATAR","ROMANIA","RUSSIA",
+  "RWANDA","SAINTKITTS","SAINTLUCIA","SAINTVINCENT","SAMOA","SANMARINO","SAOTOMEANDPRINCIPE",
+  "SAUDIARABIA","SENEGAL","SERBIA","SEYCHELLES","SIERRALEONE","SINGAPORE","SLOVAKIA","SLOVENIA",
+  "SOLOMONISLANDS","SOMALIA","SOUTHAFRICA","SOUTHKOREA","SOUTHSUDAN","SPAIN","SRI LANKA",
+  "SUDAN","SURINAME","SWEDEN","SWITZERLAND","SYRIA","TAIWAN","TAJIKISTAN","TANZANIA","THAILAND",
+  "TIMORLESTE","TOGO","TONGA","TRINIDADANDTOBAGO","TUNISIA","TURKEY","TURKMENISTAN","TUVALU",
+  "UGANDA","UKRAINE","UNITEDARABEMIRATES","UNITEDKINGDOM","UNITEDSTATES","URUGUAY","UZBEKISTAN",
+  "VANUATU","VATICANCITY","VENEZUELA","VIETNAM","YEMEN","ZAMBIA","ZIMBABWE"
+];
+
 const multiplierMap = {};
 ["0,0","0,7","0,14","7,0","7,14","14,0","14,7","14,14"].forEach(p => multiplierMap[p]="TW");
 ["1,1","2,2","3,3","4,4","7,7","10,10","11,11","12,12","13,13"].forEach(p => multiplierMap[p]="DW");
@@ -150,8 +175,8 @@ const multiplierMap = {};
 ["0,3","2,6","3,0","3,7","6,2","6,6","6,8","7,3","8,6","11,0","11,7","14,3"].forEach(p => multiplierMap[p]="DL");
 
 let placedTiles = [];
-let totalScore = 0;
 let usedCoords = new Set();
+let totalScore = 0;
 
 function buildBoard() {
   for (let r = 0; r < 15; r++) {
@@ -202,28 +227,24 @@ function handleDrop(e) {
   if (!letter) return;
   const existing = e.target.querySelector(".tile");
 
-  // drag from board to rack
   if (e.currentTarget.id === "rack") {
     if (source !== "board") return;
     const draggedTile = document.querySelector(".tile.dragging");
     if (draggedTile) {
       draggedTile.remove();
-      const newTile = createTile(letter);
-      rack.appendChild(newTile);
+      rack.appendChild(createTile(letter));
       placedTiles = placedTiles.filter(cell => cell.contains(draggedTile));
       playClick();
     }
     return;
   }
 
-  // drag from rack to board
   if (source !== "rack") return;
   if (existing) return;
 
   const tile = createTile(letter);
   tile.setAttribute("draggable", true);
-  tile.setAttribute("data-letter", letter);
-  tile.classList.add("dragging");
+  tile.dataset.letter = letter;
 
   tile.addEventListener("dragstart", e => {
     tile.classList.add("dragging");
@@ -242,32 +263,41 @@ function playClick() {
   clickSound.play();
 }
 
-function getNewWordTiles() {
-  return placedTiles.filter(cell => !usedCoords.has(`${cell.dataset.row},${cell.dataset.col}`));
+function getFullWord(cell, direction) {
+  const delta = direction === "horizontal" ? [0, 1] : [1, 0];
+  const startRow = +cell.dataset.row;
+  const startCol = +cell.dataset.col;
+
+  let word = "", cells = [];
+  let r = startRow, c = startCol;
+
+  // Move backward to find start
+  while (r - delta[0] >= 0 && c - delta[1] >= 0 &&
+         getCell(r - delta[0], c - delta[1])?.firstChild) {
+    r -= delta[0];
+    c -= delta[1];
+  }
+
+  // Move forward to collect full word
+  while (r < 15 && c < 15) {
+    const curr = getCell(r, c);
+    if (!curr || !curr.firstChild) break;
+    word += curr.firstChild.dataset.letter;
+    cells.push(curr);
+    r += delta[0];
+    c += delta[1];
+  }
+
+  return { word, cells };
 }
 
-function extractWordFromTiles(cells) {
-  if (cells.length === 0) return "";
-  const sameRow = cells.every(c => c.dataset.row === cells[0].dataset.row);
-  const sameCol = cells.every(c => c.dataset.col === cells[0].dataset.col);
-
-  if (!sameRow && !sameCol) return "";
-
-  const word = cells
-    .sort((a, b) => {
-      return sameRow
-        ? +a.dataset.col - +b.dataset.col
-        : +a.dataset.row - +b.dataset.row;
-    })
-    .map(cell => cell.firstChild?.dataset.letter || "")
-    .join("");
-
-  return word;
+function getCell(r, c) {
+  return board.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
 }
 
-function scoreWord(word, tiles) {
+function scoreWord(word, cells) {
   let wordMult = 1, score = 0;
-  tiles.forEach(cell => {
+  cells.forEach(cell => {
     const letter = cell.firstChild?.dataset.letter;
     const mult = multiplierMap[`${cell.dataset.row},${cell.dataset.col}`];
     let pts = tilePoints[letter] || 0;
@@ -280,54 +310,46 @@ function scoreWord(word, tiles) {
   return score * wordMult;
 }
 
-const validCountries = [
-  "AFGHANISTAN","ALBANIA","ALGERIA","ANDORRA","ANGOLA","ANTIGUA","ARGENTINA","ARMENIA",
-  "AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHAMAS","BAHRAIN","BANGLADESH","BARBADOS","BELARUS",
-  "BELGIUM","BELIZE","BENIN","BHUTAN","BOLIVIA","BOSNIA","BOTSWANA","BRAZIL","BRUNEI",
-  "BULGARIA","BURKINA","BURUNDI","CABOVERDE","CAMBODIA","CAMEROON","CANADA","CENTRALAFRICANREPUBLIC",
-  "CHAD","CHILE","CHINA","COLOMBIA","COMOROS","CONGO","COSTARICA","CROATIA","CUBA","CYPRUS","CZECHIA",
-  "DENMARK","DJIBOUTI","DOMINICA","DOMINICANREPUBLIC","ECUADOR","EGYPT","ELSALVADOR","EQUATORIALGUINEA",
-  "ERITREA","ESTONIA","ESWATINI","ETHIOPIA","FIJI","FINLAND","FRANCE","GABON","GAMBIA","GEORGIA",
-  "GERMANY","GHANA","GREECE","GRENADA","GUATEMALA","GUINEA","GUINEABISSAU","GUYANA","HAITI","HONDURAS",
-  "HUNGARY","ICELAND","INDIA","INDONESIA","IRAN","IRAQ","IRELAND","ISRAEL","ITALY","IVORYCOAST",
-  "JAMAICA","JAPAN","JORDAN","KAZAKHSTAN","KENYA","KIRIBATI","KOREA","KOSOVO","KUWAIT","KYRGYZSTAN",
-  "LAOS","LATVIA","LEBANON","LESOTHO","LIBERIA","LIBYA","LIECHTENSTEIN","LITHUANIA","LUXEMBOURG",
-  "MADAGASCAR","MALAWI","MALAYSIA","MALDIVES","MALI","MALTA","MARSHALLISLANDS","MAURITANIA",
-  "MAURITIUS","MEXICO","MICRONESIA","MOLDOVA","MONACO","MONGOLIA","MONTENEGRO","MOROCCO","MOZAMBIQUE",
-  "MYANMAR","NAMIBIA","NAURU","NEPAL","NETHERLANDS","NEWZEALAND","NICARAGUA","NIGER","NIGERIA",
-  "NORTHKOREA","NORTHMACEDONIA","NORWAY","OMAN","PAKISTAN","PALAU","PALESTINE","PANAMA",
-  "PAPUANEWGUINEA","PARAGUAY","PERU","PHILIPPINES","POLAND","PORTUGAL","QATAR","ROMANIA","RUSSIA",
-  "RWANDA","SAINTKITTS","SAINTLUCIA","SAINTVINCENT","SAMOA","SANMARINO","SAOTOMEANDPRINCIPE",
-  "SAUDIARABIA","SENEGAL","SERBIA","SEYCHELLES","SIERRALEONE","SINGAPORE","SLOVAKIA","SLOVENIA",
-  "SOLOMONISLANDS","SOMALIA","SOUTHAFRICA","SOUTHKOREA","SOUTHSUDAN","SPAIN","SRI LANKA",
-  "SUDAN","SURINAME","SWEDEN","SWITZERLAND","SYRIA","TAIWAN","TAJIKISTAN","TANZANIA","THAILAND",
-  "TIMORLESTE","TOGO","TONGA","TRINIDADANDTOBAGO","TUNISIA","TURKEY","TURKMENISTAN","TUVALU",
-  "UGANDA","UKRAINE","UNITEDARABEMIRATES","UNITEDKINGDOM","UNITEDSTATES","URUGUAY","UZBEKISTAN",
-  "VANUATU","VATICANCITY","VENEZUELA","VIETNAM","YEMEN","ZAMBIA","ZIMBABWE"
-];
+function getWordDirection(cells) {
+  const rows = new Set(cells.map(c => c.dataset.row));
+  const cols = new Set(cells.map(c => c.dataset.col));
+  if (rows.size === 1) return "horizontal";
+  if (cols.size === 1) return "vertical";
+  return null;
+}
 
 document.getElementById("submitBtn").onclick = () => {
-  const newTiles = getNewWordTiles();
-  const word = extractWordFromTiles(newTiles).toUpperCase();
+  if (!placedTiles.length) return;
+
+  const direction = getWordDirection(placedTiles);
+  if (!direction) {
+    alert("Place tiles in a straight line.");
+    return;
+  }
+
+  const fullWordData = getFullWord(placedTiles[0], direction);
+  const word = fullWordData.word.toUpperCase();
 
   if (!validCountries.includes(word)) {
-    alert("❌ Invalid country: " + word);
+    alert("❌ Not a valid country: " + word);
     return;
   }
 
-  // Must connect with existing tiles
-  if (usedCoords.size > 0 && !newTiles.some(cell => {
-    const key = `${cell.dataset.row},${cell.dataset.col}`;
-    return Array.from(usedCoords).some(coord => coord === key);
-  })) {
-    alert("❌ Word must connect with existing tiles.");
-    return;
+  // Check if connects to existing tiles (after first word)
+  if (usedCoords.size > 0) {
+    const overlap = fullWordData.cells.some(cell =>
+      usedCoords.has(`${cell.dataset.row},${cell.dataset.col}`)
+    );
+    if (!overlap) {
+      alert("❌ Word must connect with existing words.");
+      return;
+    }
   }
 
-  totalScore += scoreWord(word, newTiles);
+  totalScore += scoreWord(word, fullWordData.cells);
   scoreDisplay.textContent = totalScore;
 
-  newTiles.forEach(cell => {
+  fullWordData.cells.forEach(cell => {
     usedCoords.add(`${cell.dataset.row},${cell.dataset.col}`);
     cell.classList.add("highlighted");
   });
