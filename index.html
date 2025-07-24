@@ -16,15 +16,15 @@
 
     #board {
       display: grid;
-      grid-template: repeat(15, 40px) / repeat(15, 40px);
+      grid-template: repeat(15, 44px) / repeat(15, 44px);
       border: 2px solid #444;
       margin-bottom: 1rem;
     }
+
     .cell {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border: 1px solid #666;
-      box-sizing: border-box;
       border-radius: 5px;
       font-weight: bold;
       font-size: 0.8rem;
@@ -33,12 +33,14 @@
       justify-content: center;
       position: relative;
       color: white;
+      background: #2c2c2c;
     }
-    .mult-NORMAL { background: #2c2c2c; }
+
     .mult-DL { background: #3498db; }
     .mult-TL { background: #21618c; }
     .mult-DW { background: #e74c3c; }
     .mult-TW { background: #922b21; }
+
     .cell.mult-DL::after,
     .cell.mult-TL::after,
     .cell.mult-DW::after,
@@ -55,9 +57,10 @@
       justify-content: center;
       margin-bottom: 1rem;
     }
+
     .tile {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       background: orange;
       color: black;
       font-weight: bold;
@@ -69,13 +72,16 @@
       justify-content: center;
       align-items: center;
       transition: transform 0.2s ease;
+      font-size: 1rem;
     }
-    .tile.dragging {
-      transform: scale(1.3);
-      z-index: 1000;
-    }
+
     .tile span.points {
       font-size: 0.7em;
+    }
+
+    .tile.dragging {
+      transform: scale(1.2);
+      z-index: 1000;
     }
 
     #controls {
@@ -98,6 +104,8 @@
     .highlighted {
       outline: 2px solid gold;
     }
+
+    audio { display: none; }
   </style>
 </head>
 <body>
@@ -117,11 +125,18 @@
       Time Left: <span id="timer">10:00</span>
     </div>
   </div>
+
+  <!-- Embedded click sound (base64-encoded) -->
+  <audio id="clickSound">
+    <source src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA... (truncated)" type="audio/mp3" />
+    Your browser does not support the audio element.
+  </audio>
 <script>
 const board = document.getElementById("board");
 const rack = document.getElementById("rack");
 const scoreDisplay = document.getElementById("score");
 const timerDisplay = document.getElementById("timer");
+const clickSound = document.getElementById("clickSound");
 
 const tilePoints = {
   A:1,B:3,C:3,D:2,E:1,F:4,G:2,H:4,I:1,J:8,K:5,L:1,M:3,
@@ -173,40 +188,81 @@ function createTile(letter) {
   tile.addEventListener("dragstart", e => {
     tile.classList.add("dragging");
     e.dataTransfer.setData("text/plain", letter);
+    e.dataTransfer.setData("source", "rack");
   });
-  tile.addEventListener("dragend", () => tile.classList.remove("dragging"));
 
+  tile.addEventListener("dragend", () => tile.classList.remove("dragging"));
   return tile;
 }
 
 function handleDrop(e) {
   const letter = e.dataTransfer.getData("text/plain");
-  if (!letter) return;
+  const source = e.dataTransfer.getData("source");
 
+  if (!letter) return;
   const existing = e.target.querySelector(".tile");
+
+  // drag from board to rack
+  if (e.currentTarget.id === "rack") {
+    if (source !== "board") return;
+    const draggedTile = document.querySelector(".tile.dragging");
+    if (draggedTile) {
+      draggedTile.remove();
+      const newTile = createTile(letter);
+      rack.appendChild(newTile);
+      placedTiles = placedTiles.filter(cell => cell.contains(draggedTile));
+      playClick();
+    }
+    return;
+  }
+
+  // drag from rack to board
+  if (source !== "rack") return;
   if (existing) return;
 
   const tile = createTile(letter);
+  tile.setAttribute("draggable", true);
+  tile.setAttribute("data-letter", letter);
+  tile.classList.add("dragging");
+
   tile.addEventListener("dragstart", e => {
     tile.classList.add("dragging");
     e.dataTransfer.setData("text/plain", letter);
-    placedTiles = placedTiles.filter(c => c !== e.target);
-    tile.remove();
+    e.dataTransfer.setData("source", "board");
   });
   tile.addEventListener("dragend", () => tile.classList.remove("dragging"));
 
   e.target.appendChild(tile);
   placedTiles.push(e.target);
+  playClick();
 }
 
-function getWordFromPlacedTiles() {
-  if (placedTiles.length === 0) return "";
-  placedTiles.sort((a, b) => {
-    const r1 = +a.dataset.row, c1 = +a.dataset.col;
-    const r2 = +b.dataset.row, c2 = +b.dataset.col;
-    return r1 === r2 ? c1 - c2 : r1 - r2;
-  });
-  return placedTiles.map(cell => cell.firstChild?.dataset.letter || "").join("");
+function playClick() {
+  clickSound.currentTime = 0;
+  clickSound.play();
+}
+
+function getNewWordTiles() {
+  return placedTiles.filter(cell => !usedCoords.has(`${cell.dataset.row},${cell.dataset.col}`));
+}
+
+function extractWordFromTiles(cells) {
+  if (cells.length === 0) return "";
+  const sameRow = cells.every(c => c.dataset.row === cells[0].dataset.row);
+  const sameCol = cells.every(c => c.dataset.col === cells[0].dataset.col);
+
+  if (!sameRow && !sameCol) return "";
+
+  const word = cells
+    .sort((a, b) => {
+      return sameRow
+        ? +a.dataset.col - +b.dataset.col
+        : +a.dataset.row - +b.dataset.row;
+    })
+    .map(cell => cell.firstChild?.dataset.letter || "")
+    .join("");
+
+  return word;
 }
 
 function scoreWord(word, tiles) {
@@ -225,7 +281,7 @@ function scoreWord(word, tiles) {
 }
 
 const validCountries = [
-   "AFGHANISTAN","ALBANIA","ALGERIA","ANDORRA","ANGOLA","ANTIGUA","ARGENTINA","ARMENIA",
+  "AFGHANISTAN","ALBANIA","ALGERIA","ANDORRA","ANGOLA","ANTIGUA","ARGENTINA","ARMENIA",
   "AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHAMAS","BAHRAIN","BANGLADESH","BARBADOS","BELARUS",
   "BELGIUM","BELIZE","BENIN","BHUTAN","BOLIVIA","BOSNIA","BOTSWANA","BRAZIL","BRUNEI",
   "BULGARIA","BURKINA","BURUNDI","CABOVERDE","CAMBODIA","CAMEROON","CANADA","CENTRALAFRICANREPUBLIC",
@@ -251,23 +307,27 @@ const validCountries = [
 ];
 
 document.getElementById("submitBtn").onclick = () => {
-  const word = getWordFromPlacedTiles().toUpperCase();
+  const newTiles = getNewWordTiles();
+  const word = extractWordFromTiles(newTiles).toUpperCase();
+
   if (!validCountries.includes(word)) {
-    alert("❌ Not a valid country name.");
+    alert("❌ Invalid country: " + word);
     return;
   }
 
-  // must connect with previous tiles (at least 1)
-  if (usedCoords.size > 0 &&
-    !placedTiles.some(cell => usedCoords.has(`${cell.dataset.row},${cell.dataset.col}`))) {
-    alert("❌ Word must connect with existing words.");
+  // Must connect with existing tiles
+  if (usedCoords.size > 0 && !newTiles.some(cell => {
+    const key = `${cell.dataset.row},${cell.dataset.col}`;
+    return Array.from(usedCoords).some(coord => coord === key);
+  })) {
+    alert("❌ Word must connect with existing tiles.");
     return;
   }
 
-  totalScore += scoreWord(word, placedTiles);
+  totalScore += scoreWord(word, newTiles);
   scoreDisplay.textContent = totalScore;
 
-  placedTiles.forEach(cell => {
+  newTiles.forEach(cell => {
     usedCoords.add(`${cell.dataset.row},${cell.dataset.col}`);
     cell.classList.add("highlighted");
   });
@@ -277,7 +337,9 @@ document.getElementById("submitBtn").onclick = () => {
 
 document.getElementById("undoBtn").onclick = () => {
   placedTiles.forEach(cell => {
-    if (cell.firstChild) cell.firstChild.remove();
+    if (cell.firstChild && !usedCoords.has(`${cell.dataset.row},${cell.dataset.col}`)) {
+      cell.firstChild.remove();
+    }
   });
   placedTiles = [];
 };
