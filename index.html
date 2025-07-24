@@ -1,47 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Country Scrabble Challenge</title>
-<style>
-  body { margin:0; font-family:sans-serif; background:#eee; text-align:center; }
-  #game { display:flex; flex-direction:column; align-items:center; padding:10px; }
-  #board { display:grid; grid-template: repeat(15,40px) / repeat(15,40px);
-           border:2px solid #444; }
-  .cell {
-    width:40px; height:40px; box-sizing:border-box; position:relative;
-    border-radius:6px; display:flex; align-items:center; justify-content:center;
-    font-weight:bold; font-size:1rem;
-  }
-  .mult-DL { background:#cceeff; }
-  .mult-TL { background:#66ccff; }
-  .mult-DW { background:#ffcccc; }
-  .mult-TW { background:#cc0000; color:#fff; }
-  .mult-NORMAL { background:#ddd; }
-  .cell.highlighted { border:2px solid #003399; }
-  .tile { width:40px;height:40px;border:1px solid #666;display:inline-flex;
-          align-items:center;justify-content:center;background:#fff;
-          border-radius:6px;margin:2px; cursor:grab; user-select:none; }
-  #rack { margin:10px; display:flex; flex-wrap:wrap; justify-content:center; }
-  #submit { margin:10px; padding:8px 16px; font-size:1rem; }
-  #info { margin:10px; font-size:1.1rem; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Country Scrabble Game</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 1rem;
+      text-align: center;
+    }
+    #game { display: flex; flex-direction: column; align-items: center; }
+    #board {
+      display: grid;
+      grid-template: repeat(15, 40px) / repeat(15, 40px);
+      border: 2px solid #555;
+      margin-bottom: 1rem;
+    }
+    .cell {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #aaa;
+      box-sizing: border-box;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .mult-NORMAL { background: #eee; }
+    .mult-DL { background: #cceeff; }
+    .mult-TL { background: #66ccff; }
+    .mult-DW { background: #ffcccc; }
+    .mult-TW { background: #cc0000; color: white; }
+    .cell.mult-DL::after,
+    .cell.mult-TL::after,
+    .cell.mult-DW::after,
+    .cell.mult-TW::after {
+      content: attr(data-label);
+      position: absolute;
+      font-size: 0.7em;
+    }
+
+    #rack {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .tile {
+      width: 40px;
+      height: 40px;
+      background: orange;
+      color: black;
+      font-weight: bold;
+      border-radius: 5px;
+      margin: 4px;
+      cursor: grab;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .tile span.points {
+      font-size: 0.7em;
+    }
+
+    #controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    #scoreboard {
+      font-size: 1.1rem;
+      margin-top: 0.5rem;
+    }
+
+    .highlighted {
+      outline: 2px solid darkblue;
+    }
+  </style>
 </head>
 <body>
-<div id="game">
-  <div id="board"></div>
-  <button id="submit">Submit Word</button>
-  <div id="rack"></div>
-  <div id="info">
-    Score: <span id="score">0</span> | Time Left: <span id="timer">10:00</span>
-  </div>
-</div>
+  <div id="game">
+    <h1>🌍 Country Scrabble Game</h1>
+    <div id="board"></div>
 
+    <div id="controls">
+      <button id="submitBtn">✅ Submit Word</button>
+      <button id="undoBtn">🔄 Undo Word</button>
+    </div>
+
+    <div id="rack"></div>
+
+    <div id="scoreboard">
+      Score: <span id="score">0</span> |
+      Time Left: <span id="timer">10:00</span>
+    </div>
+  </div>
 <script>
-const tileScores = {A:1,B:3,C:3,D:2,E:1,F:4,G:2,H:4,I:1,J:8,K:5,L:1,M:3,N:1,O:1,
-  P:3,Q:10,R:1,S:1,T:1,U:1,V:4,W:4,X:8,Y:4,Z:10};
-const countries = ["AFGHANISTAN","ALBANIA","ALGERIA","ANDORRA","ANGOLA","ANTIGUA","ARGENTINA","ARMENIA",
+const board = document.getElementById("board");
+const rack = document.getElementById("rack");
+const scoreDisplay = document.getElementById("score");
+const timerDisplay = document.getElementById("timer");
+
+const tilePoints = {
+  A:1,B:3,C:3,D:2,E:1,F:4,G:2,H:4,I:1,J:8,K:5,L:1,M:3,
+  N:1,O:1,P:3,Q:10,R:1,S:1,T:1,U:1,V:4,W:4,X:8,Y:4,Z:10
+};
+
+const multiplierMap = {}; // Fill this with TW/DW/TL/DL positions
+const TW = ["0,0","0,7","0,14","7,0","7,14","14,0","14,7","14,14"];
+const DW = ["1,1","2,2","3,3","4,4","7,7","10,10","11,11","12,12","13,13"];
+const TL = ["1,5","5,1","5,5","5,9","9,5","9,9","13,9","9,13"];
+const DL = ["0,3","2,6","3,0","3,7","6,2","6,6","6,8","7,3","8,6","11,0","11,7","14,3"];
+
+TW.forEach(pos => multiplierMap[pos] = "TW");
+DW.forEach(pos => multiplierMap[pos] = "DW");
+TL.forEach(pos => multiplierMap[pos] = "TL");
+DL.forEach(pos => multiplierMap[pos] = "DL");
+
+let placedTiles = [];
+let totalScore = 0;
+let usedCoords = new Set();
+
+function buildBoard() {
+  for (let r = 0; r < 15; r++) {
+    for (let c = 0; c < 15; c++) {
+      const cell = document.createElement("div");
+      const key = `${r},${c}`;
+      const mult = multiplierMap[key] || "NORMAL";
+      cell.className = `cell mult-${mult}`;
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.dataset.label = mult === "NORMAL" ? "" : mult;
+      cell.ondragover = e => e.preventDefault();
+      cell.ondrop = handleDrop;
+      board.appendChild(cell);
+    }
+  }
+}
+
+function buildRack() {
+  for (let i = 65; i <= 90; i++) {
+    const ch = String.fromCharCode(i);
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.draggable = true;
+    tile.textContent = ch;
+    tile.dataset.letter = ch;
+    tile.innerHTML = `${ch}<br><span class="points">(${tilePoints[ch]})</span>`;
+    tile.ondragstart = e => e.dataTransfer.setData("text/plain", ch);
+    rack.appendChild(tile);
+  }
+}
+
+function handleDrop(e) {
+  const letter = e.dataTransfer.getData("text/plain");
+  const tile = document.createElement("div");
+  tile.className = "tile";
+  tile.textContent = letter;
+  tile.dataset.letter = letter;
+  tile.draggable = true;
+  tile.ondragstart = e => {
+    e.dataTransfer.setData("text/plain", letter);
+    e.target.remove(); // allow redrag
+  };
+
+  if (e.target.innerHTML.trim() === "") {
+    e.target.appendChild(tile);
+    placedTiles.push(e.target);
+  }
+}
+
+function getWordFromPlacedTiles() {
+  placedTiles.sort((a, b) => {
+    const r1 = +a.dataset.row, c1 = +a.dataset.col;
+    const r2 = +b.dataset.row, c2 = +b.dataset.col;
+    return r1 === r2 ? c1 - c2 : r1 - r2;
+  });
+  return placedTiles.map(cell => cell.firstChild?.dataset.letter || "").join("");
+}
+
+function scoreWord(word, tiles) {
+  let wordMult = 1, score = 0;
+  tiles.forEach(cell => {
+    const letter = cell.firstChild?.dataset.letter;
+    const mult = multiplierMap[`${cell.dataset.row},${cell.dataset.col}`];
+    let pts = tilePoints[letter] || 0;
+    if (mult === "DL") pts *= 2;
+    else if (mult === "TL") pts *= 3;
+    if (mult === "DW") wordMult *= 2;
+    else if (mult === "TW") wordMult *= 3;
+    score += pts;
+  });
+  return score * wordMult;
+}
+
+const validCountries = [
+  "AFGHANISTAN","ALBANIA","ALGERIA","ANDORRA","ANGOLA","ANTIGUA","ARGENTINA","ARMENIA",
   "AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHAMAS","BAHRAIN","BANGLADESH","BARBADOS","BELARUS",
   "BELGIUM","BELIZE","BENIN","BHUTAN","BOLIVIA","BOSNIA","BOTSWANA","BRAZIL","BRUNEI",
   "BULGARIA","BURKINA","BURUNDI","CABOVERDE","CAMBODIA","CAMEROON","CANADA","CENTRALAFRICANREPUBLIC",
@@ -64,116 +232,57 @@ const countries = ["AFGHANISTAN","ALBANIA","ALGERIA","ANDORRA","ANGOLA","ANTIGUA
   "TIMORLESTE","TOGO","TONGA","TRINIDADANDTOBAGO","TUNISIA","TURKEY","TURKMENISTAN","TUVALU",
   "UGANDA","UKRAINE","UNITEDARABEMIRATES","UNITEDKINGDOM","UNITEDSTATES","URUGUAY","UZBEKISTAN",
   "VANUATU","VATICANCITY","VENEZUELA","VIETNAM","YEMEN","ZAMBIA","ZIMBABWE"
-]; 
+];
 
-let placed = []; // [{letter, r,c, elem, baseConnected:false}]
-let score = 0, timeLeft = 600, timer;
+let firstMove = true;
 
-const mult = {
-  "0,0":"TW","0,3":"DL","0,7":"TW","0,11":"DL","0,14":"TW",
-  "1,1":"DW","1,5":"TL","1,9":"TL","1,13":"DW",
-  "2,2":"DW","2,6":"DL","2,8":"DL","2,12":"DW",
-  "3,0":"DL","3,3":"DW","3,7":"DL","3,11":"DW","3,14":"DL",
-  "4,4":"DW","4,10":"DW",
-  "5,1":"TL","5,5":"TL","5,9":"TL","5,13":"TL",
-  "6,2":"DL","6,6":"DL","6,8":"DL","6,12":"DL",
-  "7,0":"TW","7,3":"DL","7,7":"DW","7,11":"DL","7,14":"TW",
-  "8,2":"DL","8,6":"DL","8,8":"DL","8,12":"DL",
-  "9,1":"TL","9,5":"TL","9,9":"TL","9,13":"TL",
-  "10,4":"DW","10,10":"DW",
-  "11,0":"DL","11,3":"DW","11,7":"DL","11,11":"DW","11,14":"DL",
-  "12,2":"DW","12,6":"DL","12,8":"DL","12,12":"DW",
-  "13,1":"DW","13,5":"TL","13,9":"TL","13,13":"DW",
-  "14,0":"TW","14,3":"DL","14,7":"TW","14,11":"DL","14,14":"TW"
-};
-
-const boardEl = document.getElementById("board");
-for(let r=0;r<15;r++)for(let c=0;c<15;c++){
-  const cell = document.createElement("div");
-  cell.className = "cell";
-  const key=`${r},${c}`, m=mult[key]||"NORMAL";
-  cell.classList.add("mult-"+m);
-  cell.dataset.r=r; cell.dataset.c=c;
-  cell.ondrop = drop; cell.ondragover = e=>e.preventDefault();
-  boardEl.appendChild(cell);
-}
-
-function drop(e){
-  e.preventDefault();
-  const letter=e.dataTransfer.getData("text");
-  if(!letter) return;
-  const cell=e.currentTarget;
-  if(cell.textContent) return; // occupied
-  cell.textContent=letter;
-  cell.classList.add("placed");
-  placed.push({letter, r:+cell.dataset.r, c:+cell.dataset.c, elem:cell});
-  renderRack();
-}
-
-function renderRack(){
-  const rack = document.getElementById("rack");
-  rack.innerHTML="";
-  const used = placed.map(p=>p.letter);
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(l=>{
-    if(used.filter(x=>x===l).length < 26){ // unlimited but prevent duplicates in rack view
-      const t=document.createElement("div");
-      t.textContent=l; t.className="tile"; t.draggable=true;
-      t.ondragstart=e=>e.dataTransfer.setData("text",l);
-      rack.appendChild(t);
-    }
-  });
-}
-
-document.getElementById("submit").onclick = ()=>{
-  if(!placed.length) return alert("Place at least one tile!");
-  const word=placed.map(p=>p.letter).join("");
-  if(!countries.includes(word)){
-    alert("Not a valid country name.");
+document.getElementById("submitBtn").onclick = () => {
+  const word = getWordFromPlacedTiles().toUpperCase();
+  if (!validCountries.includes(word)) {
+    alert("❌ Not a valid country name.");
     return;
   }
-  // connectivity check: first move allowed anywhere; subsequent must touch existing
-  if(score>0){
-    const ok = placed.some(p=>{
-      return [[1,0],[-1,0],[0,1],[0,-1]].some(d=>{
-        const nr=p.r+d[0], nc=p.c+d[1];
-        return gridState[nr]?.[nc];
-      });
-    });
-    if(!ok) return alert("New word must connect existing tiles.");
+
+  if (!firstMove && !placedTiles.some(cell => usedCoords.has(`${cell.dataset.row},${cell.dataset.col}`))) {
+    alert("❌ Must connect to previous words.");
+    return;
   }
-  // scoring
-  let ws=1, sum=0;
-  placed.forEach(p=>{
-    const s=tileScores[p.letter];
-    const m=mult[`${p.r},${p.c}`];
-    sum += s * (m==="DL"?2:m==="TL"?3:1);
-    if(m==="DW") ws*=2;
-    if(m==="TW") ws*=3;
-    p.elem.classList.add("highlighted");
-    p.elem.ondragover=null; p.elem.ondrop=null;
+
+  totalScore += scoreWord(word, placedTiles);
+  scoreDisplay.textContent = totalScore;
+
+  placedTiles.forEach(cell => {
+    usedCoords.add(`${cell.dataset.row},${cell.dataset.col}`);
+    cell.classList.add("highlighted");
   });
-  score += sum * ws;
-  document.getElementById("score").innerText=score;
-  // mark grid state
-  placed.forEach(p=> gridState[p.r][p.c]=true);
-  placed=[];
-  renderRack();
+
+  placedTiles = [];
+  rack.querySelectorAll(".tile").forEach(tile => tile.draggable = true);
 };
 
-const gridState=Array.from({length:15},()=>Array(15).fill(false));
-renderRack();
+document.getElementById("undoBtn").onclick = () => {
+  placedTiles.forEach(cell => {
+    if (cell.firstChild) cell.firstChild.remove();
+  });
+  placedTiles = [];
+};
 
-// Timer
-timer = setInterval(()=>{
-  const min=Math.floor(timeLeft/60), sec=timeLeft%60;
-  document.getElementById("timer").innerText=
-    `${min.toString().padStart(2,"0")}:${sec.toString().padStart(2,"0")}`;
-  if(timeLeft--<=0){
-    clearInterval(timer);
-    alert(`Time's up! Final score: ${score}`);
-    boardEl.querySelectorAll(".cell").forEach(c=>c.ondrop=c.ondragover=null);
-  }
-},1000);
+function startTimer(duration) {
+  let time = duration;
+  const timer = setInterval(() => {
+    const mins = String(Math.floor(time / 60)).padStart(2, "0");
+    const secs = String(time % 60).padStart(2, "0");
+    timerDisplay.textContent = `${mins}:${secs}`;
+    if (--time < 0) {
+      clearInterval(timer);
+      alert(`⏱️ Time's up! You scored ${totalScore} points.`);
+    }
+  }, 1000);
+}
+
+buildBoard();
+buildRack();
+startTimer(600);
 </script>
 </body>
 </html>
