@@ -24,7 +24,7 @@
     .cell {
       width: 44px;
       height: 44px;
-      border: 1px solid #666;
+      border: 2px solid #777;
       border-radius: 5px;
       font-weight: bold;
       font-size: 0.8rem;
@@ -105,12 +105,30 @@
       outline: 2px solid gold;
     }
 
+    #leaderboard {
+      margin-top: 2rem;
+      background: #1e1e1e;
+      padding: 1rem;
+      border-radius: 8px;
+      max-width: 300px;
+    }
+
+    #leaderboard h3 {
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+
+    #leaderboard ol {
+      padding-left: 1.2rem;
+      text-align: left;
+    }
+
     audio { display: none; }
   </style>
 </head>
 <body>
   <div id="game">
-    <h1>🌍 Country Scrabble Game (Dark Mode)</h1>
+    <h1>🌍 Country Scrabble Game</h1>
     <div id="board"></div>
 
     <div id="controls">
@@ -124,17 +142,26 @@
       Score: <span id="score">0</span> |
       Time Left: <span id="timer">10:00</span>
     </div>
+
+    <div id="leaderboard">
+      <h3>🏆 Top Scores</h3>
+      <ol id="highScores"></ol>
+    </div>
   </div>
 
   <!-- Embedded click sound (browser-compatible) -->
-  <audio id="clickSound">
-    <source src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCAAME... (truncated for now)" type="audio/mp3" />
+  <audio id="clickSound" preload="auto">
+    <source src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCAAME...TRUNCATED" type="audio/mp3" />
   </audio>
 <script>
+let username = prompt("Enter your name to start:");
+if (!username) username = "Player";
+
 const board = document.getElementById("board");
 const rack = document.getElementById("rack");
 const scoreDisplay = document.getElementById("score");
 const timerDisplay = document.getElementById("timer");
+const leaderboardList = document.getElementById("highScores");
 const clickSound = document.getElementById("clickSound");
 
 const tilePoints = {
@@ -142,8 +169,7 @@ const tilePoints = {
   N:1,O:1,P:3,Q:10,R:1,S:1,T:1,U:1,V:4,W:4,X:8,Y:4,Z:10
 };
 
-const validCountries = [
-  "AFGHANISTAN","ALBANIA","ALGERIA","ANDORRA","ANGOLA","ANTIGUA","ARGENTINA","ARMENIA",
+const validCountries = ["AFGHANISTAN","ALBANIA","ALGERIA","ANDORRA","ANGOLA","ANTIGUA","ARGENTINA","ARMENIA",
   "AUSTRALIA","AUSTRIA","AZERBAIJAN","BAHAMAS","BAHRAIN","BANGLADESH","BARBADOS","BELARUS",
   "BELGIUM","BELIZE","BENIN","BHUTAN","BOLIVIA","BOSNIA","BOTSWANA","BRAZIL","BRUNEI",
   "BULGARIA","BURKINA","BURUNDI","CABOVERDE","CAMBODIA","CAMEROON","CANADA","CENTRALAFRICANREPUBLIC",
@@ -165,8 +191,7 @@ const validCountries = [
   "SUDAN","SURINAME","SWEDEN","SWITZERLAND","SYRIA","TAIWAN","TAJIKISTAN","TANZANIA","THAILAND",
   "TIMORLESTE","TOGO","TONGA","TRINIDADANDTOBAGO","TUNISIA","TURKEY","TURKMENISTAN","TUVALU",
   "UGANDA","UKRAINE","UNITEDARABEMIRATES","UNITEDKINGDOM","UNITEDSTATES","URUGUAY","UZBEKISTAN",
-  "VANUATU","VATICANCITY","VENEZUELA","VIETNAM","YEMEN","ZAMBIA","ZIMBABWE"
-];
+  "VANUATU","VATICANCITY","VENEZUELA","VIETNAM","YEMEN","ZAMBIA","ZIMBABWE"];
 
 const multiplierMap = {};
 ["0,0","0,7","0,14","7,0","7,14","14,0","14,7","14,14"].forEach(p => multiplierMap[p]="TW");
@@ -176,6 +201,8 @@ const multiplierMap = {};
 
 let placedTiles = [];
 let usedCoords = new Set();
+let lockedCoords = new Set();
+let usedWords = new Set();
 let totalScore = 0;
 
 function buildBoard() {
@@ -198,8 +225,7 @@ function buildBoard() {
 function buildRack() {
   for (let i = 65; i <= 90; i++) {
     const ch = String.fromCharCode(i);
-    const tile = createTile(ch);
-    rack.appendChild(tile);
+    rack.appendChild(createTile(ch));
   }
 }
 
@@ -213,7 +239,7 @@ function createTile(letter) {
   tile.addEventListener("dragstart", e => {
     tile.classList.add("dragging");
     e.dataTransfer.setData("text/plain", letter);
-    e.dataTransfer.setData("source", "rack");
+    e.dataTransfer.setData("source", tile.parentElement.id);
   });
 
   tile.addEventListener("dragend", () => tile.classList.remove("dragging"));
@@ -223,67 +249,54 @@ function createTile(letter) {
 function handleDrop(e) {
   const letter = e.dataTransfer.getData("text/plain");
   const source = e.dataTransfer.getData("source");
+  const draggedTile = document.querySelector(".tile.dragging");
 
-  if (!letter) return;
-  const existing = e.target.querySelector(".tile");
+  if (!letter || !draggedTile) return;
 
-  if (e.currentTarget.id === "rack") {
-    if (source !== "board") return;
-    const draggedTile = document.querySelector(".tile.dragging");
-    if (draggedTile) {
-      draggedTile.remove();
-      rack.appendChild(createTile(letter));
-      placedTiles = placedTiles.filter(cell => cell.contains(draggedTile));
-      playClick();
-    }
+  if (e.currentTarget.id === "rack" && source !== "rack") {
+    draggedTile.remove();
+    rack.appendChild(createTile(letter));
+    placedTiles = placedTiles.filter(cell => cell.firstChild !== draggedTile);
+    playClick();
     return;
   }
 
-  if (source !== "rack") return;
-  if (existing) return;
-
-  const tile = createTile(letter);
-  tile.setAttribute("draggable", true);
-  tile.dataset.letter = letter;
-
-  tile.addEventListener("dragstart", e => {
-    tile.classList.add("dragging");
-    e.dataTransfer.setData("text/plain", letter);
-    e.dataTransfer.setData("source", "board");
-  });
-  tile.addEventListener("dragend", () => tile.classList.remove("dragging"));
-
-  e.target.appendChild(tile);
-  placedTiles.push(e.target);
-  playClick();
+  if (source === "rack" && !e.currentTarget.firstChild && !lockedCoords.has(`${e.currentTarget.dataset.row},${e.currentTarget.dataset.col}`)) {
+    const newTile = createTile(letter);
+    newTile.classList.add("placed");
+    e.currentTarget.appendChild(newTile);
+    placedTiles.push(e.currentTarget);
+    playClick();
+  }
 }
 
 function playClick() {
-  clickSound.currentTime = 0;
-  clickSound.play();
+  try {
+    clickSound.currentTime = 0;
+    clickSound.play();
+  } catch {}
 }
 
-function getFullWord(cell, direction) {
+function getCell(r, c) {
+  return board.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+}
+
+function getFullWord(startCell, direction) {
   const delta = direction === "horizontal" ? [0, 1] : [1, 0];
-  const startRow = +cell.dataset.row;
-  const startCol = +cell.dataset.col;
+  let r = +startCell.dataset.row;
+  let c = +startCell.dataset.col;
 
-  let word = "", cells = [];
-  let r = startRow, c = startCol;
-
-  // Move backward to find start
-  while (r - delta[0] >= 0 && c - delta[1] >= 0 &&
-         getCell(r - delta[0], c - delta[1])?.firstChild) {
+  while (r - delta[0] >= 0 && c - delta[1] >= 0 && getCell(r - delta[0], c - delta[1])?.firstChild) {
     r -= delta[0];
     c -= delta[1];
   }
 
-  // Move forward to collect full word
+  let word = "", cells = [];
   while (r < 15 && c < 15) {
-    const curr = getCell(r, c);
-    if (!curr || !curr.firstChild) break;
-    word += curr.firstChild.dataset.letter;
-    cells.push(curr);
+    const cell = getCell(r, c);
+    if (!cell?.firstChild) break;
+    word += cell.firstChild.dataset.letter;
+    cells.push(cell);
     r += delta[0];
     c += delta[1];
   }
@@ -291,96 +304,96 @@ function getFullWord(cell, direction) {
   return { word, cells };
 }
 
-function getCell(r, c) {
-  return board.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
-}
-
 function scoreWord(word, cells) {
-  let wordMult = 1, score = 0;
+  let score = 0, wordMult = 1;
   cells.forEach(cell => {
-    const letter = cell.firstChild?.dataset.letter;
+    const l = cell.firstChild.dataset.letter;
+    let pts = tilePoints[l] || 0;
     const mult = multiplierMap[`${cell.dataset.row},${cell.dataset.col}`];
-    let pts = tilePoints[letter] || 0;
     if (mult === "DL") pts *= 2;
-    else if (mult === "TL") pts *= 3;
+    if (mult === "TL") pts *= 3;
     if (mult === "DW") wordMult *= 2;
-    else if (mult === "TW") wordMult *= 3;
+    if (mult === "TW") wordMult *= 3;
     score += pts;
   });
   return score * wordMult;
 }
 
-function getWordDirection(cells) {
-  const rows = new Set(cells.map(c => c.dataset.row));
-  const cols = new Set(cells.map(c => c.dataset.col));
-  if (rows.size === 1) return "horizontal";
-  if (cols.size === 1) return "vertical";
-  return null;
+function getDirection(tiles) {
+  const rows = new Set(tiles.map(c => c.dataset.row));
+  const cols = new Set(tiles.map(c => c.dataset.col));
+  return rows.size === 1 ? "horizontal" : cols.size === 1 ? "vertical" : null;
 }
 
 document.getElementById("submitBtn").onclick = () => {
   if (!placedTiles.length) return;
 
-  const direction = getWordDirection(placedTiles);
-  if (!direction) {
-    alert("Place tiles in a straight line.");
-    return;
+  const direction = getDirection(placedTiles);
+  if (!direction) return alert("Place letters in a straight line.");
+
+  const { word, cells } = getFullWord(placedTiles[0], direction);
+  if (!validCountries.includes(word)) return alert(`❌ Invalid country: ${word}`);
+  if (usedWords.has(word)) return alert(`❌ Already submitted: ${word}`);
+
+  if (lockedCoords.size > 0) {
+    const overlaps = cells.some(c => lockedCoords.has(`${c.dataset.row},${c.dataset.col}`));
+    if (!overlaps) return alert("❌ Word must connect to previous words.");
   }
 
-  const fullWordData = getFullWord(placedTiles[0], direction);
-  const word = fullWordData.word.toUpperCase();
-
-  if (!validCountries.includes(word)) {
-    alert("❌ Not a valid country: " + word);
-    return;
-  }
-
-  // Check if connects to existing tiles (after first word)
-  if (usedCoords.size > 0) {
-    const overlap = fullWordData.cells.some(cell =>
-      usedCoords.has(`${cell.dataset.row},${cell.dataset.col}`)
-    );
-    if (!overlap) {
-      alert("❌ Word must connect with existing words.");
-      return;
-    }
-  }
-
-  totalScore += scoreWord(word, fullWordData.cells);
+  totalScore += scoreWord(word, cells);
   scoreDisplay.textContent = totalScore;
-
-  fullWordData.cells.forEach(cell => {
-    usedCoords.add(`${cell.dataset.row},${cell.dataset.col}`);
-    cell.classList.add("highlighted");
+  cells.forEach(c => {
+    c.classList.add("highlighted");
+    lockedCoords.add(`${c.dataset.row},${c.dataset.col}`);
   });
-
+  usedWords.add(word);
   placedTiles = [];
 };
 
 document.getElementById("undoBtn").onclick = () => {
   placedTiles.forEach(cell => {
-    if (cell.firstChild && !usedCoords.has(`${cell.dataset.row},${cell.dataset.col}`)) {
-      cell.firstChild.remove();
+    if (!lockedCoords.has(`${cell.dataset.row},${cell.dataset.col}`)) {
+      cell.innerHTML = "";
     }
   });
   placedTiles = [];
 };
 
-function startTimer(duration) {
-  let time = duration;
+function startTimer(secs) {
+  let t = secs;
   const timer = setInterval(() => {
-    const mins = String(Math.floor(time / 60)).padStart(2, "0");
-    const secs = String(time % 60).padStart(2, "0");
-    timerDisplay.textContent = `${mins}:${secs}`;
-    if (--time < 0) {
+    const m = String(Math.floor(t / 60)).padStart(2, "0");
+    const s = String(t % 60).padStart(2, "0");
+    timerDisplay.textContent = `${m}:${s}`;
+    if (--t < 0) {
       clearInterval(timer);
-      alert(`⏱️ Time's up! You scored ${totalScore} points.`);
+      alert(`⏱ Time's up! You scored ${totalScore}.`);
+      saveScore(username, totalScore);
+      showLeaderboard();
     }
   }, 1000);
 }
 
+function saveScore(user, score) {
+  const scores = JSON.parse(localStorage.getItem("scrabbleScores") || "[]");
+  scores.push({ user, score });
+  scores.sort((a, b) => b.score - a.score);
+  localStorage.setItem("scrabbleScores", JSON.stringify(scores.slice(0, 5)));
+}
+
+function showLeaderboard() {
+  const scores = JSON.parse(localStorage.getItem("scrabbleScores") || "[]");
+  leaderboardList.innerHTML = "";
+  scores.forEach(s => {
+    const li = document.createElement("li");
+    li.textContent = `${s.user}: ${s.score}`;
+    leaderboardList.appendChild(li);
+  });
+}
+
 buildBoard();
 buildRack();
+showLeaderboard();
 startTimer(600);
 </script>
 </body>
