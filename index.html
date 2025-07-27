@@ -52,15 +52,16 @@
       background-color: #e8fce8 !important;
     }
 
-    .knight {
-      width: 80%;
-      height: 80%;
-      transition: transform 0.15s ease;
-    }
+   .knight {
+  width: 90%;
+  height: 90%;
+  transition: transform 0.2s ease;
+  user-drag: none;
+}
 
-    .knight:active {
-      transform: scale(1.2);
-    }
+.knight:active {
+  transform: scale(1.2);
+}
 
     .status {
       margin-top: 20px;
@@ -127,14 +128,10 @@
     let timer = 0;
     let timerInterval;
 
-    const knightSVG = `
-      <svg class="knight" draggable="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-        <g style="fill:#000000;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;">
-          <path d="M 22,10 C 19,10 16,13 16,16 C 16,18 17,20 19,20 C 21,20 23,18 23,16 C 23,14 23,12 22,10 z"/>
-          <path d="M 12,32 C 13,28 17,28 19,26 C 22,24 22,20 24,18 C 26,16 30,17 30,20 C 30,22 28,24 28,26 C 28,28 32,30 32,32 C 32,34 30,36 28,36 C 26,36 24,34 22,34 C 20,34 18,36 16,36 C 14,36 12,34 12,32 z"/>
-        </g>
-      </svg>
-    `;
+    const knightImg = `
+  <img src="https://lichess1.org/assets/piece/wn.png" class="knight" draggable="true" />
+`;
+
 
     function isValidKnightMove(from, to) {
       const dx = Math.abs(from.col - to.col);
@@ -161,10 +158,10 @@
     }
 
     function placeKnight(row, col) {
-      const square = getSquare(row, col);
-      square.innerHTML = knightSVG;
-      square.querySelector(".knight").addEventListener("dragstart", handleDragStart);
-    }
+  const square = getSquare(row, col);
+  square.innerHTML = knightImg;
+  square.querySelector(".knight").addEventListener("dragstart", handleDragStart);
+}
 
     function getSquare(row, col) {
       return document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
