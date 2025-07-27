@@ -3,87 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Knight's Tour Game</title>
+  <title>Knight's Tour</title>
   <style>
     body {
       background: #f0f0f0;
-      font-family: Arial, sans-serif;
-      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
       padding: 20px;
+      text-align: center;
     }
 
     h2 {
-      margin-bottom: 20px;
+      font-size: 16px;
+      margin-bottom: 16px;
+      color: #333;
+      max-width: 700px;
+      margin-inline: auto;
     }
 
     .board {
+      width: 60vw;
+      max-width: 640px;
       display: grid;
-      grid-template-columns: repeat(8, 60px);
-      grid-template-rows: repeat(8, 60px);
+      grid-template-columns: repeat(8, 1fr);
+      aspect-ratio: 1;
       margin: 0 auto;
-      border: 4px solid #444;
+      border: 4px solid #333;
     }
 
     .square {
-      width: 60px;
-      height: 60px;
-      box-sizing: border-box;
+      aspect-ratio: 1;
       display: flex;
-      justify-content: center;
       align-items: center;
-      font-size: 32px;
+      justify-content: center;
+      font-size: 3.5vw;
+      position: relative;
     }
 
     .light {
-      background: #f0d9b5;
+      background-color: #f0d9b5;
     }
 
     .dark {
-      background: #b58863;
+      background-color: #b58863;
     }
 
     .visited {
-      background-color: #c6f6c6 !important;
-    }
-
-    .status {
-      margin: 20px 0;
-      font-size: 18px;
+      background-color: #e8fce8 !important;
     }
 
     .knight {
-      cursor: grab;
+      width: 80%;
+      height: 80%;
+      transition: transform 0.15s ease;
+    }
+
+    .knight:active {
+      transform: scale(1.2);
+    }
+
+    .status {
+      margin-top: 20px;
+      font-size: 18px;
     }
 
     #leaderboard {
-      margin-top: 30px;
+      margin-top: 40px;
     }
 
     #leaderboard h3 {
+      font-size: 18px;
       margin-bottom: 10px;
     }
 
     #leaderboard ol {
-      padding-left: 0;
       list-style: none;
-      text-align: left;
-      max-width: 300px;
+      padding: 0;
       margin: 0 auto;
+      max-width: 320px;
+      text-align: left;
     }
 
     #leaderboard li {
       background: #fff;
-      padding: 8px;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
+      padding: 6px 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
-      font-size: 16px;
     }
   </style>
 </head>
 <body>
   <h2>The goal of this Knight's Tour game is to take the knight to every square on the board once. Achieve this in minimum possible moves.</h2>
-
   <div class="board" id="board"></div>
 
   <div class="status">
@@ -96,22 +107,34 @@
     <ol id="leaderboardList"></ol>
   </div>
 
+  <!-- Drop sound -->
+  <audio id="dropSound" src="https://freesound.org/data/previews/146/146726_2486946-lq.mp3"></audio>
+
   <script>
     const board = document.getElementById("board");
     const timerEl = document.getElementById("timer");
     const movesEl = document.getElementById("moves");
     const leaderboardEl = document.getElementById("leaderboardList");
+    const dropSound = document.getElementById("dropSound");
 
     let username = prompt("Enter your username:");
     if (!username || username.trim() === "") username = "Anonymous";
 
-    const knightSymbol = "♞";
     const knightStart = { row: 7, col: 1 }; // B1
     let knightPos = { ...knightStart };
     let visited = Array.from({ length: 8 }, () => Array(8).fill(false));
     let moveCount = 0;
     let timer = 0;
     let timerInterval;
+
+    const knightSVG = `
+      <svg class="knight" draggable="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
+        <g style="fill:#000000;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;">
+          <path d="M 22,10 C 19,10 16,13 16,16 C 16,18 17,20 19,20 C 21,20 23,18 23,16 C 23,14 23,12 22,10 z"/>
+          <path d="M 12,32 C 13,28 17,28 19,26 C 22,24 22,20 24,18 C 26,16 30,17 30,20 C 30,22 28,24 28,26 C 28,28 32,30 32,32 C 32,34 30,36 28,36 C 26,36 24,34 22,34 C 20,34 18,36 16,36 C 14,36 12,34 12,32 z"/>
+        </g>
+      </svg>
+    `;
 
     function isValidKnightMove(from, to) {
       const dx = Math.abs(from.col - to.col);
@@ -139,8 +162,8 @@
 
     function placeKnight(row, col) {
       const square = getSquare(row, col);
-      square.innerHTML = `<span class="knight" draggable="true" id="knight">${knightSymbol}</span>`;
-      document.getElementById("knight").addEventListener("dragstart", handleDragStart);
+      square.innerHTML = knightSVG;
+      square.querySelector(".knight").addEventListener("dragstart", handleDragStart);
     }
 
     function getSquare(row, col) {
@@ -171,6 +194,8 @@
         markVisited(targetRow, targetCol);
         moveCount++;
         movesEl.textContent = moveCount;
+        dropSound.currentTime = 0;
+        dropSound.play();
 
         if (isTourComplete()) {
           clearInterval(timerInterval);
@@ -202,9 +227,9 @@
     function updateLeaderboard() {
       const scores = JSON.parse(localStorage.getItem("knightsTourScores") || "[]");
       leaderboardEl.innerHTML = "";
-      scores.forEach((score, index) => {
+      scores.forEach((score, i) => {
         const li = document.createElement("li");
-        li.textContent = `${index + 1}. ${score.name} — ${score.time}s, ${score.moves} moves`;
+        li.textContent = `${i + 1}. ${score.name} — ${score.time}s, ${score.moves} moves`;
         leaderboardEl.appendChild(li);
       });
     }
