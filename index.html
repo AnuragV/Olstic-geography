@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Knight's Tour Game</title>
+  <style>
+    body {
+      background: #f0f0f0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(8, 60px);
+      grid-template-rows: repeat(8, 60px);
+      margin: 0 auto;
+      border: 4px solid #444;
+    }
+
+    .square {
+      width: 60px;
+      height: 60px;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 32px;
+    }
+
+    .light {
+      background: #f0d9b5;
+    }
+
+    .dark {
+      background: #b58863;
+    }
+
+    .visited {
+      background-color: #c6f6c6 !important;
+    }
+
+    .status {
+      margin: 20px 0;
+      font-size: 18px;
+    }
+
+    .knight {
+      cursor: grab;
+    }
+
+    #leaderboard {
+      margin-top: 30px;
+    }
+
+    #leaderboard h3 {
+      margin-bottom: 10px;
+    }
+
+    #leaderboard ol {
+      padding-left: 0;
+      list-style: none;
+      text-align: left;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    #leaderboard li {
+      background: #fff;
+      padding: 8px;
+      margin-bottom: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>The goal of this Knight's Tour game is to take the knight to every square on the board once. Achieve this in minimum possible moves.</h2>
+
+  <div class="board" id="board"></div>
+
+  <div class="status">
+    ⏱ Time: <span id="timer">0</span>s |
+    ♞ Moves: <span id="moves">0</span>
+  </div>
+
+  <div id="leaderboard">
+    <h3>🏆 Leaderboard (Top 5 Fastest)</h3>
+    <ol id="leaderboardList"></ol>
+  </div>
+
+  <script>
+    const board = document.getElementById("board");
+    const timerEl = document.getElementById("timer");
+    const movesEl = document.getElementById("moves");
+    const leaderboardEl = document.getElementById("leaderboardList");
+
+    let username = prompt("Enter your username:");
+    if (!username || username.trim() === "") username = "Anonymous";
+
+    const knightSymbol = "♞";
+    const knightStart = { row: 7, col: 1 }; // B1
+    let knightPos = { ...knightStart };
+    let visited = Array.from({ length: 8 }, () => Array(8).fill(false));
+    let moveCount = 0;
+    let timer = 0;
+    let timerInterval;
+
+    function isValidKnightMove(from, to) {
+      const dx = Math.abs(from.col - to.col);
+      const dy = Math.abs(from.row - to.row);
+      return (dx === 1 && dy === 2) || (dx === 2 && dy === 1);
+    }
+
+    function createBoard() {
+      board.innerHTML = "";
+      for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+          const square = document.createElement("div");
+          square.className = `square ${(row + col) % 2 === 0 ? "light" : "dark"}`;
+          square.dataset.row = row;
+          square.dataset.col = col;
+          square.addEventListener("dragover", e => e.preventDefault());
+          square.addEventListener("drop", handleDrop);
+          board.appendChild(square);
+        }
+      }
+      placeKnight(knightPos.row, knightPos.col);
+      markVisited(knightPos.row, knightPos.col);
+      startTimer();
+    }
+
+    function placeKnight(row, col) {
+      const square = getSquare(row, col);
+      square.innerHTML = `<span class="knight" draggable="true" id="knight">${knightSymbol}</span>`;
+      document.getElementById("knight").addEventListener("dragstart", handleDragStart);
+    }
+
+    function getSquare(row, col) {
+      return document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
+    }
+
+    function markVisited(row, col) {
+      visited[row][col] = true;
+      getSquare(row, col).classList.add("visited");
+    }
+
+    function handleDragStart(e) {
+      e.dataTransfer.setData("text/plain", JSON.stringify(knightPos));
+    }
+
+    function handleDrop(e) {
+      const targetRow = parseInt(e.currentTarget.dataset.row);
+      const targetCol = parseInt(e.currentTarget.dataset.col);
+      const fromPos = JSON.parse(e.dataTransfer.getData("text/plain"));
+
+      if (
+        isValidKnightMove(fromPos, { row: targetRow, col: targetCol }) &&
+        !visited[targetRow][targetCol]
+      ) {
+        getSquare(knightPos.row, knightPos.col).innerHTML = "";
+        knightPos = { row: targetRow, col: targetCol };
+        placeKnight(targetRow, targetCol);
+        markVisited(targetRow, targetCol);
+        moveCount++;
+        movesEl.textContent = moveCount;
+
+        if (isTourComplete()) {
+          clearInterval(timerInterval);
+          alert(`🎉 Knight's tour completed in ${moveCount} moves and ${timer} seconds!`);
+          saveToLeaderboard(username, timer, moveCount);
+          updateLeaderboard();
+        }
+      }
+    }
+
+    function isTourComplete() {
+      return visited.flat().every(cell => cell === true);
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timer++;
+        timerEl.textContent = timer;
+      }, 1000);
+    }
+
+    function saveToLeaderboard(name, time, moves) {
+      const scores = JSON.parse(localStorage.getItem("knightsTourScores") || "[]");
+      scores.push({ name, time, moves });
+      scores.sort((a, b) => a.time - b.time || a.moves - b.moves);
+      localStorage.setItem("knightsTourScores", JSON.stringify(scores.slice(0, 5)));
+    }
+
+    function updateLeaderboard() {
+      const scores = JSON.parse(localStorage.getItem("knightsTourScores") || "[]");
+      leaderboardEl.innerHTML = "";
+      scores.forEach((score, index) => {
+        const li = document.createElement("li");
+        li.textContent = `${index + 1}. ${score.name} — ${score.time}s, ${score.moves} moves`;
+        leaderboardEl.appendChild(li);
+      });
+    }
+
+    updateLeaderboard();
+    createBoard();
+  </script>
+</body>
+</html>
