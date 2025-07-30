@@ -76,10 +76,14 @@
       margin: 20px 0;
     }
     .bowl {
+      flex: 1;
+      max-width: 120px;
+      height: 120px;
       background-color: rgba(255,255,255,0.1);
       border-radius: 10px;
       position: relative;
       padding-top: 20px;
+      margin: 0 5px;
     }
     .string {
       width: 2px;
@@ -97,6 +101,8 @@
       transition: transform 0.2s;
       position: relative;
       top: -10px;
+      width: 60px;
+      height: 80px;
     }
     .balloon:active { transform: scale(1.2); }
     .red   { background: red; }
@@ -111,9 +117,9 @@
     .controls {
       margin: 20px 0;
     }
-    .controls .submit-btn { background-color: #ffc107; color: #000; }
+    .controls .submit-btn { background-color: #ffc107; color: #000; margin-right: 10px; }
     .controls .submit-btn:hover { background-color: #ff9800; }
-    .controls .new-code-btn { background-color: #fff; color: #000; margin-left: 10px; }
+    .controls .new-code-btn { background-color: #fff; color: #000; }
     .controls .new-code-btn:hover { background-color: #ddd; }
     .leaderboard {
       background: #1e1e1e;
@@ -158,9 +164,9 @@
   <h1>🎈 Break the Code: Arrange the Balloons 🎈</h1>
   <div class="game-area">
     <div class="mode-controls">
-      <button class="mode-btn active" onclick="setMode('easy')">Easy</button>
-      <button class="mode-btn" onclick="setMode('medium')">Medium</button>
-      <button class="mode-btn" onclick="setMode('hard')">Hard</button>
+      <button class="mode-btn active" onclick="setMode('easy', event)">Easy</button>
+      <button class="mode-btn" onclick="setMode('medium', event)">Medium</button>
+      <button class="mode-btn" onclick="setMode('hard', event)">Hard</button>
     </div>
     <div class="top-controls">
       <div class="status-box">Correct: <span id="correctCount">0</span></div>
@@ -174,7 +180,8 @@
       <audio id="popSound" src="https://freesound.org/data/previews/341/341695_6249661-lq.mp3"></audio>
     </div>
     <div class="leaderboard">
-      <h3>🏆 Leaderboard (Attempts)</n      </h3><ol id="leaderboardList"></ol>
+      <h3>🏆 Leaderboard (Attempts)</h3>
+      <ol id="leaderboardList"></ol>
     </div>
   </div>
   <div class="modal-bg" id="modalBg">
@@ -200,10 +207,10 @@
     let username = prompt("Enter your username:") || "Anonymous";
     const popSound = document.getElementById('popSound');
 
-    function setMode(m) {
+    function setMode(m, e) {
       mode = m;
       document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+      e.target.classList.add('active');
       startGame();
     }
 
@@ -227,12 +234,9 @@
 
     function renderBalloons() {
       const area = document.getElementById('bowlArea'); area.innerHTML = '';
-      const n = currentOrder.length;
       currentOrder.forEach((color,i) => {
         const bowl = document.createElement('div');
         bowl.className='bowl';
-        bowl.style.width = `${90/n}vw`;
-        bowl.style.height = `${150/n*5}vw`;
         bowl.dataset.idx=i;
         bowl.addEventListener('dragover', e=>e.preventDefault());
         bowl.addEventListener('drop', handleDrop);
@@ -240,9 +244,6 @@
         const b = document.createElement('div');
         b.className=`balloon ${color}`;
         b.draggable=true;
-        const size = 60*(5/n);
-        b.style.width = `${size}px`;
-        b.style.height = `${size*1.33}px`;
         b.dataset.color=color;
         b.addEventListener('dragstart', e=> e.dataTransfer.setData('text', color));
         bowl.appendChild(b);
@@ -291,7 +292,6 @@
     function showInfo(){ document.getElementById('modalBg').style.display='flex'; }
     function hideInfo(){ document.getElementById('modalBg').style.display='none'; }
 
-    // Initialize
     startGame();
   </script>
 </body>
