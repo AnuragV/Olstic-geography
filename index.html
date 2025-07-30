@@ -42,6 +42,9 @@
       font-weight: bold;
       font-size: 16px;
     }
+    .controls {
+      margin: 20px 0;
+    }
     .controls button,
     .top-controls button {
       padding: 10px 20px;
@@ -49,20 +52,29 @@
       cursor: pointer;
       border: none;
       border-radius: 5px;
-      background-color: #ffc107;
-      color: #000;
       font-weight: bold;
       transition: background 0.3s;
     }
-    .controls button:hover,
-    .top-controls button:hover {
+    .controls .submit-btn {
+      background-color: #ffc107;
+      color: #000;
+    }
+    .controls .new-code-btn {
+      background-color: #fff;
+      color: #000;
+      margin-left: 10px;
+    }
+    .controls .submit-btn:hover {
       background-color: #ff9800;
+    }
+    .controls .new-code-btn:hover {
+      background-color: #ddd;
     }
     .info-btn {
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: #ffc107;
+      background: #fff;
       color: #000;
       font-weight: bold;
       font-size: 18px;
@@ -112,19 +124,14 @@
     .green { background: green; }
     .yellow{ background: yellow; }
 
-    /* ---------- Leaderboard & New Code ---------- */
-    .bottom-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-top: 20px;
-    }
+    /* ---------- Leaderboard ---------- */
     .leaderboard {
       background: #1e1e1e;
       color: #eee;
       padding: 10px;
       border-radius: 10px;
       max-width: 300px;
+      margin: 0 auto;
     }
     .leaderboard h3 { margin-bottom: 8px; color: #ffc107; }
     .leaderboard ol {
@@ -177,25 +184,23 @@
       <div class="status-box">
         Time: <span id="timer">0</span>s
       </div>
-      <button class="info-btn" onclick="showInfo()">i</button>
+      <button class="info-btn" onclick="showInfo()">?</button>
     </div>
 
     <!-- Bowls & Balloons -->
     <div class="balloon-container" id="bowlArea"></div>
 
-    <!-- Submit & Pop Sound -->
+    <!-- Submit & New Code -->
     <div class="controls">
-      <button onclick="submitGuess()">Submit Guess</button>
+      <button class="submit-btn" onclick="submitGuess()">Submit Guess</button>
+      <button class="new-code-btn" onclick="startGame()">New Code</button>
       <audio id="popSound" src="https://freesound.org/data/previews/341/341695_6249661-lq.mp3"></audio>
     </div>
 
-    <!-- Leaderboard & New Code -->
-    <div class="bottom-controls">
-      <div class="leaderboard">
-        <h3>🏆 Leaderboard</h3>
-        <ol id="leaderboardList"></ol>
-      </div>
-      <button onclick="startGame()">New Code</button>
+    <!-- Leaderboard Centered -->
+    <div class="leaderboard">
+      <h3>🏆 Leaderboard (Attempts)</h3>
+      <ol id="leaderboardList"></ol>
     </div>
   </div>
 
@@ -208,7 +213,7 @@
         <li>Drag & drop balloons into the bowls, then click “Submit Guess.”</li>
         <li>You have 15 attempts. After each guess, you’ll see how many are correctly placed.</li>
         <li>A timer runs from your first move until you crack the code or exhaust attempts.</li>
-        <li>Leaderboard tracks top players (fewest attempts & fastest time).</li>
+        <li>Leaderboard tracks top players (fewest attempts).</li>
       </ul>
       <button onclick="hideInfo()">Close</button>
     </div>
@@ -219,43 +224,48 @@
     let code, currentOrder, attempts, timer, timerInterval;
     let username = prompt("Enter your username:") || "Anonymous";
 
-    // shuffle until none match
-    function shuffle(arr) {
-      let s; 
-      do {
-        s = arr.slice().sort(() => Math.random()-0.5);
-      } while (s.some((c,i) => c === code[i]));
-      return s;
+    function shuffleArray(arr) {
+      return arr.slice().sort(() => Math.random() - 0.5);
     }
 
-    function startGame(){
-      code = COLORS.slice();            // fixed pattern
-      currentOrder = shuffle(COLORS);
-      attempts = 0; timer = 0;
+    function startGame() {
+      // Reset code and guess order
+      code = shuffleArray(COLORS);
+      // Ensure initial guess has no correct positions
+      do { currentOrder = shuffleArray(COLORS); }
+      while (currentOrder.some((c,i) => c === code[i]));
+
+      // Reset stats & leaderboard
+      attempts = 0;
+      timer = 0;
       clearInterval(timerInterval);
+      localStorage.removeItem('balloonGameScores');
+
       renderStatus();
       renderBalloons();
       updateLeaderboard();
-      timerInterval = setInterval(()=>{
+
+      // Start timer
+      timerInterval = setInterval(() => {
         timer++;
         document.getElementById('timer').textContent = timer;
-      },1000);
+      }, 1000);
     }
 
-    function renderStatus(){
-      document.getElementById('attempts').textContent = attempts;
+    function renderStatus() {
       document.getElementById('correctCount').textContent = 0;
+      document.getElementById('attempts').textContent = attempts;
       document.getElementById('timer').textContent = timer;
     }
 
-    function renderBalloons(){
+    function renderBalloons() {
       const area = document.getElementById('bowlArea');
       area.innerHTML = '';
-      currentOrder.forEach((color,i)=>{
+      currentOrder.forEach((color, i) => {
         const bowl = document.createElement('div');
         bowl.className = 'bowl';
         bowl.dataset.idx = i;
-        bowl.addEventListener('dragover', e=>e.preventDefault());
+        bowl.addEventListener('dragover', e => e.preventDefault());
         bowl.addEventListener('drop', handleDrop);
 
         const str = document.createElement('div');
@@ -266,7 +276,7 @@
         b.className = `balloon ${color}`;
         b.draggable = true;
         b.dataset.color = color;
-        b.addEventListener('dragstart', e=> {
+        b.addEventListener('dragstart', e => {
           e.dataTransfer.setData('text', color);
         });
         bowl.appendChild(b);
@@ -274,7 +284,7 @@
       });
     }
 
-    function handleDrop(e){
+    function handleDrop(e) {
       const dropIdx = +e.currentTarget.dataset.idx;
       const color = e.dataTransfer.getData('text');
       const dragIdx = currentOrder.indexOf(color);
@@ -282,49 +292,54 @@
       renderBalloons();
     }
 
-    function submitGuess(){
-      if (attempts>=15) return alert("No more attempts!");
+    function submitGuess() {
+      if (attempts >= 15) return alert("No more attempts!");
       attempts++;
-      let correct = currentOrder.reduce((acc,c,i)=> acc + (c===code[i]),0);
+      let correct = currentOrder.reduce((acc, c, i) => acc + (c === code[i]), 0);
       document.getElementById('correctCount').textContent = correct;
       document.getElementById('attempts').textContent = attempts;
-      // pop sound
+
+      // Pop sound
       const pop = document.getElementById('popSound');
       pop.currentTime = 0; pop.play();
 
-      if (correct===5){
+      if (correct === 5) {
         clearInterval(timerInterval);
-        alert(`🎉 Cracked in ${attempts} attempts & ${timer}s!`);
-        saveToLeaderboard(username, attempts, timer);
+        alert(`🎉 Cracked in ${attempts} attempts!`);
+        saveToLeaderboard(username, attempts);
         updateLeaderboard();
-      } else if (attempts===15){
+      } else if (attempts === 15) {
         clearInterval(timerInterval);
         alert("🚫 Game over—out of attempts!");
       }
     }
 
-    function saveToLeaderboard(name, att, t){
-      const scores = JSON.parse(localStorage.getItem('balloonGameScores')||'[]');
-      scores.push({name,att,t});
-      scores.sort((a,b)=> a.att-b.att || a.t-b.t);
+    function saveToLeaderboard(name, att) {
+      const scores = JSON.parse(localStorage.getItem('balloonGameScores') || '[]');
+      scores.push({name, att});
+      scores.sort((a,b) => a.att - b.att);
       localStorage.setItem('balloonGameScores', JSON.stringify(scores.slice(0,5)));
     }
 
-    function updateLeaderboard(){
-      const scores = JSON.parse(localStorage.getItem('balloonGameScores')||'[]');
+    function updateLeaderboard() {
+      const scores = JSON.parse(localStorage.getItem('balloonGameScores') || '[]');
       const list = document.getElementById('leaderboardList');
       list.innerHTML = '';
-      scores.forEach((s,i)=>{
+      scores.forEach((s, i) => {
         const li = document.createElement('li');
-        li.textContent = `${i+1}. ${s.name} — ${s.att} attempts, ${s.t}s`;
+        li.textContent = `${i+1}. ${s.name} — ${s.att} attempts`;
         list.appendChild(li);
       });
     }
 
-    function showInfo(){ document.getElementById('modalBg').style.display = 'flex'; }
-    function hideInfo(){ document.getElementById('modalBg').style.display = 'none'; }
+    function showInfo() {
+      document.getElementById('modalBg').style.display = 'flex';
+    }
+    function hideInfo() {
+      document.getElementById('modalBg').style.display = 'none';
+    }
 
-    // start first game
+    // Initialize game
     startGame();
   </script>
 </body>
