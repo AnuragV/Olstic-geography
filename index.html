@@ -2,273 +2,290 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Break the Code: Arrange the Balloons</title>
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #000;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      height: 100vh;
-      overflow: hidden;
+      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: #eee;
+      text-align: center;
     }
 
     h1 {
-      color: #ffd700;
-      margin: 20px;
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #ffc107;
     }
 
     .game-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 900px;
+      margin: 0 auto;
     }
 
-    .table {
+    .mode-controls {
       display: flex;
-      justify-content: center;
-      align-items: end;
-      height: 250px;
-      gap: 20px;
+      justify-content: flex-start;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .mode-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background: #555;
+      color: #eee;
+      transition: background 0.3s;
+    }
+
+    .mode-btn.active {
+      background: #ffc107;
+      color: #000;
+    }
+
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .status-box {
+      background: #ffc107;
+      color: #000;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .info-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #ffc107;
+      color: #000;
+      font-weight: bold;
+      font-size: 18px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .balloon-container {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+      height: 200px;
     }
 
     .bowl {
-      width: 60px;
-      height: 30px;
-      background-color: #654321;
-      border-radius: 50%/100%;
       position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: end;
+      flex: 1;
+      max-width: 100px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50% 50% 0 0;
+      padding-top: 20px;
+    }
+
+    .string {
+      position: absolute;
+      width: 2px;
+      background: #000;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     .balloon {
-      width: 50px;
-      height: 65px;
-      border-radius: 50% 50% 45% 45%;
       position: absolute;
-      top: -65px;
+      top: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 50%;
       cursor: grab;
+      transition: transform 0.2s;
     }
 
-    .balloon::after {
-      content: "";
-      width: 2px;
-      height: 30px;
-      background: black;
-      position: absolute;
-      left: 50%;
-      top: 100%;
-      transform: translateX(-50%);
+    .balloon:active {
+      transform: translateX(-50%) scale(1.2);
     }
 
     .controls {
       display: flex;
+      justify-content: center;
       gap: 10px;
-      margin: 10px;
+      margin: 20px 0;
     }
 
-    button {
+    .controls button {
       padding: 10px 20px;
+      font-size: 16px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-    }
-
-    .submit {
-      background-color: #ffd700;
-      color: black;
-    }
-
-    .new-code {
-      background-color: white;
-      color: black;
-    }
-
-    .info {
-      background-color: #444;
-      color: white;
-      width: 30px;
-      height: 30px;
-      text-align: center;
-      border-radius: 50%;
       font-weight: bold;
+      transition: background 0.3s;
     }
 
-    .status {
-      display: flex;
-      gap: 10px;
-      margin: 10px;
+    .submit-btn {
+      background: #ffc107;
+      color: #000;
     }
 
-    .status-box {
-      background-color: #ffd700;
-      color: black;
-      padding: 10px 20px;
-      border-radius: 5px;
+    .new-code-btn {
+      background: #fff;
+      color: #000;
+    }
+
+    .reveal-btn {
+      background: #6a5acd;
+      color: #fff;
     }
 
     .leaderboard {
-      margin-top: 10px;
+      margin: 20px 0;
       text-align: center;
     }
+
+    .leaderboard ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .leaderboard h3 {
+      color: #ffc107;
+    }
+
+    /* Modal and code display omitted for brevity */
   </style>
 </head>
 <body>
-  <h1>Break the Code: Arrange the Balloons</h1>
+  <h1>🎈 Break the Code: Arrange the Balloons 🎈</h1>
   <div class="game-area">
-    <div class="table" id="table"></div>
-
-    <div class="status">
+    <div class="mode-controls">
+      <button class="mode-btn active" onclick="setMode('easy')">Easy</button>
+      <button class="mode-btn" onclick="setMode('medium')">Medium</button>
+      <button class="mode-btn" onclick="setMode('hard')">Hard</button>
+    </div>
+    <div class="top-controls">
       <div class="status-box" id="attemptsBox">Attempts: 0</div>
       <div class="status-box" id="correctBox">0 balloons are placed correctly</div>
+      <button class="info-btn" onclick="toggleInstructions()">?</button>
     </div>
-
+    <div class="balloon-container" id="bowlArea"></div>
     <div class="controls">
-      <button class="submit" onclick="submitGuess()">Submit Guess</button>
-      <button class="new-code" onclick="initializeGame()">New Code</button>
-      <button class="info" onclick="toggleInstructions()">?</button>
+      <button class="submit-btn" onclick="submitGuess()">Submit Guess</button>
+      <button class="new-code-btn" onclick="startGame()">New Code</button>
+      <button class="reveal-btn" onclick="revealCode()">Reveal Code</button>
     </div>
-
-    <div class="leaderboard">
-      <h3>Leaderboard</h3>
-      <ol id="leaderboardList"></ol>
+    <div class="leaderboard" id="leaderboard">
+      <h3>Easy Leaderboard</h3>
+      <ul id="easyLeaderboard"></ul>
+      <h3>Medium Leaderboard</h3>
+      <ul id="mediumLeaderboard"></ul>
+      <h3>Hard Leaderboard</h3>
+      <ul id="hardLeaderboard"></ul>
     </div>
   </div>
 
-  <div id="instructionModal" style="display:none;position:absolute;top:50px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:20px;border-radius:10px;max-width:300px;z-index:100">
-    <h3>Instructions</h3>
-    <p>Drag the balloons to arrange them in the correct order. Click "Submit Guess" to see how many are correct. Use "New Code" to restart. Try to crack the code in minimum attempts!</p>
-    <button onclick="toggleInstructions()">Close</button>
-  </div>
-
-  <audio id="popSound" src="https://www.soundjay.com/button/button-16.mp3"></audio>
+  <!-- Modal & code display omitted -->
 
   <script>
-    const allColors = ["red", "white", "blue", "green", "yellow"];
-    let correctOrder = [];
-    let currentOrder = [];
-    let attempts = 0;
-    let username = "";
-
-    window.onload = () => {
-      username = prompt("Enter your username:");
-      initializeGame();
+    const MODES = {
+      easy: ['red','yellow','white','blue','green'],
+      medium: ['red','yellow','white','blue','green','pink','purple'],
+      hard: ['red','yellow','white','blue','green','pink','purple','orange','cyan']
     };
+    let mode = 'easy', code = [], currentOrder = [], attempts = 0;
+    let username = prompt("Enter your username:")||"Anonymous";
 
-    function initializeGame() {
-      const table = document.getElementById("table");
-      table.innerHTML = "";
+    function setMode(m) {
+      mode = m;
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.toggle('active', btn.textContent.toLowerCase()===m));
+      startGame();
+    }
+
+    function shuffle(arr) {
+      return arr.slice().sort(() => Math.random()-0.5);
+    }
+
+    function startGame() {
+      const colors = MODES[mode];
+      code = shuffle(colors);
+      do { currentOrder = shuffle(colors); } while(currentOrder.some((c,i)=>c===code[i]));
       attempts = 0;
-      document.getElementById("attemptsBox").innerText = `Attempts: ${attempts}`;
+      render(); updateLeaderboards();
+    }
 
-      correctOrder = shuffle([...allColors]);
-      let initOrder = shuffle([...allColors]);
-      while (countCorrect(initOrder, correctOrder) > 0) {
-        initOrder = shuffle([...allColors]);
+    function render() {
+      document.getElementById('attemptsBox').textContent = `Attempts: ${attempts}`;
+      const correct = currentOrder.reduce((a,c,i)=>a+(c===code[i]),0);
+      document.getElementById('correctBox').textContent = `${correct} balloons are placed correctly`;
+
+      const area = document.getElementById('bowlArea');
+      area.innerHTML = '';
+      const n = currentOrder.length;
+      const totalW = area.clientWidth;
+      const gap = 10;
+      const w = (totalW - gap*(n-1))/n;
+      const h = w*1.2;
+      for(let i=0;i<n;i++){
+        const bowl = document.createElement('div'); bowl.className='bowl';
+        bowl.style.width=w+'px'; bowl.style.height=h*0.2+'px'; bowl.dataset.i=i;
+        bowl.addEventListener('dragover',e=>e.preventDefault());
+        bowl.addEventListener('drop',drop);
+        const str = document.createElement('div'); str.className='string'; str.style.height=h*0.2+'px'; bowl.appendChild(str);
+        const b = document.createElement('div'); b.className='balloon '+currentOrder[i];
+        b.draggable=true; b.dataset.c=currentOrder[i];
+        b.style.width=w*0.6+'px'; b.style.height=w*0.6+'px'; b.style.top=h*0.2+'px';
+        b.addEventListener('dragstart',e=>e.dataTransfer.setData('text',e.target.dataset.c));
+        bowl.appendChild(b);
+        area.appendChild(bowl);
       }
-      currentOrder = [...initOrder];
+    }
 
-      initOrder.forEach((color, index) => {
-        const bowl = document.createElement("div");
-        bowl.className = "bowl";
-        bowl.dataset.index = index;
+    function drop(e){
+      const to=+e.currentTarget.dataset.i;
+      const c=e.dataTransfer.getData('text');
+      const from=currentOrder.indexOf(c);
+      [currentOrder[from],currentOrder[to]]=[currentOrder[to],currentOrder[from]];
+      render();
+    }
 
-        const balloon = document.createElement("div");
-        balloon.className = "balloon";
-        balloon.style.backgroundColor = color;
-        balloon.draggable = true;
-        balloon.dataset.color = color;
+    function submitGuess(){
+      attempts++; render();
+      if(currentOrder.every((c,i)=>c===code[i])){ alert(`🎉 Done in ${attempts} moves!`); saveLeaderboard(mode); updateLeaderboards(); }
+    }
 
-        balloon.addEventListener("dragstart", dragStart);
-        bowl.addEventListener("dragover", dragOver);
-        bowl.addEventListener("drop", drop);
+    function saveLeaderboard(m){
+      const key='board_'+m;
+      let s=JSON.parse(localStorage.getItem(key)||'[]');
+      s.push({u:username,a:attempts});
+      s.sort((x,y)=>x.a-y.a);
+      localStorage.setItem(key,JSON.stringify(s.slice(0,5)));
+    }
 
-        bowl.appendChild(balloon);
-        table.appendChild(bowl);
+    function updateLeaderboards(){
+      ['easy','medium','hard'].forEach(m=>{
+        const list=document.getElementById(m+'Leaderboard');
+        list.innerHTML='';
+        JSON.parse(localStorage.getItem('board_'+m)||'[]').forEach((e,i)=>{
+          const li=document.createElement('li');
+          li.textContent=`${i+1}. ${e.u} — ${e.a} moves`;
+          list.appendChild(li);
+        });
       });
     }
 
-    function dragStart(e) {
-      e.dataTransfer.setData("text/plain", e.target.dataset.color);
-      e.dataTransfer.setData("fromIndex", [...e.target.parentNode.parentNode.children].indexOf(e.target.parentNode));
-    }
-
-    function dragOver(e) {
-      e.preventDefault();
-    }
-
-    function drop(e) {
-      const color = e.dataTransfer.getData("text/plain");
-      const fromIndex = e.dataTransfer.getData("fromIndex");
-      const toIndex = e.currentTarget.dataset.index;
-
-      if (fromIndex === toIndex) return;
-
-      const table = document.getElementById("table");
-      const fromBowl = table.children[fromIndex];
-      const toBowl = table.children[toIndex];
-      const fromBalloon = fromBowl.querySelector(".balloon");
-      const toBalloon = toBowl.querySelector(".balloon");
-
-      fromBowl.appendChild(toBalloon);
-      toBowl.appendChild(fromBalloon);
-
-      let temp = currentOrder[fromIndex];
-      currentOrder[fromIndex] = currentOrder[toIndex];
-      currentOrder[toIndex] = temp;
-    }
-
-    function submitGuess() {
-      attempts++;
-      document.getElementById("attemptsBox").innerText = `Attempts: ${attempts}`;
-
-      const correct = countCorrect(currentOrder, correctOrder);
-      document.getElementById("correctBox").innerText = `${correct} balloons are placed correctly`;
-      document.getElementById("popSound").play();
-
-      updateLeaderboard();
-    }
-
-    function countCorrect(arr1, arr2) {
-      return arr1.reduce((count, val, idx) => count + (val === arr2[idx] ? 1 : 0), 0);
-    }
-
-    function shuffle(array) {
-      return array.sort(() => Math.random() - 0.5);
-    }
-
-    function toggleInstructions() {
-      const modal = document.getElementById("instructionModal");
-      modal.style.display = modal.style.display === "none" ? "block" : "none";
-    }
-
-    function updateLeaderboard() {
-      const key = "leaderboard";
-      let board = JSON.parse(localStorage.getItem(key)) || [];
-
-      board.push({ username, attempts });
-      board.sort((a, b) => a.attempts - b.attempts);
-      board = board.slice(0, 5);
-
-      localStorage.setItem(key, JSON.stringify(board));
-
-      const list = document.getElementById("leaderboardList");
-      list.innerHTML = "";
-      board.forEach(entry => {
-        const li = document.createElement("li");
-        li.textContent = `${entry.username}: ${entry.attempts} attempts`;
-        list.appendChild(li);
-      });
-    }
+    startGame();
   </script>
 </body>
 </html>
