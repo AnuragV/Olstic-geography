@@ -6,7 +6,7 @@
   <title>Break the Code: Arrange the Balloons</title>
   <style>
     body {
-      background-color: black;
+      background-color: #000;
       color: white;
       font-family: Arial, sans-serif;
       text-align: center;
@@ -16,276 +16,245 @@
     h1 {
       margin-top: 20px;
     }
-    #game {
+    .game-container {
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 20px;
     }
-    #table, #balloons {
+    .balloon-container, .guess-container {
       display: flex;
-      margin: 10px;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+      justify-content: center;
     }
     .balloon {
       width: 60px;
       height: 80px;
-      border-radius: 50%;
-      margin: 0 5px;
+      border-radius: 30px 30px 10px 10px;
       position: relative;
       cursor: grab;
-      box-shadow: 0 0 5px rgba(255,255,255,0.5);
     }
-    .string {
-      width: 2px;
-      height: 20px;
-      background: black;
+    .balloon::after {
+      content: "";
       position: absolute;
       bottom: -20px;
       left: 50%;
+      width: 2px;
+      height: 20px;
+      background: black;
       transform: translateX(-50%);
     }
-    .bowl {
+    .slot {
       width: 60px;
       height: 80px;
       border: 2px dashed white;
-      border-radius: 50%;
-      margin: 0 5px;
+      border-radius: 30px 30px 10px 10px;
     }
-    #info {
+    .controls {
       margin: 10px;
     }
-    #submit, #newGame, #revealCode {
-      background-color: yellow;
-      color: black;
-      border: none;
+    button {
       padding: 10px 20px;
-      margin: 10px 5px;
+      margin: 5px;
       cursor: pointer;
       font-weight: bold;
+    }
+    .feedback {
+      margin: 10px;
+      font-size: 18px;
     }
     #leaderboard {
       margin-top: 20px;
     }
-    #instructionsBtn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 30px;
-      height: 30px;
-      background-color: black;
-      color: white;
-      border: 1px solid white;
-      font-weight: bold;
-      font-size: 18px;
-      cursor: pointer;
+    .leaderboard-entry {
+      margin: 2px 0;
     }
-    #modal {
-      display: none;
-      position: fixed;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -30%);
-      background-color: white;
-      color: black;
-      padding: 20px;
-      border-radius: 10px;
-      z-index: 1000;
-      width: 80%;
-      max-width: 400px;
-    }
-    #closeModal {
-      margin-top: 10px;
-      background-color: black;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      cursor: pointer;
-    }
-    .status-box {
-      background-color: yellow;
-      color: black;
-      padding: 10px;
-      margin: 10px;
-      display: inline-block;
-      font-weight: bold;
+    .username-input {
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-  <button id="instructionsBtn">?</button>
-  <div id="modal">
-    <p>Arrange the balloons in the correct order. After each guess, you'll be told how many balloons are correctly placed. Use the feedback to figure out the code!</p>
-    <button id="closeModal">Close</button>
-  </div>
   <h1>🎈 Break the Code: Arrange the Balloons 🎈</h1>
-  <div id="game">
-    <div id="balloons"></div>
-    <div id="table"></div>
-    <div id="info">
-      <div class="status-box" id="attemptsBox">Attempts: 0</div>
-      <div class="status-box" id="correctBox">Correctly Placed: 0</div>
+  <div class="game-container">
+    <div class="username-input">
+      <label for="username">Enter Username: </label>
+      <input type="text" id="username" />
+      <button onclick="startGame()">Start Game</button>
     </div>
-    <div>
-      <button id="submit">Submit Guess</button>
-      <button id="newGame">New Code</button>
+
+    <div class="controls">
+      <button onclick="setDifficulty(5)">Easy</button>
+      <button onclick="setDifficulty(7)">Medium</button>
+      <button onclick="setDifficulty(9)">Hard</button>
     </div>
-    <div>
-      <button id="revealCode">Reveal Code</button>
-    </div>
+
+    <div id="balloon-container" class="balloon-container"></div>
+    <div id="guess-container" class="guess-container"></div>
+
+    <button onclick="submitGuess()">Submit Guess</button>
+    <button onclick="resetGame()">New Code</button>
+
+    <div class="feedback" id="feedback"></div>
+
     <div id="leaderboard">
-      <h2>🏆 Leaderboard 🏆</h2>
-      <ul id="scores"></ul>
+      <h2>Leaderboard</h2>
+      <div id="leaderboard-entries"></div>
     </div>
   </div>
-
-  <audio id="popSound" src="https://www.soundjay.com/button/sounds/button-16.mp3"></audio>
 
   <script>
-    const colors = ["red", "yellow", "white", "blue", "green"];
-    let code = [];
-    let attempts = 0;
-    let username = '';
-    let leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+    const colorsEasy = ["red", "white", "blue", "green", "yellow"];
+    const colorsMedium = [...colorsEasy, "pink", "purple"];
+    const colorsHard = [...colorsEasy, "pink", "purple", "orange", "cyan"];
 
-    function generateCode() {
-      const shuffled = [...colors].sort(() => 0.5 - Math.random());
-      code = shuffled.slice(0, 5);
+    let code = [];
+    let draggedBalloon = null;
+    let difficulty = 5;
+    let attempts = 0;
+    let username = "";
+    let leaderboards = {
+      5: [],
+      7: [],
+      9: []
+    };
+
+    function startGame() {
+      const nameInput = document.getElementById("username").value.trim();
+      if (nameInput === "") {
+        alert("Please enter a username.");
+        return;
+      }
+      username = nameInput;
+      document.querySelector(".username-input").style.display = "none";
+      initGame();
     }
 
-    function createBalloons() {
-      const balloonsDiv = document.getElementById("balloons");
-      balloonsDiv.innerHTML = "";
+    function setDifficulty(level) {
+      difficulty = level;
+      initGame();
+    }
+
+    function initGame() {
+      attempts = 0;
+      code = generateCode();
+      renderBalloons();
+      renderGuessSlots();
+      document.getElementById("feedback").textContent = "";
+      renderLeaderboard();
+    }
+
+    function generateCode() {
+      const colors =
+        difficulty === 5 ? colorsEasy :
+        difficulty === 7 ? colorsMedium : colorsHard;
+
+      const copy = [...colors];
+      const result = [];
+      while (result.length < difficulty) {
+        const idx = Math.floor(Math.random() * copy.length);
+        result.push(copy.splice(idx, 1)[0]);
+      }
+      return result;
+    }
+
+    function renderBalloons() {
+      const container = document.getElementById("balloon-container");
+      container.innerHTML = "";
+      const colors =
+        difficulty === 5 ? colorsEasy :
+        difficulty === 7 ? colorsMedium : colorsHard;
+
       colors.forEach(color => {
-        const balloon = document.createElement("div");
-        balloon.className = "balloon";
-        balloon.style.backgroundColor = color;
-        balloon.setAttribute("draggable", true);
-        balloon.dataset.color = color;
-
-        const string = document.createElement("div");
-        string.className = "string";
-        balloon.appendChild(string);
-
-        balloon.addEventListener("dragstart", dragStart);
-        balloonsDiv.appendChild(balloon);
+        const div = document.createElement("div");
+        div.className = "balloon";
+        div.style.backgroundColor = color;
+        div.draggable = true;
+        div.dataset.color = color;
+        div.ondragstart = (e) => {
+          draggedBalloon = div;
+        };
+        container.appendChild(div);
       });
     }
 
-    function createTable() {
-      const table = document.getElementById("table");
-      table.innerHTML = "";
-      for (let i = 0; i < 5; i++) {
-        const bowl = document.createElement("div");
-        bowl.className = "bowl";
-        bowl.addEventListener("dragover", dragOver);
-        bowl.addEventListener("drop", drop);
-        table.appendChild(bowl);
+    function renderGuessSlots() {
+      const container = document.getElementById("guess-container");
+      container.innerHTML = "";
+      for (let i = 0; i < difficulty; i++) {
+        const slot = document.createElement("div");
+        slot.className = "slot";
+        slot.ondragover = (e) => e.preventDefault();
+        slot.ondrop = (e) => {
+          if (draggedBalloon) {
+            slot.innerHTML = "";
+            const clone = draggedBalloon.cloneNode(true);
+            clone.draggable = true;
+            clone.ondragstart = (e) => {
+              draggedBalloon = clone;
+            };
+            slot.appendChild(clone);
+          }
+        };
+        container.appendChild(slot);
       }
     }
 
-    function dragStart(e) {
-      e.dataTransfer.setData("color", e.target.dataset.color);
-    }
-
-    function dragOver(e) {
-      e.preventDefault();
-    }
-
-    function drop(e) {
-      const color = e.dataTransfer.getData("color");
-      const balloon = document.createElement("div");
-      balloon.className = "balloon";
-      balloon.style.backgroundColor = color;
-      balloon.dataset.color = color;
-
-      const string = document.createElement("div");
-      string.className = "string";
-      balloon.appendChild(string);
-
-      balloon.setAttribute("draggable", true);
-      balloon.addEventListener("dragstart", dragStart);
-      e.target.innerHTML = "";
-      e.target.appendChild(balloon);
-    }
-
-    function checkGuess() {
-      const table = document.getElementById("table");
+    function submitGuess() {
+      const slots = document.querySelectorAll(".guess-container .slot");
       const guess = [];
-      for (const bowl of table.children) {
-        if (bowl.firstChild) {
-          guess.push(bowl.firstChild.dataset.color);
-        } else {
-          guess.push(null);
-        }
-      }
+      slots.forEach(slot => {
+        const balloon = slot.querySelector(".balloon");
+        guess.push(balloon ? balloon.dataset.color : null);
+      });
 
       if (guess.includes(null)) {
-        alert("Please place all balloons before submitting.");
+        alert("Fill all slots before submitting your guess.");
         return;
       }
 
       attempts++;
-      document.getElementById("attemptsBox").innerText = "Attempts: " + attempts;
-
       let correct = 0;
-      for (let i = 0; i < 5; i++) {
-        if (guess[i] === code[i]) {
-          correct++;
-        }
+      for (let i = 0; i < difficulty; i++) {
+        if (guess[i] === code[i]) correct++;
       }
-      document.getElementById("correctBox").innerText = "Correctly Placed: " + correct;
 
-      document.getElementById("popSound").play();
+      document.getElementById("feedback").textContent =
+        `🎯 ${correct} balloons in the correct position | Attempts: ${attempts}`;
 
-      if (correct === 5) {
-        const name = prompt("🎉 You broke the code! Enter your name for the leaderboard:");
-        if (name) {
-          leaderboard.push({ name, attempts });
-          leaderboard.sort((a, b) => a.attempts - b.attempts);
-          leaderboard = leaderboard.slice(0, 5);
-          localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-          updateLeaderboard();
-        }
+      if (correct === difficulty) {
+        updateLeaderboard(username, attempts);
+        alert(`🎉 Congratulations ${username}! You broke the code in ${attempts} attempts.`);
+        initGame();
       }
     }
 
-    function updateLeaderboard() {
-      const scores = document.getElementById("scores");
-      scores.innerHTML = "";
-      leaderboard.forEach(entry => {
-        const li = document.createElement("li");
-        li.textContent = `${entry.name}: ${entry.attempts} attempts`;
-        scores.appendChild(li);
+    function resetGame() {
+      initGame();
+    }
+
+    function updateLeaderboard(name, attemptsCount) {
+      const board = leaderboards[difficulty];
+      board.push({ name, attempts: attemptsCount });
+      board.sort((a, b) => a.attempts - b.attempts);
+      leaderboards[difficulty] = board.slice(0, 5);
+      renderLeaderboard();
+    }
+
+    function renderLeaderboard() {
+      const entriesDiv = document.getElementById("leaderboard-entries");
+      entriesDiv.innerHTML = "";
+
+      const board = leaderboards[difficulty];
+      board.forEach((entry, index) => {
+        const div = document.createElement("div");
+        div.className = "leaderboard-entry";
+        div.textContent = `${index + 1}. ${entry.name} - ${entry.attempts} attempts`;
+        entriesDiv.appendChild(div);
       });
     }
-
-    document.getElementById("submit").addEventListener("click", checkGuess);
-
-    document.getElementById("newGame").addEventListener("click", () => {
-      generateCode();
-      createBalloons();
-      createTable();
-      attempts = 0;
-      document.getElementById("attemptsBox").innerText = "Attempts: 0";
-      document.getElementById("correctBox").innerText = "Correctly Placed: 0";
-    });
-
-    document.getElementById("revealCode").addEventListener("click", () => {
-      alert("🎯 The correct code is:\n" + code.join(", "));
-    });
-
-    document.getElementById("instructionsBtn").addEventListener("click", () => {
-      document.getElementById("modal").style.display = "block";
-    });
-
-    document.getElementById("closeModal").addEventListener("click", () => {
-      document.getElementById("modal").style.display = "none";
-    });
-
-    // Initialize game
-    generateCode();
-    createBalloons();
-    createTable();
-    updateLeaderboard();
   </script>
 </body>
 </html>
