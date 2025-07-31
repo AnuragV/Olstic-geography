@@ -12,29 +12,28 @@
       background: #121212;
       color: #eee;
       text-align: center;
+      overflow: hidden;
     }
-
     h1 {
       font-size: 32px;
       margin-bottom: 10px;
       color: #ffc107;
     }
-
     .game-area {
       background: #1e1e1e;
       padding: 20px;
       border-radius: 12px;
-      max-width: 900px;
+      width: 90vw;
+      max-width: 1000px;
       margin: 0 auto;
+      box-sizing: border-box;
     }
-
     .mode-controls {
       display: flex;
       justify-content: flex-start;
       gap: 10px;
       margin-bottom: 15px;
     }
-
     .mode-btn {
       padding: 10px 20px;
       font-size: 16px;
@@ -43,248 +42,181 @@
       border-radius: 5px;
       background: #555;
       color: #eee;
-      transition: background 0.3s;
     }
-
     .mode-btn.active {
       background: #ffc107;
       color: #000;
     }
-
     .top-controls {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
     }
-
     .status-box {
       background: #ffc107;
       color: #000;
       padding: 10px 15px;
       border-radius: 6px;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 16px;
     }
-
     .info-btn {
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: #ffc107;
+      background: #fff;
       color: #000;
       font-weight: bold;
       font-size: 18px;
-      border: none;
+      line-height: 32px;
       cursor: pointer;
+      border: none;
     }
-
     .balloon-container {
       display: flex;
       justify-content: space-around;
       margin: 20px 0;
-      height: 200px;
     }
-
     .bowl {
-      position: relative;
       flex: 1;
-      max-width: 100px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 50% 50% 0 0;
+      max-width: 120px;
+      height: 120px;
+      background-color: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      position: relative;
       padding-top: 20px;
+      margin: 0 5px;
     }
-
     .string {
-      position: absolute;
       width: 2px;
+      height: 40px;
       background: #000;
+      position: absolute;
       top: 0;
       left: 50%;
       transform: translateX(-50%);
     }
-
     .balloon {
-      position: absolute;
-      top: 25px;
-      left: 50%;
-      transform: translateX(-50%);
+      width: 60px;
+      height: 80px;
       border-radius: 50%;
+      margin: 0 auto;
       cursor: grab;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.6);
       transition: transform 0.2s;
+      position: relative;
+      top: -10px;
     }
-
-    .balloon:active {
-      transform: translateX(-50%) scale(1.2);
-    }
-
+    .balloon:active { transform: scale(1.2); }
+    .red   { background: red; }
+    .white { background: white; border: 2px solid #ccc; }
+    .blue  { background: blue; }
+    .green { background: green; }
+    .yellow{ background: yellow; }
+    .pink  { background: hotpink; }
+    .purple{ background: purple; }
+    .orange{ background: orange; }
+    .cyan  { background: cyan; }
     .controls {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
       margin: 20px 0;
     }
-
-    .controls button {
+    .submit-btn {
+      background-color: #ffc107;
+      color: #000;
       padding: 10px 20px;
       font-size: 16px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s;
+      margin-right: 10px;
     }
-
-    .submit-btn {
-      background: #ffc107;
-      color: #000;
-    }
-
+    .submit-btn:hover { background-color: #ff9800; }
     .new-code-btn {
-      background: #fff;
+      background-color: #fff;
       color: #000;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
-
-    .reveal-btn {
-      background: #6a5acd;
-      color: #fff;
-    }
-
+    .new-code-btn:hover { background-color: #ddd; }
     .leaderboard {
-      margin: 20px 0;
-      text-align: center;
+      background: #1e1e1e;
+      color: #eee;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 300px;
+      margin: 0 auto;
     }
-
-    .leaderboard ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .leaderboard h3 {
-      color: #ffc107;
-    }
-
-    /* Modal and code display omitted for brevity */
+    .leaderboard h3 { margin-bottom: 8px; color: #ffc107; }
+    .leaderboard ol { list-style: none; padding: 0; margin: 0; }
+    .leaderboard li { padding: 4px; border-bottom: 1px solid #333; font-size: 14px; }
+    .modal-bg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; }
+    .modal { background: #1e1e1e; padding: 20px; border-radius: 8px; max-width: 400px; color: #eee; text-align: left; }
+    .modal h4 { margin-top: 0; color: #ffc107; }
+    .modal button { margin-top: 15px; float: right; }
   </style>
 </head>
 <body>
   <h1>🎈 Break the Code: Arrange the Balloons 🎈</h1>
   <div class="game-area">
     <div class="mode-controls">
-      <button class="mode-btn active" onclick="setMode('easy')">Easy</button>
-      <button class="mode-btn" onclick="setMode('medium')">Medium</button>
-      <button class="mode-btn" onclick="setMode('hard')">Hard</button>
+      <button class="mode-btn active" onclick="setMode('easy', event)">Easy</button>
+      <button class="mode-btn" onclick="setMode('medium', event)">Medium</button>
+      <button class="mode-btn" onclick="setMode('hard', event)">Hard</button>
     </div>
     <div class="top-controls">
       <div class="status-box" id="attemptsBox">Attempts: 0</div>
       <div class="status-box" id="correctBox">0 balloons are placed correctly</div>
-      <button class="info-btn" onclick="toggleInstructions()">?</button>
+      <button class="info-btn" onclick="showInfo()">?</button>
     </div>
     <div class="balloon-container" id="bowlArea"></div>
     <div class="controls">
       <button class="submit-btn" onclick="submitGuess()">Submit Guess</button>
       <button class="new-code-btn" onclick="startGame()">New Code</button>
-      <button class="reveal-btn" onclick="revealCode()">Reveal Code</button>
+      <audio id="popSound" src="https://freesound.org/data/previews/341/341695_6249661-lq.mp3"></audio>
     </div>
-    <div class="leaderboard" id="leaderboard">
-      <h3>Easy Leaderboard</h3>
-      <ul id="easyLeaderboard"></ul>
-      <h3>Medium Leaderboard</h3>
-      <ul id="mediumLeaderboard"></ul>
-      <h3>Hard Leaderboard</h3>
-      <ul id="hardLeaderboard"></ul>
+    <div class="leaderboard">
+      <h3>🏆 Leaderboard (Attempts)</h3>
+      <ol id="leaderboardList"></ol>
     </div>
   </div>
-
-  <!-- Modal & code display omitted -->
-
+  <div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <h4>How to Play</h4>
+      <ul>
+        <li>Guess the hidden order of the balloons.</li>
+        <li>Drag & drop into bowls, then click “Submit Guess.”</li>
+        <li>After each guess, see how many are correct.</li>
+        <li>Attempts count, no limit.</li>
+        <li>Leaderboard tracks best scores (fewest attempts).</li>
+      </ul>
+      <button onclick="hideInfo()">Close</button>
+    </div>
+  </div>
   <script>
     const MODES = {
       easy: ['red','yellow','white','blue','green'],
       medium: ['red','yellow','white','blue','green','pink','purple'],
       hard: ['red','yellow','white','blue','green','pink','purple','orange','cyan']
     };
-    let mode = 'easy', code = [], currentOrder = [], attempts = 0;
-    let username = prompt("Enter your username:")||"Anonymous";
-
-    function setMode(m) {
-      mode = m;
-      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.toggle('active', btn.textContent.toLowerCase()===m));
-      startGame();
-    }
-
-    function shuffle(arr) {
-      return arr.slice().sort(() => Math.random()-0.5);
-    }
-
-    function startGame() {
-      const colors = MODES[mode];
-      code = shuffle(colors);
-      do { currentOrder = shuffle(colors); } while(currentOrder.some((c,i)=>c===code[i]));
-      attempts = 0;
-      render(); updateLeaderboards();
-    }
-
-    function render() {
-      document.getElementById('attemptsBox').textContent = `Attempts: ${attempts}`;
-      const correct = currentOrder.reduce((a,c,i)=>a+(c===code[i]),0);
-      document.getElementById('correctBox').textContent = `${correct} balloons are placed correctly`;
-
-      const area = document.getElementById('bowlArea');
-      area.innerHTML = '';
-      const n = currentOrder.length;
-      const totalW = area.clientWidth;
-      const gap = 10;
-      const w = (totalW - gap*(n-1))/n;
-      const h = w*1.2;
-      for(let i=0;i<n;i++){
-        const bowl = document.createElement('div'); bowl.className='bowl';
-        bowl.style.width=w+'px'; bowl.style.height=h*0.2+'px'; bowl.dataset.i=i;
-        bowl.addEventListener('dragover',e=>e.preventDefault());
-        bowl.addEventListener('drop',drop);
-        const str = document.createElement('div'); str.className='string'; str.style.height=h*0.2+'px'; bowl.appendChild(str);
-        const b = document.createElement('div'); b.className='balloon '+currentOrder[i];
-        b.draggable=true; b.dataset.c=currentOrder[i];
-        b.style.width=w*0.6+'px'; b.style.height=w*0.6+'px'; b.style.top=h*0.2+'px';
-        b.addEventListener('dragstart',e=>e.dataTransfer.setData('text',e.target.dataset.c));
-        bowl.appendChild(b);
-        area.appendChild(bowl);
-      }
-    }
-
-    function drop(e){
-      const to=+e.currentTarget.dataset.i;
-      const c=e.dataTransfer.getData('text');
-      const from=currentOrder.indexOf(c);
-      [currentOrder[from],currentOrder[to]]=[currentOrder[to],currentOrder[from]];
-      render();
-    }
-
-    function submitGuess(){
-      attempts++; render();
-      if(currentOrder.every((c,i)=>c===code[i])){ alert(`🎉 Done in ${attempts} moves!`); saveLeaderboard(mode); updateLeaderboards(); }
-    }
-
-    function saveLeaderboard(m){
-      const key='board_'+m;
-      let s=JSON.parse(localStorage.getItem(key)||'[]');
-      s.push({u:username,a:attempts});
-      s.sort((x,y)=>x.a-y.a);
-      localStorage.setItem(key,JSON.stringify(s.slice(0,5)));
-    }
-
-    function updateLeaderboards(){
-      ['easy','medium','hard'].forEach(m=>{
-        const list=document.getElementById(m+'Leaderboard');
-        list.innerHTML='';
-        JSON.parse(localStorage.getItem('board_'+m)||'[]').forEach((e,i)=>{
-          const li=document.createElement('li');
-          li.textContent=`${i+1}. ${e.u} — ${e.a} moves`;
-          list.appendChild(li);
-        });
-      });
-    }
-
+    let mode='easy', code=[], currentOrder=[], attempts=0;
+    let username=prompt("Enter your username:")||"Anonymous";
+    const popSound=document.getElementById('popSound');
+    function setMode(m,e){mode=m;document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase()===m));startGame();}
+    function shuffle(arr){return arr.slice().sort(()=>Math.random()-0.5);}    
+    function startGame(){code=shuffle(MODES[mode]);do{currentOrder=shuffle(MODES[mode]);}while(currentOrder.some((c,i)=>c===code[i]));attempts=0;updateDisplay();updateLeaderboard();}
+    function updateDisplay(){document.getElementById('attemptsBox').textContent=`Attempts: ${attempts}`;const correct=currentOrder.reduce((a,c,i)=>a+(c===code[i]),0);document.getElementById('correctBox').textContent=`${correct} balloons are placed correctly`;
+      const area=document.getElementById('bowlArea');area.innerHTML='';currentOrder.forEach((c,i)=>{const bowl=document.createElement('div');bowl.className='bowl';bowl.dataset.i=i;bowl.addEventListener('dragover',e=>e.preventDefault());bowl.addEventListener('drop',drop);
+        const str=document.createElement('div');str.className='string';bowl.appendChild(str);
+        const b=document.createElement('div');b.className='balloon '+c;b.draggable=true;b.dataset.c=c;b.addEventListener('dragstart',e=>e.dataTransfer.setData('text',c));bowl.appendChild(b);area.appendChild(bowl);});}
+    function drop(e){const to=+e.currentTarget.dataset.i;const c=e.dataTransfer.getData('text');const from=currentOrder.indexOf(c);[currentOrder[from],currentOrder[to]]=[currentOrder[to],currentOrder[from]];updateDisplay();}
+    function submitGuess(){attempts++;updateDisplay();popSound.currentTime=0;popSound.play();if(currentOrder.every((c,i)=>c===code[i])){alert(`🎉 Done in ${attempts} moves!`);saveLeaderboard();updateLeaderboard();}}
+    function saveLeaderboard(){const k='board_'+mode;let s=JSON.parse(localStorage.getItem(k)||'[]');s.push({u:username,a:attempts});s.sort((x,y)=>x.a-y.a);localStorage.setItem(k,JSON.stringify(s.slice(0,5)));}
+    function updateLeaderboard(){const k='board_'+mode;const s=JSON.parse(localStorage.getItem(k)||'[]');const l=document.getElementById('leaderboardList');l.innerHTML='';s.forEach((e,i)=>{const li=document.createElement('li');li.textContent=`${i+1}. ${e.u} — ${e.a} moves`;l.appendChild(li);});}
+    function showInfo(){document.getElementById('modalBg').style.display='flex';}function hideInfo(){document.getElementById('modalBg').style.display='none';}
     startGame();
   </script>
 </body>
