@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Break the Code: Arrange the Balloons</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000;
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    .balloon-container, .guess-container {
+      display: flex;
+      justify-content: center;
+      margin: 20px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .balloon {
+      width: 50px;
+      height: 70px;
+      border-radius: 50% 50% 45% 45%;
+      position: relative;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      color: #000;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .balloon::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      width: 2px;
+      height: 20px;
+      background: black;
+      transform: translateX(-50%);
+    }
+    .slot {
+      width: 50px;
+      height: 70px;
+      border: 2px dashed #555;
+      border-radius: 10px;
+    }
+    .buttons, .feedback, .leaderboard {
+      margin: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-weight: bold;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+    #submitGuess {
+      background-color: yellow;
+    }
+    .guess-row {
+      display: flex;
+      justify-content: center;
+      margin: 5px;
+      gap: 10px;
+    }
+    .balloon.guess {
+      cursor: default;
+    }
+    .difficulty-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .popup {
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -20%);
+      background: #222;
+      color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      z-index: 10;
+      box-shadow: 0 0 10px #fff;
+    }
+    .popup button {
+      background: yellow;
+      color: #000;
+    }
+    #overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 9;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎈 Break the Code: Arrange the Balloons 🎈</h1>
+  <div class="difficulty-buttons">
+    <button onclick="setDifficulty('easy')">Easy</button>
+    <button onclick="setDifficulty('medium')">Medium</button>
+    <button onclick="setDifficulty('hard')">Hard</button>
+  </div>
+  <div class="balloon-container" id="balloonTable"></div>
+  <div class="guess-container" id="guessSlots"></div>
+  <div class="buttons">
+    <button id="submitGuess" onclick="submitGuess()">Submit Guess</button>
+  </div>
+  <div class="feedback" id="feedbackText"></div>
+  <div class="leaderboard" id="leaderboard">
+    <h2>🏆 Leaderboard</h2>
+    <ul id="leaderboardList"></ul>
+  </div>
+
+  <script>
+    const colors = {
+      easy: ['red', 'white', 'blue', 'green', 'yellow'],
+      medium: ['red', 'white', 'blue', 'green', 'yellow', 'pink', 'purple'],
+      hard: ['red', 'white', 'blue', 'green', 'yellow', 'pink', 'purple', 'orange', 'cyan']
+    };
+    let difficulty = 'easy';
+    let correctCode = [];
+    let username = '';
+    let attemptCount = 0;
+    const maxBalloons = {
+      easy: 5,
+      medium: 7,
+      hard: 9
+    };
+
+    window.onload = () => {
+      username = prompt("Enter your username:");
+      setDifficulty('easy');
+    };
+
+    function setDifficulty(level) {
+      difficulty = level;
+      attemptCount = 0;
+      correctCode = generateCode();
+      renderBalloonTable();
+      renderGuessSlots();
+      renderLeaderboard();
+      document.getElementById('feedbackText').textContent = '';
+    }
+
+    function generateCode() {
+      const pool = [...colors[difficulty]];
+      const code = [];
+      for (let i = 0; i < maxBalloons[difficulty]; i++) {
+        const index = Math.floor(Math.random() * pool.length);
+        code.push(pool.splice(index, 1)[0]);
+      }
+      return code;
+    }
+
+    function renderBalloonTable() {
+      const container = document.getElementById('balloonTable');
+      container.innerHTML = '';
+      colors[difficulty].forEach(color => {
+        const div = document.createElement('div');
+        div.className = 'balloon';
+        div.style.backgroundColor = color;
+        div.draggable = true;
+        div.textContent = color[0].toUpperCase();
+        div.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', color);
+        });
+        container.appendChild(div);
+      });
+    }
+
+    function renderGuessSlots() {
+      const container = document.getElementById('guessSlots');
+      container.innerHTML = '';
+      for (let i = 0; i < maxBalloons[difficulty]; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'slot';
+        slot.ondragover = e => e.preventDefault();
+        slot.ondrop = e => {
+          e.preventDefault();
+          const color = e.dataTransfer.getData('text/plain');
+          if (!slot.hasChildNodes()) {
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            balloon.style.backgroundColor = color;
+            balloon.textContent = color[0].toUpperCase();
+            slot.appendChild(balloon);
+          }
+        };
+        container.appendChild(slot);
+      }
+    }
+
+    function submitGuess() {
+      const slots = document.querySelectorAll('.slot');
+      const guess = [];
+      slots.forEach(slot => {
+        if (slot.hasChildNodes()) {
+          guess.push(slot.firstChild.style.backgroundColor);
+        }
+      });
+
+      if (guess.length !== correctCode.length) {
+        alert("Place all balloons before submitting!");
+        return;
+      }
+
+      attemptCount++;
+      const correct = guess.filter((color, i) => color === correctCode[i]).length;
+      document.getElementById('feedbackText').textContent =
+        `${correct} balloons are correctly placed. Attempts: ${attemptCount}`;
+
+      if (correct === correctCode.length) {
+        alert(`🎉 You cracked the code in ${attemptCount} attempts!`);
+        saveScore();
+        setDifficulty(difficulty);
+      }
+    }
+
+    function saveScore() {
+      const scores = JSON.parse(localStorage.getItem('balloonScores') || '[]');
+      scores.push({ name: username, attempts: attemptCount, level: difficulty });
+      scores.sort((a, b) => a.attempts - b.attempts);
+      localStorage.setItem('balloonScores', JSON.stringify(scores));
+    }
+
+    function renderLeaderboard() {
+      const list = document.getElementById('leaderboardList');
+      list.innerHTML = '';
+      const scores = JSON.parse(localStorage.getItem('balloonScores') || '[]')
+        .filter(score => score.level === difficulty)
+        .slice(0, 5);
+      scores.forEach(score => {
+        const li = document.createElement('li');
+        li.textContent = `${score.name} - ${score.attempts} tries`;
+        list.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
