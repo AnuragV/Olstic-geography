@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Globe-Trotters</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .card {
+            min-height: 150px; /* Ensure cards have a consistent height */
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            backface-visibility: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+        .card-used {
+            transform: scale(0.95);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .answer-box {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .answer-box-yes {
+            animation: pop-in-yes 0.5s ease-in-out forwards;
+        }
+        .answer-box-no {
+            animation: pop-in-no 0.5s ease-in-out forwards;
+        }
+        @keyframes pop-in-yes {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        @keyframes pop-in-no {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 md:p-8">
+    <div id="game-container" class="bg-[#1f1f1f] border border-[#333] rounded-3xl shadow-2xl p-6 md:p-10 max-w-4xl w-full flex flex-col items-center transition-all duration-300">
+        <h1 class="text-4xl md:text-5xl font-bold text-[#4caf50] mb-2 drop-shadow-md">Globe-Trotters</h1>
+        <p class="text-xl md:text-2xl font-light text-gray-300 mb-8">The Geography Deduction Game</p>
+
+        <!-- Username Input Screen -->
+        <div id="username-screen" class="space-y-6 text-center w-full max-w-sm">
+            <label for="username-input" class="block text-gray-400 text-lg">Enter your username to begin:</label>
+            <input type="text" id="username-input" placeholder="Your Name" class="w-full bg-[#1e1e1e] border border-[#333] rounded-xl p-4 text-white text-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#4caf50] transition-all duration-200">
+            <button id="start-button" class="bg-[#4caf50] hover:bg-[#66bb6a] text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg w-full">
+                Start Game
+            </button>
+        </div>
+
+        <!-- Main Game Play Screen -->
+        <div id="game-play-screen" class="w-full space-y-8 hidden">
+            <!-- Central Question Box -->
+            <div id="answer-box-container" class="flex flex-col items-center space-y-4">
+                <div id="answer-box" class="w-36 h-36 md:w-48 md:h-48 rounded-2xl bg-yellow-400 flex items-center justify-center transition-all duration-300 transform shadow-xl">
+                    <span id="answer-text" class="text-7xl md:text-9xl font-black text-[#1f1f1f]">?</span>
+                </div>
+                <p class="text-xl md:text-2xl font-bold text-gray-300">Guess the Place</p>
+                <div class="flex items-center space-x-2 text-gray-400">
+                    <span class="text-sm">Cards Used:</span>
+                    <span id="cards-used-counter" class="text-lg font-bold text-[#4caf50]">0</span>
+                </div>
+            </div>
+
+            <!-- Cards Display -->
+            <div id="card-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full">
+                <!-- Cards will be injected here by JavaScript -->
+            </div>
+
+            <!-- Guess Input -->
+            <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 w-full max-w-lg mx-auto">
+                <input type="text" id="guess-input" placeholder="Enter country name (e.g., france)" class="w-full bg-[#1e1e1e] border border-[#333] rounded-xl p-4 text-white text-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#4caf50] transition-all duration-200">
+                <button id="submit-guess-button" class="bg-[#2196f3] hover:bg-[#64b5f6] text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg w-full md:w-auto">
+                    Submit
+                </button>
+            </div>
+            <p id="feedback-message" class="text-center text-lg font-medium mt-4"></p>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="space-y-6 text-center hidden">
+            <p id="game-over-message" class="text-4xl font-bold text-green-500"></p>
+            <p id="correct-location" class="text-2xl font-medium text-gray-300"></p>
+            <p id="final-score" class="text-2xl font-bold text-[#4caf50]"></p>
+            <button id="play-again-button" class="bg-[#4caf50] hover:bg-[#66bb6a] text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg">
+                Play Again
+            </button>
+        </div>
+
+        <!-- Leaderboard Screen -->
+        <div id="leaderboard-screen" class="w-full space-y-4 hidden mt-8">
+            <h2 class="text-3xl font-bold text-gray-200 mb-4">Leaderboard</h2>
+            <div id="leaderboard-list" class="space-y-2 text-left">
+                <!-- Leaderboard items will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Game Data ---
+        // This object holds all the game data for countries and cards.
+        const GAME_DATA = {
+            countries: [
+                { name: "France", isNorthernHemisphere: true, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: true, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: false, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: false, neverWar21C: false, preChristKnown: false, britishRule: false, newWonder: false },
+                { name: "Brazil", isNorthernHemisphere: false, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: false, neighborsMoreThan10: true, hasRedAndBlueFlag: false, reachableByLandFromParis: false, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: false, hasStarsOnFlag: true, isMonarchy: false, neverWar20C: false, neverWar21C: true, preChristKnown: false, britishRule: false, newWonder: true },
+                { name: "Egypt", isNorthernHemisphere: true, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: true, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: true, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: false, neverWar21C: false, preChristKnown: true, britishRule: true, newWonder: true },
+                { name: "Switzerland", isNorthernHemisphere: true, hasPopOver10M: false, isLandlocked: true, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: true, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: true, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: true, neverWar21C: true, preChristKnown: false, britishRule: false, newWonder: false },
+                { name: "Australia", isNorthernHemisphere: false, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: false, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: false, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: true, isLargelyChristian: true, hasTwoPartySystem: true, neverHostedOlympics: false, hasStarsOnFlag: true, isMonarchy: true, neverWar20C: false, neverWar21C: false, preChristKnown: false, britishRule: false, newWonder: false },
+                { name: "Canada", isNorthernHemisphere: true, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: false, reachableByLandFromNewYork: true, isOfficialLanguageEnglish: true, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: false, hasStarsOnFlag: false, isMonarchy: true, neverWar20C: false, neverWar21C: false, preChristKnown: false, britishRule: true, newWonder: false },
+                { name: "Vatican City", isNorthernHemisphere: true, hasPopOver10M: false, isLandlocked: true, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: false, reachableByLandFromParis: true, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: true, hasStarsOnFlag: false, isMonarchy: true, neverWar20C: true, neverWar21C: true, preChristKnown: false, britishRule: false, newWonder: false }
+            ],
+            cardDetails: {
+                geography: {
+                    color: 'bg-blue-600',
+                    texts: [
+                        { text: "This country is in the northern hemisphere", key: "isNorthernHemisphere" },
+                        { text: "This country has a population of more than 10 million", key: "hasPopOver10M" },
+                        { text: "This country is landlocked", key: "isLandlocked" },
+                        { text: "This country neighbours less than 5 countries", key: "neighborsLessThan5" },
+                        { text: "This country neighbours more than 10 countries", key: "neighborsMoreThan10" },
+                        { text: "This country's flag has both red and blue colors", key: "hasRedAndBlueFlag" },
+                        { text: "If you start in Paris, you can reach this country by land", key: "reachableByLandFromParis" },
+                        { text: "If you start in New York, you can reach this country by land", key: "reachableByLandFromNewYork" }
+                    ]
+                },
+                culture: {
+                    color: 'bg-red-600',
+                    texts: [
+                        { text: "This country's official language is not english", key: "isOfficialLanguageEnglish", negate: true },
+                        { text: "This country's population is largely christian", key: "isLargelyChristian" },
+                        { text: "This country has a 2-party system", key: "hasTwoPartySystem" },
+                        { text: "This country has never hosted olympics", key: "neverHostedOlympics" },
+                        { text: "This country's flag has stars", key: "hasStarsOnFlag" },
+                        { text: "This country is a monarchy", key: "isMonarchy" },
+                        { text: "This country has one of the wonders of the world (New 7 Wonders list)", key: "newWonder" }
+                    ]
+                },
+                history: {
+                    color: 'bg-green-600',
+                    texts: [
+                        { text: "This country has never been at war in 20th century", key: "neverWar20C" },
+                        { text: "This country has never been at war in 21st century", key: "neverWar21C" },
+                        { text: "This country was discovered/known about before Jesus Christ was born", key: "preChristKnown" },
+                        { text: "This country was discovered/known about after Jesus Christ was born", key: "preChristKnown", negate: true },
+                        { text: "This country's flag has stars", key: "hasStarsOnFlag" },
+                        { text: "This country is a monarchy", key: "isMonarchy" },
+                        { text: "This country was ruled by British at some point in history", key: "britishRule" }
+                    ]
+                }
+            }
+        };
+
+        // --- UI Elements ---
+        const usernameScreen = document.getElementById('username-screen');
+        const usernameInput = document.getElementById('username-input');
+        const gamePlayScreen = document.getElementById('game-play-screen');
+        const startButton = document.getElementById('start-button');
+        const answerBox = document.getElementById('answer-box');
+        const answerText = document.getElementById('answer-text');
+        const cardsUsedCounter = document.getElementById('cards-used-counter');
+        const cardContainer = document.getElementById('card-container');
+        const guessInput = document.getElementById('guess-input');
+        const submitGuessButton = document.getElementById('submit-guess-button');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const correctLocation = document.getElementById('correct-location');
+        const finalScore = document.getElementById('final-score');
+        const playAgainButton = document.getElementById('play-again-button');
+        const leaderboardScreen = document.getElementById('leaderboard-screen');
+        const leaderboardList = document.getElementById('leaderboard-list');
+
+        // --- Game State Variables ---
+        let mysteryCountry = null;
+        let activeCards = {};
+        let cardsUsed = 0;
+        let username = '';
+        const cardCategories = ['geography', 'culture', 'history'];
+
+        // --- Game Logic Functions ---
+
+        // Function to shuffle an array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Function to render the UI for a specific screen
+        function showScreen(screenToShow) {
+            const allScreens = [usernameScreen, gamePlayScreen, gameOverScreen, leaderboardScreen];
+            allScreens.forEach(screen => screen.classList.add('hidden'));
+            screenToShow.classList.remove('hidden');
+        }
+
+        // Draws a random card for a given category
+        function drawRandomCard(category) {
+            const availableCards = GAME_DATA.cardDetails[category].texts;
+            const randomIndex = Math.floor(Math.random() * availableCards.length);
+            const cardData = availableCards[randomIndex];
+            
+            // This is a simple implementation. In a more complex game, you might remove
+            // used cards from the pool to avoid duplicates.
+            return {
+                category: category,
+                text: cardData.text,
+                key: cardData.key,
+                negate: cardData.negate || false
+            };
+        }
+
+        // Renders the three active cards on the screen
+        function renderActiveCards() {
+            cardContainer.innerHTML = '';
+            for (const category of cardCategories) {
+                const card = activeCards[category];
+                const cardElement = document.createElement('div');
+                cardElement.className = `card ${GAME_DATA.cardDetails[category].color} text-white p-4 rounded-xl flex items-center justify-center transition-all duration-200 transform shadow-md text-center text-sm md:text-base`;
+                cardElement.innerHTML = `<p>${card.text}</p>`;
+                cardElement.dataset.category = category;
+                cardElement.addEventListener('click', () => handleCardClick(cardElement, card));
+                cardContainer.appendChild(cardElement);
+            }
+        }
+
+        // Handles a card click event
+        function handleCardClick(cardElement, card) {
+            // Check if the country meets the card's criteria
+            const countryMeetsCriteria = mysteryCountry[card.key];
+            const isCorrect = card.negate ? !countryMeetsCriteria : countryMeetsCriteria;
+
+            // Update the central answer box
+            answerBox.classList.remove('answer-box', 'bg-yellow-400');
+            answerBox.classList.add('transition-none');
+            
+            if (isCorrect) {
+                answerBox.classList.add('bg-green-500', 'answer-box-yes');
+                answerText.textContent = 'Yes';
+            } else {
+                answerBox.classList.add('bg-red-500', 'answer-box-no');
+                answerText.textContent = 'No';
+            }
+
+            // Animate card and draw a new one
+            cardElement.classList.add('card-used');
+            
+            setTimeout(() => {
+                cardsUsed++;
+                cardsUsedCounter.textContent = cardsUsed;
+                
+                // Replace the card with a new one
+                activeCards[card.category] = drawRandomCard(card.category);
+                renderActiveCards();
+
+                // Reset answer box after a short delay
+                setTimeout(() => {
+                    answerBox.classList.remove('bg-green-500', 'bg-red-500', 'answer-box-yes', 'answer-box-no');
+                    answerBox.classList.add('bg-yellow-400', 'answer-box');
+                    answerText.textContent = '?';
+                    answerBox.classList.add('transition-all');
+                }, 1000);
+
+            }, 500); // Small delay to show the "used" card state
+        }
+        
+        // Handles the user's guess submission
+        function checkGuess() {
+            const userGuess = guessInput.value.trim().toLowerCase();
+            const correctName = mysteryCountry.name.toLowerCase();
+
+            if (userGuess === correctName) {
+                endGame(true);
+            } else {
+                feedbackMessage.textContent = "That's not it. Keep trying!";
+                feedbackMessage.className = "text-center text-lg font-medium mt-4 text-yellow-500";
+            }
+            guessInput.value = '';
+        }
+
+        // Function to save and load leaderboard from local storage
+        function getLeaderboard() {
+            const leaderboard = JSON.parse(localStorage.getItem('globeTrottersLeaderboard')) || [];
+            return leaderboard.sort((a, b) => a.score - b.score).slice(0, 5);
+        }
+
+        function saveScore(newScore) {
+            const leaderboard = getLeaderboard();
+            leaderboard.push(newScore);
+            const top5 = leaderboard.sort((a, b) => a.score - b.score).slice(0, 5);
+            localStorage.setItem('globeTrottersLeaderboard', JSON.stringify(top5));
+        }
+
+        // Renders the leaderboard screen
+        function renderLeaderboard() {
+            const leaderboard = getLeaderboard();
+            leaderboardList.innerHTML = '';
+            if (leaderboard.length > 0) {
+                leaderboard.forEach((item, index) => {
+                    const entry = document.createElement('div');
+                    entry.className = "bg-[#2a2a2a] p-4 rounded-xl flex justify-between items-center shadow-md";
+                    entry.innerHTML = `
+                        <span class="text-gray-300 font-semibold">${index + 1}. ${item.username}</span>
+                        <span class="text-[#4caf50] font-bold">${item.score} cards</span>
+                    `;
+                    leaderboardList.appendChild(entry);
+                });
+            } else {
+                leaderboardList.innerHTML = `<p class="text-center text-gray-500">No scores yet. Be the first!</p>`;
+            }
+        }
+
+        // Ends the game and displays the results
+        function endGame(isWin) {
+            showScreen(gameOverScreen);
+            
+            if (isWin) {
+                gameOverMessage.textContent = "Congratulations! You've cracked it!";
+                gameOverMessage.className = "text-4xl font-bold text-green-500";
+                correctLocation.textContent = `The correct country was ${mysteryCountry.name}.`;
+                finalScore.textContent = `Your score: ${cardsUsed} cards used.`;
+
+                // Save score to the leaderboard
+                saveScore({ username: username, score: cardsUsed });
+                renderLeaderboard();
+                leaderboardScreen.classList.remove('hidden');
+            } else {
+                // This branch is not reached with current mechanics (no losing condition)
+            }
+        }
+        
+        // Starts a new game session
+        function startGame() {
+            cardsUsed = 0;
+            cardsUsedCounter.textContent = '0';
+            guessInput.value = '';
+            feedbackMessage.textContent = '';
+            
+            // Reset answer box
+            answerBox.classList.remove('bg-green-500', 'bg-red-500', 'answer-box-yes', 'answer-box-no');
+            answerBox.classList.add('bg-yellow-400', 'answer-box');
+            answerText.textContent = '?';
+            
+            // Choose a random mystery country
+            shuffleArray(GAME_DATA.countries);
+            mysteryCountry = GAME_DATA.countries[0];
+
+            // Draw initial cards
+            activeCards = {};
+            for (const category of cardCategories) {
+                activeCards[category] = drawRandomCard(category);
+            }
+            renderActiveCards();
+            showScreen(gamePlayScreen);
+        }
+
+        // --- Event Listeners ---
+        startButton.addEventListener('click', () => {
+            const inputUsername = usernameInput.value.trim();
+            if (inputUsername) {
+                username = inputUsername;
+                startGame();
+            } else {
+                alert("Please enter a username.");
+            }
+        });
+
+        submitGuessButton.addEventListener('click', checkGuess);
+        guessInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                checkGuess();
+            }
+        });
+        
+        playAgainButton.addEventListener('click', () => {
+            showScreen(usernameScreen);
+        });
+
+        // Initialize the game by showing the username screen on page load
+        window.onload = () => {
+            showScreen(usernameScreen);
+        };
+    </script>
+</body>
+</html>
