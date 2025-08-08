@@ -13,7 +13,7 @@
             color: #e0e0e0;
         }
         .card {
-            min-height: 150px; /* Ensure cards have a consistent height */
+            min-height: 150px;
             cursor: pointer;
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
             backface-visibility: hidden;
@@ -51,9 +51,34 @@
             80% { transform: scale(1.1); opacity: 1; }
             100% { transform: scale(1); }
         }
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+        }
+        .card-stack-item {
+            width: 100%;
+            height: 20px;
+            border-radius: 0.5rem;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transform-origin: bottom;
+            transition: all 0.3s ease-in-out;
+            opacity: 0.8;
+        }
+        .card-stack-container {
+            position: relative;
+            height: 120px;
+            width: 100%;
+        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4 md:p-8">
+<body class="flex items-center justify-center min-h-screen p-4 md:p-8 relative">
+    <!-- Instructions Button -->
+    <button id="instructions-button" class="absolute top-4 right-4 md:top-8 md:right-8 bg-gray-700 text-white font-bold rounded-full w-10 h-10 flex items-center justify-center text-lg shadow-lg hover:bg-gray-600 transition-colors duration-200">
+        i
+    </button>
+
     <div id="game-container" class="bg-[#1f1f1f] border border-[#333] rounded-3xl shadow-2xl p-6 md:p-10 max-w-4xl w-full flex flex-col items-center transition-all duration-300">
         <h1 class="text-4xl md:text-5xl font-bold text-[#4caf50] mb-2 drop-shadow-md">Globe-Trotters</h1>
         <p class="text-xl md:text-2xl font-light text-gray-300 mb-8">The Geography Deduction Game</p>
@@ -85,10 +110,15 @@
             <div id="card-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full">
                 <!-- Cards will be injected here by JavaScript -->
             </div>
+            
+            <!-- Remaining Card Stacks -->
+            <div id="card-stacks-container" class="grid grid-cols-3 gap-4 md:gap-6 w-full mt-4">
+                <!-- Card stacks will be injected here by JavaScript -->
+            </div>
 
             <!-- Guess Input -->
             <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 w-full max-w-lg mx-auto">
-                <input type="text" id="guess-input" placeholder="Enter country name (e.g., france)" class="w-full bg-[#1e1e1e] border border-[#333] rounded-xl p-4 text-white text-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#4caf50] transition-all duration-200">
+                <input type="text" id="guess-input" placeholder="Enter country name in small letters" class="w-full bg-[#1e1e1e] border border-[#333] rounded-xl p-4 text-white text-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#4caf50] transition-all duration-200">
                 <button id="submit-guess-button" class="bg-[#2196f3] hover:bg-[#64b5f6] text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg w-full md:w-auto">
                     Submit
                 </button>
@@ -115,6 +145,27 @@
         </div>
     </div>
 
+    <!-- Instructions Modal -->
+    <div id="instructions-modal" class="fixed inset-0 flex items-center justify-center hidden modal-overlay">
+        <div class="bg-[#1f1f1f] border border-[#333] rounded-3xl shadow-2xl p-8 max-w-xl w-full mx-4 relative text-gray-300">
+            <h2 class="text-3xl font-bold text-[#4caf50] mb-4">How to Play</h2>
+            <p class="mb-4">
+                A mystery country is chosen at random. Your goal is to figure out which one it is using the fewest cards possible.
+            </p>
+            <ul class="list-disc list-inside space-y-2 mb-6">
+                <li>You start with one **Geography** (blue), one **Culture** (red), and one **History** (green) card.</li>
+                <li>Click a card to reveal a "Yes" or "No" answer. The `?` box will change accordingly.</li>
+                <li>When you use a card, a new one from the same category is drawn from the remaining deck.</li>
+                <li>The number of cards used is your score. The fewer, the better!</li>
+                <li>Enter your guess in the text box at any time and click submit.</li>
+                <li>Good luck, and happy travels!</li>
+            </ul>
+            <button id="close-instructions-button" class="absolute top-4 right-4 text-gray-500 hover:text-gray-200 text-2xl font-bold">
+                &times;
+            </button>
+        </div>
+    </div>
+
     <script>
         // --- Game Data ---
         // This object holds all the game data for countries and cards.
@@ -126,11 +177,21 @@
                 { name: "Switzerland", isNorthernHemisphere: true, hasPopOver10M: false, isLandlocked: true, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: true, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: true, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: true, neverWar21C: true, preChristKnown: false, britishRule: false, newWonder: false },
                 { name: "Australia", isNorthernHemisphere: false, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: false, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: false, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: true, isLargelyChristian: true, hasTwoPartySystem: true, neverHostedOlympics: false, hasStarsOnFlag: true, isMonarchy: true, neverWar20C: false, neverWar21C: false, preChristKnown: false, britishRule: false, newWonder: false },
                 { name: "Canada", isNorthernHemisphere: true, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: false, reachableByLandFromNewYork: true, isOfficialLanguageEnglish: true, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: false, hasStarsOnFlag: false, isMonarchy: true, neverWar20C: false, neverWar21C: false, preChristKnown: false, britishRule: true, newWonder: false },
-                { name: "Vatican City", isNorthernHemisphere: true, hasPopOver10M: false, isLandlocked: true, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: false, reachableByLandFromParis: true, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: true, hasStarsOnFlag: false, isMonarchy: true, neverWar20C: true, neverWar21C: true, preChristKnown: false, britishRule: false, newWonder: false }
+                { name: "Vatican City", isNorthernHemisphere: true, hasPopOver10M: false, isLandlocked: true, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: false, reachableByLandFromParis: true, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: true, hasStarsOnFlag: false, isMonarchy: true, neverWar20C: true, neverWar21C: true, preChristKnown: false, britishRule: false, newWonder: false },
+                { name: "Japan", isNorthernHemisphere: true, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: false, reachableByLandFromParis: false, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: false, hasTwoPartySystem: false, neverHostedOlympics: false, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: false, neverWar21C: false, preChristKnown: true, britishRule: false, newWonder: false },
+                { name: "Peru", isNorthernHemisphere: false, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: false, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: false, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: false, neverWar21C: false, preChristKnown: false, britishRule: false, newWonder: true },
+                { name: "India", isNorthernHemisphere: true, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: false, neighborsMoreThan10: false, hasRedAndBlueFlag: false, reachableByLandFromParis: false, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: true, isLargelyChristian: false, hasTwoPartySystem: false, neverHostedOlympics: false, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: false, neverWar21C: false, preChristKnown: true, britishRule: true, newWonder: true },
+                { name: "Russia", isNorthernHemisphere: true, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: false, neighborsMoreThan10: true, hasRedAndBlueFlag: true, reachableByLandFromParis: true, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: false, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: false, neverWar21C: false, preChristKnown: false, britishRule: false, newWonder: false },
+                { name: "South Korea", isNorthernHemisphere: true, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: false, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: false, hasTwoPartySystem: false, neverHostedOlympics: false, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: false, neverWar21C: false, preChristKnown: false, britishRule: false, newWonder: false },
+                { name: "Mexico", isNorthernHemisphere: true, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: false, reachableByLandFromNewYork: true, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: false, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: false, neverWar21C: false, preChristKnown: true, britishRule: false, newWonder: true },
+                { name: "Greece", isNorthernHemisphere: true, hasPopOver10M: false, isLandlocked: false, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: true, reachableByLandFromParis: true, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: true, hasTwoPartySystem: false, neverHostedOlympics: false, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: false, neverWar21C: true, preChristKnown: true, britishRule: false, newWonder: false },
+                { name: "Madagascar", isNorthernHemisphere: false, hasPopOver10M: true, isLandlocked: false, neighborsLessThan5: true, neighborsMoreThan10: false, hasRedAndBlueFlag: false, reachableByLandFromParis: false, reachableByLandFromNewYork: false, isOfficialLanguageEnglish: false, isLargelyChristian: false, hasTwoPartySystem: false, neverHostedOlympics: true, hasStarsOnFlag: false, isMonarchy: false, neverWar20C: false, neverWar21C: false, preChristKnown: false, britishRule: false, newWonder: false }
             ],
             cardDetails: {
                 geography: {
                     color: 'bg-blue-600',
+                    lightColor: 'bg-blue-300',
+                    label: 'use your geography card',
                     texts: [
                         { text: "This country is in the northern hemisphere", key: "isNorthernHemisphere" },
                         { text: "This country has a population of more than 10 million", key: "hasPopOver10M" },
@@ -144,6 +205,8 @@
                 },
                 culture: {
                     color: 'bg-red-600',
+                    lightColor: 'bg-red-300',
+                    label: 'use your culture card',
                     texts: [
                         { text: "This country's official language is not english", key: "isOfficialLanguageEnglish", negate: true },
                         { text: "This country's population is largely christian", key: "isLargelyChristian" },
@@ -156,6 +219,8 @@
                 },
                 history: {
                     color: 'bg-green-600',
+                    lightColor: 'bg-green-300',
+                    label: 'use your history card',
                     texts: [
                         { text: "This country has never been at war in 20th century", key: "neverWar20C" },
                         { text: "This country has never been at war in 21st century", key: "neverWar21C" },
@@ -178,6 +243,7 @@
         const answerText = document.getElementById('answer-text');
         const cardsUsedCounter = document.getElementById('cards-used-counter');
         const cardContainer = document.getElementById('card-container');
+        const cardStacksContainer = document.getElementById('card-stacks-container');
         const guessInput = document.getElementById('guess-input');
         const submitGuessButton = document.getElementById('submit-guess-button');
         const feedbackMessage = document.getElementById('feedback-message');
@@ -188,6 +254,9 @@
         const playAgainButton = document.getElementById('play-again-button');
         const leaderboardScreen = document.getElementById('leaderboard-screen');
         const leaderboardList = document.getElementById('leaderboard-list');
+        const instructionsButton = document.getElementById('instructions-button');
+        const instructionsModal = document.getElementById('instructions-modal');
+        const closeInstructionsButton = document.getElementById('close-instructions-button');
 
         // --- Game State Variables ---
         let mysteryCountry = null;
@@ -195,6 +264,7 @@
         let cardsUsed = 0;
         let username = '';
         const cardCategories = ['geography', 'culture', 'history'];
+        let allCardsPools = {}; // Stores all available cards for the current game
 
         // --- Game Logic Functions ---
 
@@ -213,20 +283,20 @@
             screenToShow.classList.remove('hidden');
         }
 
-        // Draws a random card for a given category
+        // Draws a random card from the available pool for a given category
         function drawRandomCard(category) {
-            const availableCards = GAME_DATA.cardDetails[category].texts;
-            const randomIndex = Math.floor(Math.random() * availableCards.length);
-            const cardData = availableCards[randomIndex];
-            
-            // This is a simple implementation. In a more complex game, you might remove
-            // used cards from the pool to avoid duplicates.
-            return {
-                category: category,
-                text: cardData.text,
-                key: cardData.key,
-                negate: cardData.negate || false
-            };
+            const pool = allCardsPools[category];
+            if (pool.length > 0) {
+                const randomIndex = Math.floor(Math.random() * pool.length);
+                const cardData = pool.splice(randomIndex, 1)[0];
+                return {
+                    category: category,
+                    text: cardData.text,
+                    key: cardData.key,
+                    negate: cardData.negate || false
+                };
+            }
+            return null; // Return null if no cards are left
         }
 
         // Renders the three active cards on the screen
@@ -234,12 +304,50 @@
             cardContainer.innerHTML = '';
             for (const category of cardCategories) {
                 const card = activeCards[category];
-                const cardElement = document.createElement('div');
-                cardElement.className = `card ${GAME_DATA.cardDetails[category].color} text-white p-4 rounded-xl flex items-center justify-center transition-all duration-200 transform shadow-md text-center text-sm md:text-base`;
-                cardElement.innerHTML = `<p>${card.text}</p>`;
-                cardElement.dataset.category = category;
-                cardElement.addEventListener('click', () => handleCardClick(cardElement, card));
-                cardContainer.appendChild(cardElement);
+                if (card) {
+                    const cardWrapper = document.createElement('div');
+                    cardWrapper.className = "flex flex-col items-center space-y-2 text-center";
+                    cardWrapper.innerHTML = `<p class="text-xs md:text-sm text-gray-400 font-medium tracking-wide uppercase">${GAME_DATA.cardDetails[category].label}</p>`;
+                    
+                    const cardElement = document.createElement('div');
+                    cardElement.className = `card ${GAME_DATA.cardDetails[category].color} text-white p-4 rounded-xl flex items-center justify-center transition-all duration-200 transform shadow-md text-sm md:text-base`;
+                    cardElement.innerHTML = `<p>${card.text}</p>`;
+                    cardElement.dataset.category = category;
+                    cardElement.addEventListener('click', () => handleCardClick(cardElement, card));
+                    
+                    cardWrapper.appendChild(cardElement);
+                    cardContainer.appendChild(cardWrapper);
+                }
+            }
+        }
+        
+        // Renders the card stacks for each category
+        function renderRemainingCardStacks() {
+            cardStacksContainer.innerHTML = '';
+            for (const category of cardCategories) {
+                const remainingCount = allCardsPools[category].length;
+                const stackWrapper = document.createElement('div');
+                stackWrapper.className = "flex flex-col items-center space-y-1";
+                
+                const stack = document.createElement('div');
+                stack.className = "card-stack-container relative w-full max-w-[150px] mx-auto";
+                
+                // Create stack items
+                const color = GAME_DATA.cardDetails[category].lightColor;
+                for (let i = 0; i < remainingCount; i++) {
+                    const stackItem = document.createElement('div');
+                    stackItem.className = `card-stack-item ${color}`;
+                    stackItem.style.transform = `translateY(${i * -8}px) scale(0.9)`;
+                    stack.appendChild(stackItem);
+                }
+
+                const cardCount = document.createElement('span');
+                cardCount.className = "text-xs text-gray-500 mt-2";
+                cardCount.textContent = `${remainingCount} cards remaining`;
+
+                stackWrapper.appendChild(stack);
+                stackWrapper.appendChild(cardCount);
+                cardStacksContainer.appendChild(stackWrapper);
             }
         }
 
@@ -250,7 +358,7 @@
             const isCorrect = card.negate ? !countryMeetsCriteria : countryMeetsCriteria;
 
             // Update the central answer box
-            answerBox.classList.remove('answer-box', 'bg-yellow-400');
+            answerBox.classList.remove('answer-box', 'bg-yellow-400', 'bg-green-500', 'bg-red-500');
             answerBox.classList.add('transition-none');
             
             if (isCorrect) {
@@ -268,9 +376,10 @@
                 cardsUsed++;
                 cardsUsedCounter.textContent = cardsUsed;
                 
-                // Replace the card with a new one
+                // Replace the card with a new one from the remaining pool
                 activeCards[card.category] = drawRandomCard(card.category);
                 renderActiveCards();
+                renderRemainingCardStacks();
 
                 // Reset answer box after a short delay
                 setTimeout(() => {
@@ -364,12 +473,20 @@
             shuffleArray(GAME_DATA.countries);
             mysteryCountry = GAME_DATA.countries[0];
 
+            // Initialize the card pools for this game
+            allCardsPools = {
+                geography: [...GAME_DATA.cardDetails.geography.texts],
+                culture: [...GAME_DATA.cardDetails.culture.texts],
+                history: [...GAME_DATA.cardDetails.history.texts]
+            };
+            
             // Draw initial cards
             activeCards = {};
             for (const category of cardCategories) {
                 activeCards[category] = drawRandomCard(category);
             }
             renderActiveCards();
+            renderRemainingCardStacks();
             showScreen(gamePlayScreen);
         }
 
@@ -393,6 +510,14 @@
         
         playAgainButton.addEventListener('click', () => {
             showScreen(usernameScreen);
+        });
+
+        instructionsButton.addEventListener('click', () => {
+            instructionsModal.classList.remove('hidden');
+        });
+
+        closeInstructionsButton.addEventListener('click', () => {
+            instructionsModal.classList.add('hidden');
         });
 
         // Initialize the game by showing the username screen on page load
