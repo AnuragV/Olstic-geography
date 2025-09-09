@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Break the Code: Arrange the Balloons</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: #eee;
+      text-align: center;
+      overflow: hidden;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #ffc107;
+    }
+    .game-area {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90vw;
+      max-width: 1000px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .mode-controls {
+      display: flex;
+      justify-content: flex-start;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .mode-btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background: #555;
+      color: #eee;
+      transition: background 0.3s;
+    }
+    .mode-btn.active {
+      background: #ffc107;
+      color: #000;
+    }
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .status-box {
+      background: #ffc107;
+      color: #000;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .info-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      color: #000;
+      font-weight: bold;
+      font-size: 18px;
+      line-height: 28px;
+      cursor: pointer;
+      border: none;
+    }
+    .balloon-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .bowl {
+      background-color: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .string {
+      width: 2px;
+      background: #000;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .balloon {
+      border-radius: 50%;
+      cursor: grab;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.6);
+      transition: transform 0.2s;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .balloon:active { transform: translateX(-50%) scale(1.2); }
+    .red   { background: red; }
+    .white { background: white; border: 2px solid #ccc; }
+    .blue  { background: blue; }
+    .green { background: green; }
+    .yellow{ background: yellow; }
+    .pink  { background: hotpink; }
+    .purple{ background: purple; }
+    .orange{ background: orange; }
+    .cyan  { background: cyan; }
+    .controls {
+      margin: 20px 0;
+    }
+    .submit-btn, .new-code-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .submit-btn { background-color: #ffc107; color: #000; }
+    .submit-btn:hover { background-color: #ff9800; }
+    .new-code-btn { background-color: #fff; color: #000; margin-left: 10px; }
+    .new-code-btn:hover { background-color: #ddd; }
+    .leaderboard {
+      background: #1e1e1e;
+      color: #eee;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .leaderboard h3 { margin-bottom: 8px; color: #ffc107; }
+    .leaderboard ol { list-style: none; padding: 0; margin: 0; }
+    .leaderboard li {
+      padding: 4px;
+      border-bottom: 1px solid #333;
+      font-size: 14px;
+    }
+    .modal-bg {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      color: #eee;
+      text-align: left;
+    }
+    .modal h4 { margin-top: 0; color: #ffc107; }
+    .modal button { margin-top: 15px; float: right; }
+  </style>
+</head>
+<body>
+  <h1>🎈 Break the Code: Arrange the Balloons 🎈</h1>
+  <div class="game-area">
+    <div class="mode-controls">
+      <button class="mode-btn active" onclick="setMode('easy', event)">Easy</button>
+      <button class="mode-btn" onclick="setMode('medium', event)">Medium</button>
+      <button class="mode-btn" onclick="setMode('hard', event)">Hard</button>
+    </div>
+    <div class="top-controls">
+      <div class="status-box">Correct: <span id="correctCount">0</span></div>
+      <div class="status-box">Attempts: <span id="attempts">0</span></div>
+      <button class="info-btn" onclick="showInfo()">?</button>
+    </div>
+    <div class="balloon-container" id="bowlArea"></div>
+    <div class="controls">
+      <button class="submit-btn" onclick="submitGuess()">Submit Guess</button>
+      <button class="new-code-btn" onclick="startGame()">New Code</button>
+      <audio id="popSound" src="https://freesound.org/data/previews/341/341695_6249661-lq.mp3"></audio>
+    </div>
+    <div class="leaderboard">
+      <h3>🏆 Leaderboard (Attempts)</h3>
+      <ol id="leaderboardList"></ol>
+    </div>
+  </div>
+  <div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <h4>How to Play</h4>
+      <ul>
+        <li>Guess the hidden order of the balloons.</li>
+        <li>Drag & drop into bowls, then click “Submit Guess.”</li>
+        <li>After each guess, see how many are correct.</li>
+        <li>Attempts count, no limit.</li>
+        <li>Leaderboard tracks best scores (fewest attempts).</li>
+      </ul>
+      <button onclick="hideInfo()">Close</button>
+    </div>
+  </div>
+  <script>
+    const MODES = {
+      easy: ['red','yellow','white','blue','green'],
+      medium: ['red','yellow','white','blue','green','pink','purple'],
+      hard: ['red','yellow','white','blue','green','pink','purple','orange','cyan']
+    };
+    let mode = 'easy', code = [], currentOrder = [], attempts = 0;
+    let username = prompt("Enter your username:") || "Anonymous";
+    const popSound = document.getElementById('popSound');
+
+    function setMode(m, e) {
+      mode = m;
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+      e.target.classList.add('active');
+      startGame();
+    }
+
+    function shuffle(arr) {
+      return arr.slice().sort(() => Math.random()-0.5);
+    }
+
+    function startGame() {
+      const COLORS = MODES[mode];
+      code = shuffle(COLORS);
+      do { currentOrder = shuffle(COLORS); } while (currentOrder.some((c,i)=> c===code[i]));
+      attempts = 0;
+      renderStatus(); renderBalloons(); updateLeaderboard();
+    }
+
+    function renderStatus() {
+      document.getElementById('correctCount').textContent = 0;
+      document.getElementById('attempts').textContent = attempts;
+    }
+
+    function renderBalloons() {
+      const area = document.getElementById('bowlArea'); area.innerHTML = '';
+      const n = currentOrder.length;
+      // Calculate bowl and balloon sizes
+      const totalWidth = area.clientWidth;
+      const gap = 10;
+      const bowlWidth = Math.floor((totalWidth - gap*(n-1)) / n);
+      const bowlHeight = Math.floor(bowlWidth * 1.2);
+      const balloonSize = Math.floor(bowlWidth * 0.6);
+
+      currentOrder.forEach((color,i) => {
+        const bowl = document.createElement('div');
+        bowl.className = 'bowl';
+        bowl.style.width = bowlWidth + 'px';
+        bowl.style.height = bowlHeight + 'px';
+        bowl.dataset.idx = i;
+        bowl.addEventListener('dragover', e=>e.preventDefault());
+        bowl.addEventListener('drop', handleDrop);
+
+        const str = document.createElement('div');
+        str.className = 'string';
+        str.style.height = (bowlHeight * 0.25) + 'px';
+        bowl.appendChild(str);
+
+        const b = document.createElement('div');
+        b.className = `balloon ${color}`;
+        b.draggable = true;
+        b.dataset.color = color;
+        b.style.width = balloonSize + 'px';
+        b.style.height = balloonSize + 'px';
+        b.style.top = (bowlHeight * 0.25) + 'px';
+        b.addEventListener('dragstart', e=> e.dataTransfer.setData('text', color));
+
+        bowl.appendChild(b);
+        area.appendChild(bowl);
+      });
+    }
+
+    function handleDrop(e) {
+      const drop = +e.currentTarget.dataset.idx;
+      const clr = e.dataTransfer.getData('text');
+      const drag = currentOrder.indexOf(clr);
+      [currentOrder[drag], currentOrder[drop]] = [currentOrder[drop], currentOrder[drag]];
+      renderBalloons();
+    }
+
+    function submitGuess() {
+      attempts++;
+      const correct = currentOrder.reduce((a,c,i)=> a + (c===code[i]),0);
+      document.getElementById('correctCount').textContent = correct;
+      document.getElementById('attempts').textContent = attempts;
+      popSound.currentTime=0; popSound.play();
+      if (correct === currentOrder.length) {
+        alert(`🎉 Cracked in ${attempts} attempts!`);
+        saveLeaderboard(attempts);
+        updateLeaderboard();
+      }
+    }
+
+    function saveLeaderboard(att) {
+      const scores = JSON.parse(localStorage.getItem('balloonGameScores')||'[]');
+      scores.push({name:username, att});
+      scores.sort((a,b)=>a.att-b.att);
+      localStorage.setItem('balloonGameScores', JSON.stringify(scores.slice(0,5)));
+    }
+
+    function updateLeaderboard() {
+      const list = document.getElementById('leaderboardList'); list.innerHTML='';
+      JSON.parse(localStorage.getItem('balloonGameScores')||'[]')
+        .forEach((s,i)=>{
+          const li = document.createElement('li');
+          li.textContent = `${i+1}. ${s.name} — ${s.att} attempts`;
+          list.appendChild(li);
+        });
+    }
+
+    function showInfo(){ document.getElementById('modalBg').style.display = 'flex'; }
+    function hideInfo(){ document.getElementById('modalBg').style.display = 'none'; }
+
+    startGame();
+  </script>
+</body>
+</html>
