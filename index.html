@@ -180,11 +180,37 @@
             background: var(--warning-color);
             color: white;
             border-color: var(--warning-color);
+            position: relative;
         }
 
         .cell.solution.letter {
             background: var(--warning-color);
             color: white;
+        }
+
+        .cell.solution::before {
+            content: attr(data-step);
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            background: #dc2626;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .cell.solution.start::before {
+            background: #059669;
+            content: "START";
+            width: 40px;
+            font-size: 0.6rem;
         }
 
         .wall-top { border-top: 4px solid #374151; }
@@ -373,6 +399,21 @@
             margin-bottom: 10px;
         }
 
+        .solution-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .solution-step {
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid var(--warning-color);
+        }
+
         @media (max-width: 768px) {
             .cell {
                 width: 50px;
@@ -420,8 +461,12 @@
 
         <!-- Solution Info -->
         <div class="solution-info hidden" id="solutionInfo">
-            <h3>Solution Shown (Debug Mode)</h3>
-            <p>Word: <strong id="solutionWord"></strong> | Yellow path visits all cells in correct letter order</p>
+            <h3>Solution Revealed (Debug Mode)</h3>
+            <p>Target Word: <strong id="solutionWord"></strong></p>
+            <p>Follow the numbered path: START → 1 → 2 → 3... Letters are highlighted in RED numbers</p>
+            <div class="solution-steps" id="solutionSteps">
+                <!-- Steps will be populated by JavaScript -->
+            </div>
         </div>
 
         <!-- Game Board -->
@@ -537,7 +582,7 @@
                         {row: 2, col: 0, side: 'right'}
                     ],
                     solution: [
-                        {row: 0, col: 1}, // M
+                        {row: 0, col: 1}, // M - START
                         {row: 0, col: 0},
                         {row: 1, col: 0}, // S  
                         {row: 2, col: 0},
@@ -570,7 +615,7 @@
                         {row: 2, col: 3, side: 'bottom'}
                     ],
                     solution: [
-                        {row: 0, col: 0}, // D
+                        {row: 0, col: 0}, // D - START
                         {row: 1, col: 0},
                         {row: 2, col: 0},
                         {row: 3, col: 0}, // E
@@ -607,7 +652,7 @@
                         {row: 3, col: 1, side: 'right'}
                     ],
                     solution: [
-                        {row: 0, col: 0}, // J - start here and create a solution manually
+                        {row: 0, col: 0}, // J - START
                         {row: 0, col: 1},
                         {row: 0, col: 2},
                         {row: 0, col: 3}, // O
@@ -814,8 +859,11 @@
             document.getElementById('solutionInfo').classList.remove('hidden');
             document.getElementById('solutionWord').textContent = gameState.currentPuzzle.word;
             
-            // Display solution path
+            // Display solution path with numbered steps
             displaySolutionPath();
+            
+            // Generate solution steps explanation
+            generateSolutionSteps();
         }
 
         function displaySolutionPath() {
@@ -824,13 +872,53 @@
             // Clear current path display
             clearAllCellStates();
             
-            // Show solution path in yellow
-            puzzle.solution.forEach(({row, col}) => {
+            // Show solution path with numbered steps
+            puzzle.solution.forEach(({row, col}, index) => {
                 const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                 if (cell) {
                     cell.classList.add('solution');
+                    
+                    if (index === 0) {
+                        cell.classList.add('start');
+                        cell.setAttribute('data-step', 'START');
+                    } else {
+                        cell.setAttribute('data-step', index.toString());
+                    }
                 }
             });
+        }
+
+        function generateSolutionSteps() {
+            const puzzle = gameState.currentPuzzle;
+            const stepsContainer = document.getElementById('solutionSteps');
+            
+            let stepsHTML = '';
+            let letterIndex = 0;
+            const targetWord = puzzle.word;
+            
+            puzzle.solution.forEach(({row, col}, index) => {
+                const cellLetter = puzzle.letters[row][col];
+                const stepLabel = index === 0 ? 'START' : index.toString();
+                
+                if (cellLetter) {
+                    // This is a letter cell
+                    stepsHTML += `
+                        <div class="solution-step" style="border-left-color: #dc2626;">
+                            <strong>Step ${stepLabel}:</strong> Hit "${cellLetter}" (${letterIndex + 1}/${targetWord.length})
+                        </div>
+                    `;
+                    letterIndex++;
+                } else {
+                    // This is an empty cell
+                    stepsHTML += `
+                        <div class="solution-step">
+                            <strong>Step ${stepLabel}:</strong> Pass through (${row + 1}, ${col + 1})
+                        </div>
+                    `;
+                }
+            });
+            
+            stepsContainer.innerHTML = stepsHTML;
         }
 
         function clearAllCellStates() {
@@ -840,7 +928,8 @@
                 for (let col = 0; col < puzzle.gridSize; col++) {
                     const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                     if (cell) {
-                        cell.classList.remove('filled', 'solution');
+                        cell.classList.remove('filled', 'solution', 'start');
+                        cell.removeAttribute('data-step');
                     }
                 }
             }
