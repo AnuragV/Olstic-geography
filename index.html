@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordlock - Word Puzzle Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --background-color: #f8fafc;
+            --surface-color: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .word-display {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 3px;
+            color: var(--primary-color);
+        }
+
+        .game-board {
+            position: relative;
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .grid-container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .connection-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .grid {
+            display: inline-grid;
+            gap: 8px;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .grid-4x4 { grid-template-columns: repeat(4, 1fr); }
+        .grid-5x5 { grid-template-columns: repeat(5, 1fr); }
+        .grid-6x6 { grid-template-columns: repeat(6, 1fr); }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            background: var(--surface-color);
+        }
+
+        .cell.letter {
+            background: #e0f2fe;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .cell.letter:hover {
+            background: #b3e5fc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .cell.wall {
+            background: #374151;
+            border-color: #374151;
+            cursor: not-allowed;
+        }
+
+        .cell.empty {
+            background: #f8fafc;
+            border-style: dashed;
+            border-color: #cbd5e1;
+        }
+
+        .cell.selected {
+            background: var(--success-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .cell.connected {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .cell.current {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn--primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn--primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn--secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn--secondary:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .btn--outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn--outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn--sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: var(--surface-color);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .modal-body {
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .difficulty-options {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .difficulty-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .difficulty-option:hover {
+            border-color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .difficulty-option.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .instructions-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .instructions-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .instructions-list li:before {
+            content: "→ ";
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .leaderboard {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .leaderboard-entry:first-child {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-left-color: #f59e0b;
+        }
+
+        .leaderboard-position {
+            font-weight: bold;
+            color: var(--text-muted);
+            margin-right: 15px;
+        }
+
+        .leaderboard-name {
+            flex: 1;
+            font-weight: 600;
+        }
+
+        .leaderboard-time {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .win-message {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .win-time {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--success-color);
+            margin: 15px 0;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .game-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .game-title {
+                font-size: 2rem;
+            }
+
+            .cell {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .game-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .difficulty-options {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <header class="game-header">
+            <div class="header-left">
+                <button class="btn btn--secondary btn--sm" id="difficultyBtn">Easy</button>
+            </div>
+            <h1 class="game-title">Wordlock</h1>
+            <div class="header-right">
+                <button class="btn btn--outline btn--sm" id="instructionsBtn">?</button>
+            </div>
+        </header>
+
+        <!-- Game Stats -->
+        <div class="game-stats">
+            <div class="stat-item">
+                <span class="stat-label">Player:</span>
+                <span class="stat-value" id="playerName">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Time:</span>
+                <span class="stat-value" id="timer">00:00</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Word:</span>
+                <span class="stat-value word-display" id="wordDisplay">????</span>
+            </div>
+        </div>
+
+        <!-- Game Board -->
+        <div class="game-board" id="gameBoard">
+            <div class="grid-container" id="gridContainer">
+                <!-- Grid cells will be generated by JavaScript -->
+            </div>
+            <canvas class="connection-canvas" id="connectionCanvas"></canvas>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <button class="btn btn--primary" id="replayBtn">New Game</button>
+            <button class="btn btn--secondary" id="leaderboardBtn">Leaderboard</button>
+        </div>
+    </div>
+
+    <!-- Username Modal -->
+    <div class="modal" id="usernameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Welcome to Wordlock!</h2>
+                <p>Enter your username to start playing</p>
+            </div>
+            <div class="modal-body">
+                <form id="usernameForm">
+                    <div class="form-group">
+                        <label for="usernameInput" class="form-label">Username:</label>
+                        <input type="text" id="usernameInput" class="form-input" placeholder="Enter your name" maxlength="20" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="usernameForm" class="btn btn--primary" id="startGameBtn">Start Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Difficulty Modal -->
+    <div class="modal hidden" id="difficultyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Select Difficulty</h2>
+            </div>
+            <div class="modal-body">
+                <div class="difficulty-options">
+                    <div class="difficulty-option selected" data-difficulty="easy">
+                        <h3>Easy</h3>
+                        <p>4×4 grid<br>5-letter words</p>
+                    </div>
+                    <div class="difficulty-option" data-difficulty="medium">
+                        <h3>Medium</h3>
+                        <p>5×5 grid<br>6-8 letter words</p>
+                    </div>
+                    <div class="difficulty-option" data-difficulty="hard">
+                        <h3>Hard</h3>
+                        <p>6×6 grid<br>8-10 letter words</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" id="closeDifficultyBtn">Cancel</button>
+                <button class="btn btn--primary" id="selectDifficultyBtn">Select</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div class="modal hidden" id="instructionsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">How to Play Wordlock</h2>
+            </div>
+            <div class="modal-body">
+                <ul class="instructions-list">
+                    <li>Look at the scrambled letters and figure out what word they spell</li>
+                    <li>Connect the letters in alphabetical order by clicking/dragging from one to the next</li>
+                    <li>Fill all empty cells on the grid to complete the puzzle</li>
+                    <li>Avoid wall blocks - you cannot pass through them!</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--primary" id="closeInstructionsBtn">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal hidden" id="winModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">🎉 Congratulations!</h2>
+            </div>
+            <div class="modal-body">
+                <div class="win-message">
+                    <p>You solved the puzzle in:</p>
+                    <div class="win-time" id="winTime">00:00</div>
+                    <p>Great job! 🎊</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" id="closeWinBtn">Close</button>
+                <button class="btn btn--primary" id="playAgainBtn">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div class="modal hidden" id="leaderboardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">🏆 Leaderboard</h2>
+            </div>
+            <div class="modal-body">
+                <div class="leaderboard" id="leaderboardList">
+                    <p style="text-align: center; color: var(--text-muted);">No scores yet. Play a game to see your time!</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--primary" id="closeLeaderboardBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game data and configuration
+        const WORD_LISTS = {
+            easy: ["HOUSE", "PLANT", "MUSIC", "DANCE", "HAPPY", "WORLD", "LIGHT", "BEACH", "PHONE", "SMILE", "PEACE", "DREAM", "TRUTH", "BRAVE", "SWEET"],
+            medium: ["KITCHEN", "JOURNEY", "MORNING", "RAINBOW", "PICTURE", "ELEPHANT", "MOUNTAIN", "COMPUTER", "FREEDOM", "COURAGE", "HOLIDAY", "DIAMOND"],
+            hard: ["ADVENTURE", "BEAUTIFUL", "CHOCOLATE", "BUTTERFLY", "TELEPHONE", "WONDERFUL", "DIFFERENT", "IMPORTANT", "CELEBRATE", "FANTASTIC"]
+        };
+
+        const GAME_SETTINGS = {
+            easy: { gridSize: 4, wordLength: 5 },
+            medium: { gridSize: 5, wordLength: [6, 8] },
+            hard: { gridSize: 6, wordLength: [8, 10] }
+        };
+
+        // Game state
+        let gameState = {
+            difficulty: 'easy',
+            currentWord: '',
+            grid: [],
+            letterPositions: [],
+            connections: [],
+            isConnecting: false,
+            connectionPath: [],
+            startTime: null,
+            timerInterval: null,
+            playerName: '',
+            gameStarted: false,
+            selectedDifficulty: 'easy'
+        };
+
+        // Initialize game when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            initGame();
+        });
+
+        function initGame() {
+            setupEventListeners();
+            showUsernameModal();
+        }
+
+        function setupEventListeners() {
+            // Username modal
+            const startGameBtn = document.getElementById('startGameBtn');
+            const usernameInput = document.getElementById('usernameInput');
+            const usernameForm = document.getElementById('usernameForm');
+            
+            if (startGameBtn) {
+                startGameBtn.addEventListener('click', handleUsernameSubmit);
+            }
+            
+            if (usernameForm) {
+                usernameForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleUsernameSubmit();
+                });
+            }
+
+            // Difficulty button and modal
+            const difficultyBtn = document.getElementById('difficultyBtn');
+            const closeDifficultyBtn = document.getElementById('closeDifficultyBtn');
+            const selectDifficultyBtn = document.getElementById('selectDifficultyBtn');
+            
+            if (difficultyBtn) {
+                difficultyBtn.addEventListener('click', showDifficultyModal);
+            }
+            
+            if (closeDifficultyBtn) {
+                closeDifficultyBtn.addEventListener('click', hideDifficultyModal);
+            }
+            
+            if (selectDifficultyBtn) {
+                selectDifficultyBtn.addEventListener('click', handleDifficultySelect);
+            }
+
+            // Difficulty options
+            const difficultyOptions = document.querySelectorAll('.difficulty-option');
+            difficultyOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    difficultyOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    gameState.selectedDifficulty = this.dataset.difficulty;
+                });
+            });
+
+            // Instructions button
+            const instructionsBtn = document.getElementById('instructionsBtn');
+            const closeInstructionsBtn = document.getElementById('closeInstructionsBtn');
+            
+            if (instructionsBtn) {
+                instructionsBtn.addEventListener('click', showInstructionsModal);
+            }
+            
+            if (closeInstructionsBtn) {
+                closeInstructionsBtn.addEventListener('click', hideInstructionsModal);
+            }
+
+            // Game controls
+            const replayBtn = document.getElementById('replayBtn');
+            const leaderboardBtn = document.getElementById('leaderboardBtn');
+            
+            if (replayBtn) {
+                replayBtn.addEventListener('click', startNewGame);
+            }
+            
+            if (leaderboardBtn) {
+                leaderboardBtn.addEventListener('click', showLeaderboardModal);
+            }
+
+            // Win modal
+            const closeWinBtn = document.getElementById('closeWinBtn');
+            const playAgainBtn = document.getElementById('playAgainBtn');
+            
+            if (closeWinBtn) {
+                closeWinBtn.addEventListener('click', hideWinModal);
+            }
+            
+            if (playAgainBtn) {
+                playAgainBtn.addEventListener('click', function() {
+                    hideWinModal();
+                    startNewGame();
+                });
+            }
+
+            // Leaderboard modal
+            const closeLeaderboardBtn = document.getElementById('closeLeaderboardBtn');
+            if (closeLeaderboardBtn) {
+                closeLeaderboardBtn.addEventListener('click', hideLeaderboardModal);
+            }
+        }
+
+        function showUsernameModal() {
+            const modal = document.getElementById('usernameModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                const input = document.getElementById('usernameInput');
+                if (input) {
+                    setTimeout(() => input.focus(), 100);
+                }
+            }
+        }
+
+        function hideUsernameModal() {
+            const modal = document.getElementById('usernameModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function handleUsernameSubmit() {
+            const input = document.getElementById('usernameInput');
+            const name = input ? input.value.trim() : '';
+            
+            if (name.length > 0) {
+                gameState.playerName = name;
+                document.getElementById('playerName').textContent = name;
+                hideUsernameModal();
+                startNewGame();
+            } else {
+                alert('Please enter a valid username!');
+            }
+        }
+
+        function showDifficultyModal() {
+            const modal = document.getElementById('difficultyModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function hideDifficultyModal() {
+            const modal = document.getElementById('difficultyModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function handleDifficultySelect() {
+            gameState.difficulty = gameState.selectedDifficulty;
+            document.getElementById('difficultyBtn').textContent = 
+                gameState.difficulty.charAt(0).toUpperCase() + gameState.difficulty.slice(1);
+            hideDifficultyModal();
+            if (gameState.gameStarted) {
+                startNewGame();
+            }
+        }
+
+        function showInstructionsModal() {
+            const modal = document.getElementById('instructionsModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function hideInstructionsModal() {
+            const modal = document.getElementById('instructionsModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function showWinModal(time) {
+            const modal = document.getElementById('winModal');
+            const winTimeElement = document.getElementById('winTime');
+            
+            if (modal && winTimeElement) {
+                winTimeElement.textContent = time;
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function hideWinModal() {
+            const modal = document.getElementById('winModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function showLeaderboardModal() {
+            const modal = document.getElementById('leaderboardModal');
+            if (modal) {
+                updateLeaderboardDisplay();
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function hideLeaderboardModal() {
+            const modal = document.getElementById('leaderboardModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function startNewGame() {
+            gameState.gameStarted = true;
+            resetGame();
+            generateGrid();
+            startTimer();
+        }
+
+        function resetGame() {
+            gameState.connections = [];
+            gameState.connectionPath = [];
+            gameState.isConnecting = false;
+            
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+            
+            gameState.startTime = null;
+            document.getElementById('timer').textContent = '00:00';
+        }
+
+        function generateGrid() {
+            const settings = GAME_SETTINGS[gameState.difficulty];
+            const gridSize = settings.gridSize;
+            const wordList = WORD_LISTS[gameState.difficulty];
+            
+            // Select random word
+            gameState.currentWord = wordList[Math.floor(Math.random() * wordList.length)];
+            
+            // Update word display
+            const scrambledWord = scrambleWord(gameState.currentWord);
+            document.getElementById('wordDisplay').textContent = scrambledWord;
+            
+            // Create grid
+            createGridElement(gridSize);
+            placeLettersOnGrid(gridSize);
+        }
+
+        function scrambleWord(word) {
+            const letters = word.split('');
+            for (let i = letters.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [letters[i], letters[j]] = [letters[j], letters[i]];
+            }
+            return letters.join('');
+        }
+
+        function createGridElement(gridSize) {
+            const gridContainer = document.getElementById('gridContainer');
+            gridContainer.innerHTML = '';
+            
+            const grid = document.createElement('div');
+            grid.className = `grid grid-${gridSize}x${gridSize}`;
+            
+            // Initialize grid state
+            gameState.grid = Array(gridSize).fill().map(() => Array(gridSize).fill('empty'));
+            
+            // Create cells
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell empty';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    
+                    // Add click event listener
+                    cell.addEventListener('click', function() {
+                        handleCellClick(row, col);
+                    });
+                    
+                    grid.appendChild(cell);
+                }
+            }
+            
+            gridContainer.appendChild(grid);
+            
+            // Setup canvas for connections
+            setupCanvas();
+        }
+
+        function placeLettersOnGrid(gridSize) {
+            const word = gameState.currentWord;
+            const letters = word.split('');
+            gameState.letterPositions = [];
+            
+            // Add some walls (about 20% of empty cells)
+            const numWalls = Math.floor((gridSize * gridSize - letters.length) * 0.2);
+            const wallPositions = [];
+            
+            for (let i = 0; i < numWalls; i++) {
+                let row, col;
+                do {
+                    row = Math.floor(Math.random() * gridSize);
+                    col = Math.floor(Math.random() * gridSize);
+                } while (wallPositions.some(w => w.row === row && w.col === col));
+                
+                wallPositions.push({ row, col });
+                gameState.grid[row][col] = 'wall';
+                
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.className = 'cell wall';
+                }
+            }
+            
+            // Place letters randomly
+            for (let i = 0; i < letters.length; i++) {
+                let row, col;
+                do {
+                    row = Math.floor(Math.random() * gridSize);
+                    col = Math.floor(Math.random() * gridSize);
+                } while (gameState.grid[row][col] !== 'empty');
+                
+                gameState.grid[row][col] = letters[i];
+                gameState.letterPositions.push({ 
+                    letter: letters[i], 
+                    row: row, 
+                    col: col,
+                    index: i
+                });
+                
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.className = 'cell letter';
+                    cell.textContent = letters[i];
+                }
+            }
+        }
+
+        function setupCanvas() {
+            const canvas = document.getElementById('connectionCanvas');
+            const gameBoard = document.getElementById('gameBoard');
+            
+            if (canvas && gameBoard) {
+                const rect = gameBoard.getBoundingClientRect();
+                canvas.width = gameBoard.offsetWidth;
+                canvas.height = gameBoard.offsetHeight;
+            }
+        }
+
+        function handleCellClick(row, col) {
+            const cellValue = gameState.grid[row][col];
+            
+            if (cellValue === 'wall' || cellValue === 'empty') {
+                return;
+            }
+            
+            // Find the letter and its expected position in the word
+            const letterInfo = gameState.letterPositions.find(l => l.row === row && l.col === col);
+            if (!letterInfo) {
+                return;
+            }
+            
+            // Check if this is the next expected letter
+            const expectedIndex = gameState.connectionPath.length;
+            const sortedWord = gameState.currentWord.split('').sort();
+            
+            if (sortedWord[expectedIndex] === letterInfo.letter) {
+                // Add to connection path
+                gameState.connectionPath.push(letterInfo);
+                
+                // Update cell appearance
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.classList.add('connected');
+                }
+                
+                // Draw connection line if not first letter
+                if (gameState.connectionPath.length > 1) {
+                    drawConnectionLine();
+                }
+                
+                // Check if word is complete
+                if (gameState.connectionPath.length === gameState.currentWord.length) {
+                    handleWin();
+                }
+            } else {
+                // Wrong letter - shake effect or visual feedback
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        cell.style.animation = '';
+                    }, 500);
+                }
+            }
+        }
+
+        function drawConnectionLine() {
+            const canvas = document.getElementById('connectionCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const path = gameState.connectionPath;
+            
+            if (path.length < 2) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            
+            ctx.beginPath();
+            
+            for (let i = 0; i < path.length; i++) {
+                const pos = getCellCenter(path[i].row, path[i].col);
+                if (i === 0) {
+                    ctx.moveTo(pos.x, pos.y);
+                } else {
+                    ctx.lineTo(pos.x, pos.y);
+                }
+            }
+            
+            ctx.stroke();
+        }
+
+        function getCellCenter(row, col) {
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            if (!cell) return { x: 0, y: 0 };
+            
+            const rect = cell.getBoundingClientRect();
+            const boardRect = document.getElementById('gameBoard').getBoundingClientRect();
+            
+            return {
+                x: rect.left - boardRect.left + rect.width / 2,
+                y: rect.top - boardRect.top + rect.height / 2
+            };
+        }
+
+        function startTimer() {
+            gameState.startTime = Date.now();
+            gameState.timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            if (!gameState.startTime) return;
+            
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            
+            const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timer').textContent = timeString;
+        }
+
+        function handleWin() {
+            // Stop timer
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+            
+            const finalTime = document.getElementById('timer').textContent;
+            
+            // Save score to leaderboard
+            saveScore(gameState.playerName, finalTime, gameState.difficulty);
+            
+            // Show win modal
+            showWinModal(finalTime);
+        }
+
+        function saveScore(playerName, time, difficulty) {
+            const scores = getLeaderboard();
+            const score = {
+                name: playerName,
+                time: time,
+                difficulty: difficulty,
+                timestamp: Date.now(),
+                timeInSeconds: timeToSeconds(time)
+            };
+            
+            scores.push(score);
+            
+            // Sort by time (ascending - faster is better)
+            scores.sort((a, b) => a.timeInSeconds - b.timeInSeconds);
+            
+            // Keep only top 10
+            const topScores = scores.slice(0, 10);
+            
+            localStorage.setItem('wordlock_leaderboard', JSON.stringify(topScores));
+        }
+
+        function getLeaderboard() {
+            const saved = localStorage.getItem('wordlock_leaderboard');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function timeToSeconds(timeString) {
+            const [minutes, seconds] = timeString.split(':').map(Number);
+            return minutes * 60 + seconds;
+        }
+
+        function updateLeaderboardDisplay() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            const scores = getLeaderboard();
+            
+            if (scores.length === 0) {
+                leaderboardList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No scores yet. Play a game to see your time!</p>';
+                return;
+            }
+            
+            let html = '';
+            scores.forEach((score, index) => {
+                html += `
+                    <div class="leaderboard-entry">
+                        <span class="leaderboard-position">#${index + 1}</span>
+                        <span class="leaderboard-name">${score.name}</span>
+                        <span class="leaderboard-time">${score.time}</span>
+                        <span class="leaderboard-difficulty" style="font-size: 0.8rem; color: var(--text-muted); margin-left: 8px;">${score.difficulty}</span>
+                    </div>
+                `;
+            });
+            
+            leaderboardList.innerHTML = html;
+        }
+
+        // Add CSS for shake animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
