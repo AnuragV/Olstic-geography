@@ -15,6 +15,8 @@
             --primary-color: #2563eb;
             --secondary-color: #64748b;
             --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
             --background-color: #f8fafc;
             --surface-color: #ffffff;
             --text-color: #1e293b;
@@ -174,6 +176,17 @@
             color: white;
         }
 
+        .cell.solution {
+            background: var(--warning-color);
+            color: white;
+            border-color: var(--warning-color);
+        }
+
+        .cell.solution.letter {
+            background: var(--warning-color);
+            color: white;
+        }
+
         .wall-top { border-top: 4px solid #374151; }
         .wall-right { border-right: 4px solid #374151; }
         .wall-bottom { border-bottom: 4px solid #374151; }
@@ -183,6 +196,7 @@
             display: flex;
             gap: 15px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -219,6 +233,15 @@
         .btn--outline:hover {
             background: var(--primary-color);
             color: white;
+        }
+
+        .btn--danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn--danger:hover {
+            background: #dc2626;
         }
 
         .btn--sm {
@@ -336,6 +359,20 @@
             text-align: center;
         }
 
+        .solution-info {
+            background: #fef3c7;
+            border: 2px solid var(--warning-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .solution-info h3 {
+            color: var(--warning-color);
+            margin-bottom: 10px;
+        }
+
         @media (max-width: 768px) {
             .cell {
                 width: 50px;
@@ -381,6 +418,12 @@
             </div>
         </div>
 
+        <!-- Solution Info -->
+        <div class="solution-info hidden" id="solutionInfo">
+            <h3>Solution Shown (Debug Mode)</h3>
+            <p>Word: <strong id="solutionWord"></strong> | Yellow path visits all cells in correct letter order</p>
+        </div>
+
         <!-- Game Board -->
         <div class="game-board" id="gameBoard">
             <div class="grid-container" id="gridContainer">
@@ -393,6 +436,7 @@
             <button class="btn btn--primary" id="replayBtn">New Puzzle</button>
             <button class="btn btn--secondary" id="leaderboardBtn">Leaderboard</button>
             <button class="btn btn--outline" id="resetPathBtn">Reset Path</button>
+            <button class="btn btn--danger" id="giveUpBtn">Give Up (Show Solution)</button>
         </div>
     </div>
 
@@ -491,6 +535,24 @@
                         {row: 0, col: 1, side: 'bottom'},
                         {row: 1, col: 2, side: 'right'},
                         {row: 2, col: 0, side: 'right'}
+                    ],
+                    solution: [
+                        {row: 0, col: 1}, // M
+                        {row: 0, col: 0},
+                        {row: 1, col: 0}, // S  
+                        {row: 2, col: 0},
+                        {row: 3, col: 0},
+                        {row: 3, col: 1}, // C
+                        {row: 3, col: 2},
+                        {row: 3, col: 3},
+                        {row: 2, col: 3},
+                        {row: 1, col: 3},
+                        {row: 0, col: 3}, // U
+                        {row: 0, col: 2},
+                        {row: 1, col: 2},
+                        {row: 1, col: 1},
+                        {row: 2, col: 1},
+                        {row: 2, col: 2}  // I
                     ]
                 },
                 {
@@ -506,21 +568,24 @@
                         {row: 0, col: 0, side: 'right'},
                         {row: 1, col: 1, side: 'bottom'},
                         {row: 2, col: 3, side: 'bottom'}
-                    ]
-                },
-                {
-                    word: "HOUSE",
-                    gridSize: 4,
-                    letters: [
-                        ['H', null, 'O', null],
-                        [null, null, null, 'U'],
-                        ['S', null, null, null],
-                        [null, null, 'E', null]
                     ],
-                    walls: [
-                        {row: 0, col: 2, side: 'bottom'},
-                        {row: 1, col: 0, side: 'bottom'},
-                        {row: 2, col: 2, side: 'right'}
+                    solution: [
+                        {row: 0, col: 0}, // D
+                        {row: 1, col: 0},
+                        {row: 2, col: 0},
+                        {row: 3, col: 0}, // E
+                        {row: 3, col: 1},
+                        {row: 3, col: 2},
+                        {row: 3, col: 3},
+                        {row: 2, col: 3},
+                        {row: 2, col: 2},
+                        {row: 2, col: 1}, // C
+                        {row: 1, col: 1},
+                        {row: 1, col: 2}, // N
+                        {row: 1, col: 3},
+                        {row: 0, col: 3}, // A
+                        {row: 0, col: 2},
+                        {row: 0, col: 1}
                     ]
                 }
             ],
@@ -540,23 +605,33 @@
                         {row: 1, col: 2, side: 'right'},
                         {row: 2, col: 4, side: 'bottom'},
                         {row: 3, col: 1, side: 'right'}
-                    ]
-                },
-                {
-                    word: "RAINBOW",
-                    gridSize: 5,
-                    letters: [
-                        ['R', null, null, 'A', null],
-                        [null, 'I', null, null, 'N'],
-                        [null, null, null, 'B', null],
-                        ['O', null, null, null, null],
-                        [null, 'W', null, null, null]
                     ],
-                    walls: [
-                        {row: 0, col: 3, side: 'bottom'},
-                        {row: 1, col: 1, side: 'right'},
-                        {row: 2, col: 3, side: 'bottom'},
-                        {row: 3, col: 0, side: 'right'}
+                    solution: [
+                        {row: 0, col: 0}, // J - start here and create a solution manually
+                        {row: 0, col: 1},
+                        {row: 0, col: 2},
+                        {row: 0, col: 3}, // O
+                        {row: 0, col: 4},
+                        {row: 1, col: 4},
+                        {row: 1, col: 3},
+                        {row: 1, col: 2}, // U
+                        {row: 1, col: 1},
+                        {row: 1, col: 0},
+                        {row: 2, col: 0},
+                        {row: 2, col: 1}, // R
+                        {row: 2, col: 2},
+                        {row: 2, col: 3},
+                        {row: 2, col: 4}, // N
+                        {row: 3, col: 4},
+                        {row: 3, col: 3}, // E
+                        {row: 3, col: 2},
+                        {row: 3, col: 1},
+                        {row: 3, col: 0},
+                        {row: 4, col: 0}, // Y
+                        {row: 4, col: 1},
+                        {row: 4, col: 2},
+                        {row: 4, col: 3},
+                        {row: 4, col: 4}
                     ]
                 }
             ],
@@ -578,10 +653,19 @@
                         {row: 2, col: 4, side: 'bottom'},
                         {row: 3, col: 0, side: 'right'},
                         {row: 4, col: 2, side: 'right'}
-                    ]
+                    ],
+                    solution: [] // Will be generated as a simple path for now
                 }
             ]
         };
+
+        // Generate simple solutions for hard puzzles
+        PUZZLE_SETS.hard[0].solution = [];
+        for (let row = 0; row < 6; row++) {
+            for (let col = 0; col < 6; col++) {
+                PUZZLE_SETS.hard[0].solution.push({row, col});
+            }
+        }
 
         // Game state
         let gameState = {
@@ -589,6 +673,7 @@
             puzzleIndex: 0,
             currentPuzzle: null,
             path: [],
+            solutionShown: false,
             isDragging: false,
             startTime: null,
             timerInterval: null,
@@ -629,6 +714,7 @@
             document.getElementById('closeInstructionsBtn').addEventListener('click', hideInstructionsModal);
             document.getElementById('replayBtn').addEventListener('click', startNewPuzzle);
             document.getElementById('resetPathBtn').addEventListener('click', resetPath);
+            document.getElementById('giveUpBtn').addEventListener('click', showSolution);
             document.getElementById('leaderboardBtn').addEventListener('click', showLeaderboardModal);
             document.getElementById('closeLeaderboardBtn').addEventListener('click', hideLeaderboardModal);
             
@@ -702,7 +788,11 @@
 
         function resetGame() {
             gameState.path = [];
+            gameState.solutionShown = false;
             gameState.isDragging = false;
+            
+            // Hide solution info
+            document.getElementById('solutionInfo').classList.add('hidden');
             
             if (gameState.timerInterval) {
                 clearInterval(gameState.timerInterval);
@@ -715,6 +805,45 @@
             gameState.path = [];
             gameState.isDragging = false;
             updateGridDisplay();
+        }
+
+        function showSolution() {
+            gameState.solutionShown = true;
+            
+            // Show solution info
+            document.getElementById('solutionInfo').classList.remove('hidden');
+            document.getElementById('solutionWord').textContent = gameState.currentPuzzle.word;
+            
+            // Display solution path
+            displaySolutionPath();
+        }
+
+        function displaySolutionPath() {
+            const puzzle = gameState.currentPuzzle;
+            
+            // Clear current path display
+            clearAllCellStates();
+            
+            // Show solution path in yellow
+            puzzle.solution.forEach(({row, col}) => {
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.classList.add('solution');
+                }
+            });
+        }
+
+        function clearAllCellStates() {
+            const puzzle = gameState.currentPuzzle;
+            
+            for (let row = 0; row < puzzle.gridSize; row++) {
+                for (let col = 0; col < puzzle.gridSize; col++) {
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    if (cell) {
+                        cell.classList.remove('filled', 'solution');
+                    }
+                }
+            }
         }
 
         function loadPuzzle() {
@@ -790,6 +919,8 @@
         }
 
         function startDrag(row, col, e) {
+            if (gameState.solutionShown) return; // Don't allow interaction if solution is shown
+            
             e.preventDefault();
             gameState.isDragging = true;
             gameState.path = [{row, col}];
@@ -797,7 +928,7 @@
         }
 
         function continueDrag(row, col, e) {
-            if (!gameState.isDragging) return;
+            if (!gameState.isDragging || gameState.solutionShown) return;
             
             const lastCell = gameState.path[gameState.path.length - 1];
             if (!lastCell) return;
@@ -822,7 +953,9 @@
 
         function endDrag(row, col, e) {
             gameState.isDragging = false;
-            checkWinCondition();
+            if (!gameState.solutionShown) {
+                checkWinCondition();
+            }
         }
 
         function isAdjacent(row1, col1, row2, col2) {
@@ -856,6 +989,8 @@
         }
 
         function updateGridDisplay() {
+            if (gameState.solutionShown) return; // Don't update if solution is shown
+            
             const puzzle = gameState.currentPuzzle;
             
             // Clear all fill states
