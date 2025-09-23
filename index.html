@@ -15,8 +15,6 @@
             --primary-color: #2563eb;
             --secondary-color: #64748b;
             --success-color: #22c55e;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
             --background-color: #f8fafc;
             --surface-color: #ffffff;
             --text-color: #1e293b;
@@ -134,19 +132,9 @@
             z-index: 2;
         }
 
-        .connection-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
         .grid {
             display: inline-grid;
-            gap: 4px;
+            gap: 2px;
             padding: 20px;
             background: #f1f5f9;
             border-radius: 8px;
@@ -162,7 +150,7 @@
             width: 60px;
             height: 60px;
             border: 2px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -179,49 +167,37 @@
             background: #e0f2fe;
             color: var(--primary-color);
             border-color: var(--primary-color);
+            z-index: 10;
         }
 
-        .cell.letter:hover {
-            background: #b3e5fc;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .cell.empty {
-            background: var(--surface-color);
-            border-style: dashed;
-            border-color: #cbd5e1;
-        }
-
-        .cell.connected {
-            background: var(--success-color);
+        .cell.filled {
+            background: #22c55e;
             color: white;
-            border-color: var(--success-color);
+            border-color: #22c55e;
         }
 
-        .cell.current {
+        .cell.current-target {
+            background: #fbbf24;
+            color: white;
+            border-color: #f59e0b;
             animation: pulse 1s infinite;
         }
 
-        .wall {
-            position: absolute;
-            background: #374151;
-            z-index: 3;
-        }
-
-        .wall-h {
-            height: 4px;
-            width: 64px;
-        }
-
-        .wall-v {
-            width: 4px;
-            height: 64px;
-        }
+        .wall-top { border-top: 4px solid #374151; }
+        .wall-right { border-right: 4px solid #374151; }
+        .wall-bottom { border-bottom: 4px solid #374151; }
+        .wall-left { border-left: 4px solid #374151; }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
+        }
+
+        .path-line {
+            position: absolute;
+            background: #22c55e;
+            z-index: 5;
+            border-radius: 2px;
         }
 
         .game-controls {
@@ -238,10 +214,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .btn--primary {
@@ -252,17 +224,11 @@
         .btn--primary:hover {
             background: #1d4ed8;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
         }
 
         .btn--secondary {
             background: var(--secondary-color);
             color: white;
-        }
-
-        .btn--secondary:hover {
-            background: #475569;
-            transform: translateY(-2px);
         }
 
         .btn--outline {
@@ -293,7 +259,6 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(4px);
         }
 
         .modal.hidden {
@@ -306,8 +271,6 @@
             padding: 30px;
             max-width: 500px;
             width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
         }
 
@@ -319,7 +282,6 @@
         .modal-title {
             font-size: 1.8rem;
             font-weight: bold;
-            color: var(--text-color);
             margin-bottom: 10px;
         }
 
@@ -335,7 +297,6 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: var(--text-color);
         }
 
         .form-input {
@@ -344,13 +305,11 @@
             border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 1rem;
-            transition: border-color 0.2s ease;
         }
 
         .form-input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .instructions-list {
@@ -369,6 +328,12 @@
             font-weight: bold;
         }
 
+        .modal-footer {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
         .leaderboard {
             max-height: 300px;
             overflow-y: auto;
@@ -377,7 +342,6 @@
         .leaderboard-entry {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             padding: 12px 16px;
             margin-bottom: 8px;
             background: #f8fafc;
@@ -385,75 +349,25 @@
             border-left: 4px solid var(--primary-color);
         }
 
-        .leaderboard-entry:first-child {
-            background: linear-gradient(135deg, #ffd700, #ffed4e);
-            border-left-color: #f59e0b;
-        }
-
-        .leaderboard-position {
-            font-weight: bold;
-            color: var(--text-muted);
-            margin-right: 15px;
-        }
-
-        .leaderboard-name {
-            flex: 1;
-            font-weight: 600;
-        }
-
-        .leaderboard-time {
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .win-message {
-            text-align: center;
-            padding: 20px;
-        }
-
         .win-time {
             font-size: 2rem;
             font-weight: bold;
             color: var(--success-color);
             margin: 15px 0;
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
+            text-align: center;
         }
 
         @media (max-width: 768px) {
-            .game-header {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .game-title {
-                font-size: 2rem;
-            }
-
             .cell {
                 width: 50px;
                 height: 50px;
                 font-size: 1.2rem;
             }
 
-            .game-stats {
-                flex-direction: column;
-                gap: 15px;
-            }
-
             .difficulty-buttons {
                 flex-direction: column;
+                gap: 5px;
             }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
         }
     </style>
 </head>
@@ -493,13 +407,13 @@
             <div class="grid-container" id="gridContainer">
                 <!-- Grid cells will be generated by JavaScript -->
             </div>
-            <canvas class="connection-canvas" id="connectionCanvas"></canvas>
         </div>
 
         <!-- Game Controls -->
         <div class="game-controls">
             <button class="btn btn--primary" id="replayBtn">New Game</button>
             <button class="btn btn--secondary" id="leaderboardBtn">Leaderboard</button>
+            <button class="btn btn--outline" id="resetPathBtn">Reset Path</button>
         </div>
     </div>
 
@@ -519,7 +433,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" form="usernameForm" class="btn btn--primary" id="startGameBtn">Start Game</button>
+                <button type="submit" form="usernameForm" class="btn btn--primary">Start Game</button>
             </div>
         </div>
     </div>
@@ -533,9 +447,9 @@
             <div class="modal-body">
                 <ul class="instructions-list">
                     <li>Look at the scrambled letters and figure out what word they spell</li>
-                    <li>Connect the letters in the correct word order by dragging/clicking from one to the next</li>
-                    <li>Fill all cells by creating a path that connects all letters in sequence</li>
-                    <li>Avoid walls - you cannot pass through them when drawing your path!</li>
+                    <li>Drag to create a path that connects all letters in the correct word order</li>
+                    <li>Your path must fill ALL cells on the grid (like in Zip)</li>
+                    <li>Walls block paths between cells but all cells remain navigable</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -551,7 +465,7 @@
                 <h2 class="modal-title">🎉 Congratulations!</h2>
             </div>
             <div class="modal-body">
-                <div class="win-message">
+                <div>
                     <p>You solved the puzzle in:</p>
                     <div class="win-time" id="winTime">00:00</div>
                     <p>Great job! 🎊</p>
@@ -584,36 +498,35 @@
     <script>
         // Game data and configuration
         const WORD_LISTS = {
-            easy: ["HOUSE", "PLANT", "MUSIC", "DANCE", "HAPPY", "WORLD", "LIGHT", "BEACH", "PHONE", "SMILE", "PEACE", "DREAM", "TRUTH", "BRAVE", "SWEET"],
-            medium: ["KITCHEN", "JOURNEY", "MORNING", "RAINBOW", "PICTURE", "ELEPHANT", "MOUNTAIN", "COMPUTER", "FREEDOM", "COURAGE", "HOLIDAY", "DIAMOND"],
-            hard: ["ADVENTURE", "BEAUTIFUL", "CHOCOLATE", "BUTTERFLY", "TELEPHONE", "WONDERFUL", "DIFFERENT", "IMPORTANT", "CELEBRATE", "FANTASTIC"]
+            easy: ["HOUSE", "PLANT", "MUSIC", "DANCE", "HAPPY", "WORLD", "LIGHT", "BEACH", "PHONE", "SMILE"],
+            medium: ["KITCHEN", "JOURNEY", "MORNING", "RAINBOW", "PICTURE", "ELEPHANT", "MOUNTAIN", "COMPUTER"],
+            hard: ["ADVENTURE", "BEAUTIFUL", "CHOCOLATE", "BUTTERFLY", "TELEPHONE", "WONDERFUL", "DIFFERENT", "IMPORTANT"]
         };
 
         const GAME_SETTINGS = {
-            easy: { gridSize: 4, wordLength: 5 },
-            medium: { gridSize: 5, wordLength: [6, 8] },
-            hard: { gridSize: 6, wordLength: [8, 10] }
+            easy: { gridSize: 4 },
+            medium: { gridSize: 5 },
+            hard: { gridSize: 6 }
         };
 
         // Game state
         let gameState = {
             difficulty: 'easy',
             currentWord: '',
+            targetWord: '',
             grid: [],
-            letterPositions: [],
-            connections: [],
-            walls: [],
-            isConnecting: false,
+            letterPositions: new Map(),
+            path: [],
+            walls: new Set(),
             isDragging: false,
-            connectionPath: [],
             startTime: null,
             timerInterval: null,
             playerName: '',
             gameStarted: false,
-            currentCell: null
+            currentLetterIndex: 0
         };
 
-        // Initialize game when DOM is ready
+        // Initialize game
         document.addEventListener('DOMContentLoaded', function() {
             initGame();
         });
@@ -624,157 +537,81 @@
         }
 
         function setupEventListeners() {
-            // Username modal
-            const startGameBtn = document.getElementById('startGameBtn');
-            const usernameInput = document.getElementById('usernameInput');
-            const usernameForm = document.getElementById('usernameForm');
-            
-            if (startGameBtn) {
-                startGameBtn.addEventListener('click', handleUsernameSubmit);
-            }
-            
-            if (usernameForm) {
-                usernameForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    handleUsernameSubmit();
-                });
-            }
+            // Username form
+            document.getElementById('usernameForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleUsernameSubmit();
+            });
 
             // Difficulty buttons
-            const difficultyBtns = document.querySelectorAll('.difficulty-btn');
-            difficultyBtns.forEach(btn => {
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    difficultyBtns.forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     gameState.difficulty = this.dataset.difficulty;
-                    if (gameState.gameStarted) {
-                        startNewGame();
-                    }
+                    if (gameState.gameStarted) startNewGame();
                 });
             });
 
-            // Instructions button
-            const instructionsBtn = document.getElementById('instructionsBtn');
-            const closeInstructionsBtn = document.getElementById('closeInstructionsBtn');
+            // Control buttons
+            document.getElementById('instructionsBtn').addEventListener('click', showInstructionsModal);
+            document.getElementById('closeInstructionsBtn').addEventListener('click', hideInstructionsModal);
+            document.getElementById('replayBtn').addEventListener('click', startNewGame);
+            document.getElementById('resetPathBtn').addEventListener('click', resetPath);
+            document.getElementById('leaderboardBtn').addEventListener('click', showLeaderboardModal);
+            document.getElementById('closeLeaderboardBtn').addEventListener('click', hideLeaderboardModal);
             
-            if (instructionsBtn) {
-                instructionsBtn.addEventListener('click', showInstructionsModal);
-            }
-            
-            if (closeInstructionsBtn) {
-                closeInstructionsBtn.addEventListener('click', hideInstructionsModal);
-            }
-
-            // Game controls
-            const replayBtn = document.getElementById('replayBtn');
-            const leaderboardBtn = document.getElementById('leaderboardBtn');
-            
-            if (replayBtn) {
-                replayBtn.addEventListener('click', startNewGame);
-            }
-            
-            if (leaderboardBtn) {
-                leaderboardBtn.addEventListener('click', showLeaderboardModal);
-            }
-
             // Win modal
-            const closeWinBtn = document.getElementById('closeWinBtn');
-            const playAgainBtn = document.getElementById('playAgainBtn');
-            
-            if (closeWinBtn) {
-                closeWinBtn.addEventListener('click', hideWinModal);
-            }
-            
-            if (playAgainBtn) {
-                playAgainBtn.addEventListener('click', function() {
-                    hideWinModal();
-                    startNewGame();
-                });
-            }
-
-            // Leaderboard modal
-            const closeLeaderboardBtn = document.getElementById('closeLeaderboardBtn');
-            if (closeLeaderboardBtn) {
-                closeLeaderboardBtn.addEventListener('click', hideLeaderboardModal);
-            }
+            document.getElementById('closeWinBtn').addEventListener('click', hideWinModal);
+            document.getElementById('playAgainBtn').addEventListener('click', function() {
+                hideWinModal();
+                startNewGame();
+            });
         }
 
         function showUsernameModal() {
-            const modal = document.getElementById('usernameModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                const input = document.getElementById('usernameInput');
-                if (input) {
-                    setTimeout(() => input.focus(), 100);
-                }
-            }
+            document.getElementById('usernameModal').classList.remove('hidden');
+            document.getElementById('usernameInput').focus();
         }
 
         function hideUsernameModal() {
-            const modal = document.getElementById('usernameModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
+            document.getElementById('usernameModal').classList.add('hidden');
         }
 
         function handleUsernameSubmit() {
-            const input = document.getElementById('usernameInput');
-            const name = input ? input.value.trim() : '';
-            
-            if (name.length > 0) {
+            const name = document.getElementById('usernameInput').value.trim();
+            if (name) {
                 gameState.playerName = name;
                 document.getElementById('playerName').textContent = name;
                 hideUsernameModal();
                 startNewGame();
-            } else {
-                alert('Please enter a valid username!');
             }
         }
 
         function showInstructionsModal() {
-            const modal = document.getElementById('instructionsModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-            }
+            document.getElementById('instructionsModal').classList.remove('hidden');
         }
 
         function hideInstructionsModal() {
-            const modal = document.getElementById('instructionsModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
+            document.getElementById('instructionsModal').classList.add('hidden');
         }
 
         function showWinModal(time) {
-            const modal = document.getElementById('winModal');
-            const winTimeElement = document.getElementById('winTime');
-            
-            if (modal && winTimeElement) {
-                winTimeElement.textContent = time;
-                modal.classList.remove('hidden');
-            }
+            document.getElementById('winTime').textContent = time;
+            document.getElementById('winModal').classList.remove('hidden');
         }
 
         function hideWinModal() {
-            const modal = document.getElementById('winModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
+            document.getElementById('winModal').classList.add('hidden');
         }
 
         function showLeaderboardModal() {
-            const modal = document.getElementById('leaderboardModal');
-            if (modal) {
-                updateLeaderboardDisplay();
-                modal.classList.remove('hidden');
-            }
+            updateLeaderboardDisplay();
+            document.getElementById('leaderboardModal').classList.remove('hidden');
         }
 
         function hideLeaderboardModal() {
-            const modal = document.getElementById('leaderboardModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
+            document.getElementById('leaderboardModal').classList.add('hidden');
         }
 
         function startNewGame() {
@@ -785,19 +622,22 @@
         }
 
         function resetGame() {
-            gameState.connections = [];
-            gameState.connectionPath = [];
-            gameState.isConnecting = false;
+            gameState.path = [];
+            gameState.currentLetterIndex = 0;
             gameState.isDragging = false;
-            gameState.currentCell = null;
             
             if (gameState.timerInterval) {
                 clearInterval(gameState.timerInterval);
-                gameState.timerInterval = null;
             }
-            
             gameState.startTime = null;
             document.getElementById('timer').textContent = '00:00';
+        }
+
+        function resetPath() {
+            gameState.path = [];
+            gameState.currentLetterIndex = 0;
+            gameState.isDragging = false;
+            updateGridDisplay();
         }
 
         function generateGrid() {
@@ -806,78 +646,125 @@
             const wordList = WORD_LISTS[gameState.difficulty];
             
             // Select random word
-            gameState.currentWord = wordList[Math.floor(Math.random() * wordList.length)];
+            gameState.targetWord = wordList[Math.floor(Math.random() * wordList.length)];
+            gameState.currentWord = scrambleWord(gameState.targetWord);
             
-            // Update word display
-            const scrambledWord = scrambleWord(gameState.currentWord);
-            document.getElementById('wordDisplay').textContent = scrambledWord;
+            document.getElementById('wordDisplay').textContent = gameState.currentWord;
             
-            // Create grid
-            createGridElement(gridSize);
-            placeLettersOnGrid(gridSize);
+            // Initialize grid
+            gameState.grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(null));
+            gameState.letterPositions.clear();
+            
+            // Place letters randomly
+            const letters = gameState.targetWord.split('');
+            const positions = [];
+            
+            // Generate all possible positions
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    positions.push({row, col});
+                }
+            }
+            
+            // Shuffle and take needed positions
+            shuffleArray(positions);
+            
+            for (let i = 0; i < letters.length; i++) {
+                const pos = positions[i];
+                gameState.grid[pos.row][pos.col] = letters[i];
+                gameState.letterPositions.set(letters[i] + '_' + i, pos);
+            }
+            
+            // Generate walls
             generateWalls(gridSize);
+            
+            // Create DOM elements
+            createGridDOM(gridSize);
         }
 
         function scrambleWord(word) {
             const letters = word.split('');
-            for (let i = letters.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [letters[i], letters[j]] = [letters[j], letters[i]];
-            }
+            shuffleArray(letters);
             return letters.join('');
         }
 
-        function createGridElement(gridSize) {
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function generateWalls(gridSize) {
+            gameState.walls.clear();
+            const numWalls = Math.floor(gridSize * gridSize * 0.15); // 15% of total possible walls
+            
+            for (let i = 0; i < numWalls; i++) {
+                const row = Math.floor(Math.random() * gridSize);
+                const col = Math.floor(Math.random() * gridSize);
+                const direction = Math.floor(Math.random() * 4); // 0=top, 1=right, 2=bottom, 3=left
+                
+                // Check if wall would be valid (not sealing off areas)
+                const wallKey = `${row}_${col}_${direction}`;
+                gameState.walls.add(wallKey);
+            }
+        }
+
+        function createGridDOM(gridSize) {
             const gridContainer = document.getElementById('gridContainer');
             gridContainer.innerHTML = '';
             
             const grid = document.createElement('div');
             grid.className = `grid grid-${gridSize}x${gridSize}`;
+            grid.id = 'gameGrid';
             
-            // Initialize grid state
-            gameState.grid = Array(gridSize).fill().map(() => Array(gridSize).fill('empty'));
-            
-            // Create cells
             for (let row = 0; row < gridSize; row++) {
                 for (let col = 0; col < gridSize; col++) {
                     const cell = document.createElement('div');
-                    cell.className = 'cell empty';
+                    cell.className = 'cell';
                     cell.dataset.row = row;
                     cell.dataset.col = col;
                     
-                    // Add event listeners for drag and drop
-                    cell.addEventListener('mousedown', function(e) {
-                        handleCellMouseDown(row, col, e);
-                    });
+                    const cellValue = gameState.grid[row][col];
+                    if (cellValue) {
+                        cell.textContent = cellValue;
+                        cell.classList.add('letter');
+                    }
                     
-                    cell.addEventListener('mouseenter', function(e) {
-                        handleCellMouseEnter(row, col, e);
-                    });
+                    // Add wall classes
+                    for (let dir = 0; dir < 4; dir++) {
+                        const wallKey = `${row}_${col}_${dir}`;
+                        if (gameState.walls.has(wallKey)) {
+                            const wallClasses = ['wall-top', 'wall-right', 'wall-bottom', 'wall-left'];
+                            cell.classList.add(wallClasses[dir]);
+                        }
+                    }
                     
-                    cell.addEventListener('mouseup', function(e) {
-                        handleCellMouseUp(row, col, e);
-                    });
+                    // Add event listeners
+                    cell.addEventListener('mousedown', (e) => startDrag(row, col, e));
+                    cell.addEventListener('mouseenter', (e) => continueDrag(row, col, e));
+                    cell.addEventListener('mouseup', (e) => endDrag(row, col, e));
                     
                     // Touch events for mobile
-                    cell.addEventListener('touchstart', function(e) {
+                    cell.addEventListener('touchstart', (e) => {
                         e.preventDefault();
-                        handleCellMouseDown(row, col, e);
+                        startDrag(row, col, e);
                     });
                     
-                    cell.addEventListener('touchmove', function(e) {
+                    cell.addEventListener('touchmove', (e) => {
                         e.preventDefault();
                         const touch = e.touches[0];
                         const element = document.elementFromPoint(touch.clientX, touch.clientY);
                         if (element && element.classList.contains('cell')) {
                             const touchRow = parseInt(element.dataset.row);
                             const touchCol = parseInt(element.dataset.col);
-                            handleCellMouseEnter(touchRow, touchCol, e);
+                            continueDrag(touchRow, touchCol, e);
                         }
                     });
                     
-                    cell.addEventListener('touchend', function(e) {
+                    cell.addEventListener('touchend', (e) => {
                         e.preventDefault();
-                        handleCellMouseUp(row, col, e);
+                        endDrag(row, col, e);
                     });
                     
                     grid.appendChild(cell);
@@ -885,263 +772,142 @@
             }
             
             gridContainer.appendChild(grid);
-            
-            // Setup canvas for connections
-            setupCanvas();
-            
-            // Add global mouse events
-            document.addEventListener('mouseup', handleGlobalMouseUp);
-            document.addEventListener('mousemove', handleGlobalMouseMove);
+            updateGridDisplay();
         }
 
-        function placeLettersOnGrid(gridSize) {
-            const word = gameState.currentWord;
-            const letters = word.split('');
-            gameState.letterPositions = [];
+        function startDrag(row, col, e) {
+            e.preventDefault();
+            gameState.isDragging = true;
+            gameState.path = [{row, col}];
+            updateGridDisplay();
+        }
+
+        function continueDrag(row, col, e) {
+            if (!gameState.isDragging) return;
             
-            // Place letters randomly ensuring they are all accessible
-            for (let i = 0; i < letters.length; i++) {
-                let row, col;
-                do {
-                    row = Math.floor(Math.random() * gridSize);
-                    col = Math.floor(Math.random() * gridSize);
-                } while (gameState.grid[row][col] !== 'empty');
+            const lastCell = gameState.path[gameState.path.length - 1];
+            if (!lastCell) return;
+            
+            // Check if adjacent and not blocked by wall
+            if (isAdjacent(lastCell.row, lastCell.col, row, col) && 
+                !isWallBlocking(lastCell.row, lastCell.col, row, col)) {
                 
-                gameState.grid[row][col] = letters[i];
-                gameState.letterPositions.push({ 
-                    letter: letters[i], 
-                    row: row, 
-                    col: col,
-                    index: i
-                });
+                // Don't add if already in path (except going back one step)
+                if (gameState.path.length > 1 && 
+                    gameState.path[gameState.path.length - 2].row === row && 
+                    gameState.path[gameState.path.length - 2].col === col) {
+                    // Going back one step - remove last cell
+                    gameState.path.pop();
+                } else if (!gameState.path.some(cell => cell.row === row && cell.col === col)) {
+                    // Add new cell to path
+                    gameState.path.push({row, col});
+                }
                 
+                updateGridDisplay();
+            }
+        }
+
+        function endDrag(row, col, e) {
+            gameState.isDragging = false;
+            checkWinCondition();
+        }
+
+        function isAdjacent(row1, col1, row2, col2) {
+            const rowDiff = Math.abs(row1 - row2);
+            const colDiff = Math.abs(col1 - col2);
+            return (rowDiff <= 1 && colDiff <= 1) && !(rowDiff === 0 && colDiff === 0);
+        }
+
+        function isWallBlocking(row1, col1, row2, col2) {
+            // Check for walls that would block this movement
+            if (row2 === row1 - 1) { // Moving up
+                return gameState.walls.has(`${row1}_${col1}_0`) || gameState.walls.has(`${row2}_${col2}_2`);
+            }
+            if (col2 === col1 + 1) { // Moving right
+                return gameState.walls.has(`${row1}_${col1}_1`) || gameState.walls.has(`${row2}_${col2}_3`);
+            }
+            if (row2 === row1 + 1) { // Moving down
+                return gameState.walls.has(`${row1}_${col1}_2`) || gameState.walls.has(`${row2}_${col2}_0`);
+            }
+            if (col2 === col1 - 1) { // Moving left
+                return gameState.walls.has(`${row1}_${col1}_3`) || gameState.walls.has(`${row2}_${col2}_1`);
+            }
+            return false;
+        }
+
+        function updateGridDisplay() {
+            const gridSize = GAME_SETTINGS[gameState.difficulty].gridSize;
+            
+            // Clear all cell states
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    if (cell) {
+                        cell.classList.remove('filled', 'current-target');
+                    }
+                }
+            }
+            
+            // Mark cells in path as filled
+            gameState.path.forEach(({row, col}) => {
                 const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                 if (cell) {
-                    cell.className = 'cell letter';
-                    cell.textContent = letters[i];
+                    cell.classList.add('filled');
                 }
-            }
-        }
-
-        function generateWalls(gridSize) {
-            gameState.walls = [];
-            const numWalls = Math.floor(gridSize * 2); // Fewer walls
+            });
             
-            for (let i = 0; i < numWalls; i++) {
-                const isHorizontal = Math.random() > 0.5;
-                let row, col;
-                
-                if (isHorizontal) {
-                    row = Math.floor(Math.random() * (gridSize - 1));
-                    col = Math.floor(Math.random() * gridSize);
-                } else {
-                    row = Math.floor(Math.random() * gridSize);
-                    col = Math.floor(Math.random() * (gridSize - 1));
-                }
-                
-                // Check if wall already exists
-                const wallExists = gameState.walls.some(wall => 
-                    wall.row === row && wall.col === col && wall.horizontal === isHorizontal
-                );
-                
-                if (!wallExists) {
-                    gameState.walls.push({
-                        row: row,
-                        col: col,
-                        horizontal: isHorizontal
-                    });
-                    
-                    createWallElement(row, col, isHorizontal);
-                }
-            }
-        }
-
-        function createWallElement(row, col, horizontal) {
-            const grid = document.querySelector('.grid');
-            const wall = document.createElement('div');
-            wall.className = `wall ${horizontal ? 'wall-h' : 'wall-v'}`;
-            
-            const cellSize = 64; // Cell width + gap
-            
-            if (horizontal) {
-                wall.style.left = `${col * cellSize + 20}px`;
-                wall.style.top = `${(row + 1) * cellSize + 16}px`;
-            } else {
-                wall.style.left = `${(col + 1) * cellSize + 16}px`;
-                wall.style.top = `${row * cellSize + 20}px`;
-            }
-            
-            grid.appendChild(wall);
-        }
-
-        function handleCellMouseDown(row, col, e) {
-            const cellValue = gameState.grid[row][col];
-            
-            if (cellValue && cellValue !== 'empty') {
-                gameState.isDragging = true;
-                gameState.isConnecting = true;
-                gameState.connectionPath = [];
-                gameState.currentCell = {row, col};
-                
-                // Add first cell to path
-                const letterInfo = gameState.letterPositions.find(l => l.row === row && l.col === col);
-                if (letterInfo) {
-                    gameState.connectionPath.push(letterInfo);
-                    updateCellAppearance(row, col, 'connected');
-                }
-                
-                e.preventDefault();
-            }
-        }
-
-        function handleCellMouseEnter(row, col, e) {
-            if (!gameState.isDragging || !gameState.isConnecting) return;
-            
-            const cellValue = gameState.grid[row][col];
-            if (cellValue && cellValue !== 'empty') {
-                // Check if this is the next expected letter
-                const expectedNextLetter = gameState.currentWord[gameState.connectionPath.length];
-                
-                if (cellValue === expectedNextLetter) {
-                    // Check if path is valid (no walls blocking)
-                    if (gameState.currentCell && isValidPath(gameState.currentCell.row, gameState.currentCell.col, row, col)) {
-                        const letterInfo = gameState.letterPositions.find(l => l.row === row && l.col === col);
-                        if (letterInfo && !gameState.connectionPath.includes(letterInfo)) {
-                            gameState.connectionPath.push(letterInfo);
-                            gameState.currentCell = {row, col};
-                            updateCellAppearance(row, col, 'connected');
-                            drawConnectionLine();
-                            
-                            // Check if word is complete
-                            if (gameState.connectionPath.length === gameState.currentWord.length) {
-                                handleWin();
-                            }
+            // Highlight next target letter
+            const nextLetter = getNextTargetLetter();
+            if (nextLetter) {
+                gameState.letterPositions.forEach((pos, key) => {
+                    if (key.startsWith(nextLetter + '_')) {
+                        const cell = document.querySelector(`[data-row="${pos.row}"][data-col="${pos.col}"]`);
+                        if (cell && !cell.classList.contains('filled')) {
+                            cell.classList.add('current-target');
                         }
                     }
-                }
+                });
             }
         }
 
-        function handleCellMouseUp(row, col, e) {
-            gameState.isDragging = false;
-            gameState.isConnecting = false;
-            e.preventDefault();
+        function getNextTargetLetter() {
+            const pathLetters = gameState.path
+                .map(({row, col}) => gameState.grid[row][col])
+                .filter(letter => letter !== null);
+            
+            const targetSequence = gameState.targetWord.split('');
+            return targetSequence[pathLetters.length] || null;
         }
 
-        function handleGlobalMouseUp(e) {
-            gameState.isDragging = false;
-            gameState.isConnecting = false;
+        function checkWinCondition() {
+            const gridSize = GAME_SETTINGS[gameState.difficulty].gridSize;
+            const totalCells = gridSize * gridSize;
+            
+            // Check if path fills all cells
+            if (gameState.path.length !== totalCells) return false;
+            
+            // Check if letters are in correct order
+            const pathLetters = gameState.path
+                .map(({row, col}) => gameState.grid[row][col])
+                .filter(letter => letter !== null)
+                .join('');
+            
+            if (pathLetters === gameState.targetWord) {
+                handleWin();
+                return true;
+            }
+            
+            return false;
         }
 
-        function handleGlobalMouseMove(e) {
-            // Update current drawing line if dragging
-            if (gameState.isDragging && gameState.connectionPath.length > 0) {
-                drawConnectionLine(e.clientX, e.clientY);
-            }
-        }
-
-        function isValidPath(fromRow, fromCol, toRow, toCol) {
-            // Simple adjacency check and wall collision
-            const rowDiff = Math.abs(toRow - fromRow);
-            const colDiff = Math.abs(toCol - fromCol);
-            
-            // Must be adjacent (including diagonals)
-            if (rowDiff > 1 || colDiff > 1) return false;
-            
-            // Check for walls blocking the path
-            for (const wall of gameState.walls) {
-                if (wall.horizontal) {
-                    // Horizontal wall blocks vertical movement
-                    if (((fromRow === wall.row && toRow === wall.row + 1) || (fromRow === wall.row + 1 && toRow === wall.row)) &&
-                        fromCol === wall.col && toCol === wall.col) {
-                        return false;
-                    }
-                } else {
-                    // Vertical wall blocks horizontal movement  
-                    if (((fromCol === wall.col && toCol === wall.col + 1) || (fromCol === wall.col + 1 && toCol === wall.col)) &&
-                        fromRow === wall.row && toRow === wall.row) {
-                        return false;
-                    }
-                }
+        function handleWin() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
             }
             
-            return true;
-        }
-
-        function updateCellAppearance(row, col, state) {
-            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-            if (cell) {
-                cell.classList.remove('letter', 'connected', 'current');
-                cell.classList.add('cell', state);
-            }
-        }
-
-        function setupCanvas() {
-            const canvas = document.getElementById('connectionCanvas');
-            const gameBoard = document.getElementById('gameBoard');
-            
-            if (canvas && gameBoard) {
-                canvas.width = gameBoard.offsetWidth;
-                canvas.height = gameBoard.offsetHeight;
-            }
-        }
-
-        function drawConnectionLine(mouseX, mouseY) {
-            const canvas = document.getElementById('connectionCanvas');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const path = gameState.connectionPath;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            if (path.length === 0) return;
-            
-            ctx.strokeStyle = '#2563eb';
-            ctx.lineWidth = 4;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            
-            ctx.beginPath();
-            
-            for (let i = 0; i < path.length; i++) {
-                const pos = getCellCenter(path[i].row, path[i].col);
-                if (i === 0) {
-                    ctx.moveTo(pos.x, pos.y);
-                } else {
-                    ctx.lineTo(pos.x, pos.y);
-                }
-            }
-            
-            // Draw line to mouse if dragging
-            if (mouseX && mouseY && gameState.isDragging) {
-                const boardRect = document.getElementById('gameBoard').getBoundingClientRect();
-                ctx.lineTo(mouseX - boardRect.left, mouseY - boardRect.top);
-            }
-            
-            ctx.stroke();
-            
-            // Draw dots at connection points
-            ctx.fillStyle = '#2563eb';
-            for (const point of path) {
-                const pos = getCellCenter(point.row, point.col);
-                ctx.beginPath();
-                ctx.arc(pos.x, pos.y, 6, 0, 2 * Math.PI);
-                ctx.fill();
-            }
-        }
-
-        function getCellCenter(row, col) {
-            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-            if (!cell) return { x: 0, y: 0 };
-            
-            const rect = cell.getBoundingClientRect();
-            const boardRect = document.getElementById('gameBoard').getBoundingClientRect();
-            
-            return {
-                x: rect.left - boardRect.left + rect.width / 2,
-                y: rect.top - boardRect.top + rect.height / 2
-            };
+            const finalTime = document.getElementById('timer').textContent;
+            saveScore(gameState.playerName, finalTime, gameState.difficulty);
+            setTimeout(() => showWinModal(finalTime), 300);
         }
 
         function startTimer() {
@@ -1156,45 +922,22 @@
             const minutes = Math.floor(elapsed / 60);
             const seconds = elapsed % 60;
             
-            const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            document.getElementById('timer').textContent = timeString;
-        }
-
-        function handleWin() {
-            // Stop timer
-            if (gameState.timerInterval) {
-                clearInterval(gameState.timerInterval);
-                gameState.timerInterval = null;
-            }
-            
-            const finalTime = document.getElementById('timer').textContent;
-            
-            // Save score to leaderboard
-            saveScore(gameState.playerName, finalTime, gameState.difficulty);
-            
-            // Show win modal
-            setTimeout(() => showWinModal(finalTime), 500);
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
         function saveScore(playerName, time, difficulty) {
             const scores = getLeaderboard();
-            const score = {
+            scores.push({
                 name: playerName,
                 time: time,
                 difficulty: difficulty,
                 timestamp: Date.now(),
                 timeInSeconds: timeToSeconds(time)
-            };
+            });
             
-            scores.push(score);
-            
-            // Sort by time (ascending - faster is better)
             scores.sort((a, b) => a.timeInSeconds - b.timeInSeconds);
-            
-            // Keep only top 10
-            const topScores = scores.slice(0, 10);
-            
-            localStorage.setItem('wordlock_leaderboard', JSON.stringify(topScores));
+            localStorage.setItem('wordlock_leaderboard', JSON.stringify(scores.slice(0, 10)));
         }
 
         function getLeaderboard() {
@@ -1208,27 +951,20 @@
         }
 
         function updateLeaderboardDisplay() {
-            const leaderboardList = document.getElementById('leaderboardList');
             const scores = getLeaderboard();
+            const leaderboardList = document.getElementById('leaderboardList');
             
             if (scores.length === 0) {
-                leaderboardList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No scores yet. Play a game to see your time!</p>';
+                leaderboardList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No scores yet!</p>';
                 return;
             }
             
-            let html = '';
-            scores.forEach((score, index) => {
-                html += `
-                    <div class="leaderboard-entry">
-                        <span class="leaderboard-position">#${index + 1}</span>
-                        <span class="leaderboard-name">${score.name}</span>
-                        <span class="leaderboard-time">${score.time}</span>
-                        <span class="leaderboard-difficulty" style="font-size: 0.8rem; color: var(--text-muted); margin-left: 8px;">${score.difficulty}</span>
-                    </div>
-                `;
-            });
-            
-            leaderboardList.innerHTML = html;
+            leaderboardList.innerHTML = scores.map((score, index) => `
+                <div class="leaderboard-entry">
+                    <span>#${index + 1} ${score.name}</span>
+                    <span>${score.time} (${score.difficulty})</span>
+                </div>
+            `).join('');
         }
     </script>
 </body>
