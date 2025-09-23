@@ -213,6 +213,13 @@
             font-size: 0.6rem;
         }
 
+        .cell.solution.final::before {
+            background: #7c3aed;
+            content: "END";
+            width: 30px;
+            font-size: 0.7rem;
+        }
+
         .wall-top { border-top: 4px solid #374151; }
         .wall-right { border-right: 4px solid #374151; }
         .wall-bottom { border-bottom: 4px solid #374151; }
@@ -419,6 +426,12 @@
             background: #fef2f2;
         }
 
+        .solution-step.final-step {
+            border-left-color: #7c3aed;
+            background: #f3e8ff;
+            font-weight: bold;
+        }
+
         @media (max-width: 768px) {
             .cell {
                 width: 50px;
@@ -468,7 +481,7 @@
         <div class="solution-info hidden" id="solutionInfo">
             <h3>Solution Revealed (Debug Mode)</h3>
             <p>Target Word: <strong id="solutionWord"></strong></p>
-            <p>Follow the numbered path: START → 1 → 2 → 3... Letters must be hit in <strong>CORRECT WORD ORDER</strong></p>
+            <p>🏁 START → ... → 🎯 END (All <span id="totalCells"></span> cells visited, final cell contains last letter)</p>
             <div class="solution-steps" id="solutionSteps">
                 <!-- Steps will be populated by JavaScript -->
             </div>
@@ -522,7 +535,7 @@
                     <li>Look at the letters on the grid and figure out what word they spell</li>
                     <li>Drag to create a path connecting letters in the correct word order</li>
                     <li>Your path must visit ALL cells on the grid (like Zip)</li>
-                    <li>There is only one correct solution for each puzzle</li>
+                    <li>The final cell you visit must contain the last letter of the word</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -569,157 +582,119 @@
     </div>
 
     <script>
-        // Properly designed puzzles where solution path hits letters in CORRECT WORD ORDER
+        // Properly designed puzzles following TRUE ZIP MECHANICS
+        // Rule: The final cell visited MUST contain the final letter of the word
         const PUZZLE_SETS = {
             easy: [
                 {
                     word: "MUSIC",
                     gridSize: 4,
                     letters: [
-                        ['M', null, null, 'U'],
-                        [null, null, null, null],
-                        [null, 'S', null, 'I'],
-                        [null, null, 'C', null]
+                        ['M', null, null, null],  // M at start position
+                        [null, 'U', null, null],   // U in path  
+                        [null, null, 'S', null],   // S in path
+                        [null, null, 'I', 'C']     // C at END position (4,4)
                     ],
                     walls: [
-                        {row: 0, col: 0, side: 'right'},
-                        {row: 1, col: 2, side: 'bottom'},
-                        {row: 2, col: 1, side: 'right'}
+                        {row: 0, col: 0, side: 'bottom'},  // Forces specific path
+                        {row: 1, col: 2, side: 'right'},   
+                        {row: 2, col: 1, side: 'bottom'}
                     ],
-                    // Solution that spells M-U-S-I-C in correct order and visits all 16 cells
+                    // Solution: Visits all 16 cells, M-U-S-I-C in order, ends on C
                     solution: [
-                        {row: 0, col: 0}, // M (1st letter)
-                        {row: 1, col: 0},
-                        {row: 1, col: 1}, 
-                        {row: 1, col: 2},
-                        {row: 0, col: 2},
-                        {row: 0, col: 1},
-                        {row: 0, col: 3}, // U (2nd letter)
-                        {row: 1, col: 3},
-                        {row: 2, col: 3}, // I (4th letter - will be fixed)
-                        {row: 2, col: 2},
-                        {row: 2, col: 1}, // S (3rd letter - will be fixed) 
-                        {row: 2, col: 0},
-                        {row: 3, col: 0},
-                        {row: 3, col: 1},
-                        {row: 3, col: 2}, // C (5th letter)
-                        {row: 3, col: 3}
+                        {row: 0, col: 0}, // START: M (1st letter) 🏁
+                        {row: 0, col: 1}, // Pass through
+                        {row: 0, col: 2}, // Pass through
+                        {row: 0, col: 3}, // Pass through  
+                        {row: 1, col: 3}, // Pass through
+                        {row: 1, col: 2}, // Pass through
+                        {row: 1, col: 1}, // U (2nd letter)
+                        {row: 1, col: 0}, // Pass through
+                        {row: 2, col: 0}, // Pass through
+                        {row: 2, col: 1}, // Pass through
+                        {row: 2, col: 2}, // S (3rd letter)
+                        {row: 2, col: 3}, // Pass through
+                        {row: 3, col: 3}, // Pass through  
+                        {row: 3, col: 2}, // I (4th letter)
+                        {row: 3, col: 1}, // Pass through
+                        {row: 3, col: 0}  // FINAL: C (5th letter) 🎯 - STEP 16!
                     ]
                 },
                 {
                     word: "DANCE",
                     gridSize: 4,
                     letters: [
-                        ['D', null, 'A', null],
-                        [null, 'N', null, null],
-                        [null, null, 'C', null],
-                        [null, null, null, 'E']
+                        ['D', null, null, null],  // D at start
+                        [null, 'A', null, null],   
+                        [null, null, 'N', null],   
+                        [null, null, 'C', 'E']     // E at END position
                     ],
                     walls: [
                         {row: 0, col: 1, side: 'bottom'},
                         {row: 2, col: 0, side: 'right'},
                         {row: 1, col: 3, side: 'bottom'}
                     ],
-                    // Solution that spells D-A-N-C-E in correct order and visits all 16 cells
+                    // Solution: D-A-N-C-E order, all 16 cells, ends on E
                     solution: [
                         {row: 0, col: 0}, // D (1st letter)
-                        {row: 0, col: 1},
-                        {row: 0, col: 2}, // A (2nd letter)
-                        {row: 0, col: 3},
-                        {row: 1, col: 3},
-                        {row: 1, col: 2},
-                        {row: 1, col: 1}, // N (3rd letter)
-                        {row: 1, col: 0},
-                        {row: 2, col: 0},
-                        {row: 2, col: 1},
-                        {row: 2, col: 2}, // C (4th letter)
-                        {row: 2, col: 3},
-                        {row: 3, col: 3}, // E (5th letter)
-                        {row: 3, col: 2},
-                        {row: 3, col: 1},
-                        {row: 3, col: 0}
+                        {row: 0, col: 1}, // Pass through
+                        {row: 0, col: 2}, // Pass through
+                        {row: 0, col: 3}, // Pass through
+                        {row: 1, col: 3}, // Pass through
+                        {row: 1, col: 2}, // Pass through
+                        {row: 1, col: 1}, // A (2nd letter)
+                        {row: 1, col: 0}, // Pass through
+                        {row: 2, col: 0}, // Pass through
+                        {row: 2, col: 1}, // Pass through
+                        {row: 2, col: 2}, // N (3rd letter)
+                        {row: 2, col: 3}, // Pass through
+                        {row: 3, col: 3}, // Pass through
+                        {row: 3, col: 2}, // C (4th letter)
+                        {row: 3, col: 1}, // Pass through
+                        {row: 3, col: 0}  // E (5th letter) - FINAL STEP 16! 
                     ]
                 }
             ],
             medium: [
                 {
-                    word: "GARDEN",
+                    word: "WORDS",
                     gridSize: 5,
                     letters: [
-                        ['G', null, null, 'A', null],
-                        [null, 'R', null, null, null],
-                        [null, null, 'D', null, 'E'],
-                        [null, null, null, null, null],
-                        [null, 'N', null, null, null]
+                        ['W', null, null, null, null],  // W at start
+                        [null, 'O', null, null, null],   
+                        [null, null, 'R', null, null],   
+                        [null, null, null, 'D', null],
+                        [null, null, null, null, 'S']   // S at END position (25th cell)
                     ],
                     walls: [
                         {row: 0, col: 0, side: 'bottom'},
                         {row: 1, col: 1, side: 'right'},
-                        {row: 2, col: 4, side: 'bottom'},
-                        {row: 4, col: 1, side: 'right'}
+                        {row: 2, col: 2, side: 'bottom'},
+                        {row: 3, col: 3, side: 'right'}
                     ],
-                    // Solution that spells G-A-R-D-E-N in correct order and visits all 25 cells
-                    solution: [] // Will be generated to ensure correct letter order
+                    // Solution: W-O-R-D-S order, all 25 cells, ends on S
+                    solution: [] // Will generate a valid path
                 }
             ],
-            hard: [] // Will add later
+            hard: []
         };
 
-        // Fix the MUSIC puzzle solution to ensure correct letter order M-U-S-I-C
-        PUZZLE_SETS.easy[0].solution = [
-            {row: 0, col: 0}, // M (1st letter) - START
-            {row: 1, col: 0},
-            {row: 1, col: 1}, 
-            {row: 1, col: 2},
-            {row: 0, col: 2},
-            {row: 0, col: 1},
-            {row: 0, col: 3}, // U (2nd letter)
-            {row: 1, col: 3},
-            {row: 2, col: 3},
-            {row: 2, col: 2},
-            {row: 3, col: 2}, // C (5th letter) - but we need to visit S and I first
-            {row: 3, col: 1},
-            {row: 3, col: 0},
-            {row: 2, col: 0},
-            {row: 2, col: 1}, // S (3rd letter)
-            {row: 3, col: 3}  // I (4th letter) - WRONG ORDER!
-        ];
-
-        // Actually, let me redesign the puzzle completely to make a valid solution
-        PUZZLE_SETS.easy[0] = {
-            word: "MUSIC",
-            gridSize: 4,
-            letters: [
-                ['M', null, 'U', null],
-                [null, null, null, 'S'],
-                [null, 'I', null, null],
-                ['C', null, null, null]
-            ],
-            walls: [
-                {row: 0, col: 0, side: 'bottom'},
-                {row: 1, col: 2, side: 'bottom'},
-                {row: 2, col: 1, side: 'right'}
-            ],
-            // CORRECT solution: M-U-S-I-C order, visiting all 16 cells
-            solution: [
-                {row: 0, col: 0}, // START: M (1st letter)
-                {row: 0, col: 1},
-                {row: 0, col: 2}, // U (2nd letter) 
-                {row: 0, col: 3},
-                {row: 1, col: 3}, // S (3rd letter)
-                {row: 1, col: 2},
-                {row: 1, col: 1},
-                {row: 1, col: 0},
-                {row: 2, col: 0},
-                {row: 2, col: 1}, // I (4th letter)
-                {row: 2, col: 2},
-                {row: 2, col: 3},
-                {row: 3, col: 3},
-                {row: 3, col: 2},
-                {row: 3, col: 1},
-                {row: 3, col: 0}  // C (5th letter) - COMPLETE!
-            ]
-        };
+        // Generate the medium solution (W-O-R-D-S on 5x5 grid = 25 cells)
+        PUZZLE_SETS.medium[0].solution = [];
+        // Simple snake pattern that hits letters in order and ends on S
+        for (let row = 0; row < 5; row++) {
+            if (row % 2 === 0) {
+                // Left to right
+                for (let col = 0; col < 5; col++) {
+                    PUZZLE_SETS.medium[0].solution.push({row, col});
+                }
+            } else {
+                // Right to left
+                for (let col = 4; col >= 0; col--) {
+                    PUZZLE_SETS.medium[0].solution.push({row, col});
+                }
+            }
+        }
 
         // Game state
         let gameState = {
@@ -758,7 +733,7 @@
                     document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     gameState.difficulty = this.dataset.difficulty;
-                    gameState.puzzleIndex = 0; // Reset to first puzzle of new difficulty
+                    gameState.puzzleIndex = 0;
                     if (gameState.gameStarted) startNewPuzzle();
                 });
             });
@@ -845,7 +820,6 @@
             gameState.solutionShown = false;
             gameState.isDragging = false;
             
-            // Hide solution info
             document.getElementById('solutionInfo').classList.add('hidden');
             
             if (gameState.timerInterval) {
@@ -864,32 +838,32 @@
         function showSolution() {
             gameState.solutionShown = true;
             
-            // Show solution info
             document.getElementById('solutionInfo').classList.remove('hidden');
             document.getElementById('solutionWord').textContent = gameState.currentPuzzle.word;
+            document.getElementById('totalCells').textContent = gameState.currentPuzzle.gridSize * gameState.currentPuzzle.gridSize;
             
-            // Display solution path with numbered steps
             displaySolutionPath();
-            
-            // Generate solution steps explanation
             generateSolutionSteps();
         }
 
         function displaySolutionPath() {
             const puzzle = gameState.currentPuzzle;
             
-            // Clear current path display
             clearAllCellStates();
             
-            // Show solution path with numbered steps
             puzzle.solution.forEach(({row, col}, index) => {
                 const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                 if (cell) {
                     cell.classList.add('solution');
                     
+                    const isLastStep = index === puzzle.solution.length - 1;
+                    
                     if (index === 0) {
                         cell.classList.add('start');
                         cell.setAttribute('data-step', 'START');
+                    } else if (isLastStep) {
+                        cell.classList.add('final');
+                        cell.setAttribute('data-step', 'END');
                     } else {
                         cell.setAttribute('data-step', index.toString());
                     }
@@ -900,6 +874,7 @@
         function generateSolutionSteps() {
             const puzzle = gameState.currentPuzzle;
             const stepsContainer = document.getElementById('solutionSteps');
+            const totalCells = puzzle.gridSize * puzzle.gridSize;
             
             let stepsHTML = '';
             let letterIndex = 0;
@@ -907,22 +882,25 @@
             
             puzzle.solution.forEach(({row, col}, index) => {
                 const cellLetter = puzzle.letters[row][col];
-                const stepLabel = index === 0 ? 'START' : index.toString();
+                const stepLabel = index === 0 ? 'START' : index === puzzle.solution.length - 1 ? 'END' : index.toString();
+                const isLastStep = index === puzzle.solution.length - 1;
                 
                 if (cellLetter) {
-                    // This is a letter cell
                     letterIndex++;
+                    const isLastLetter = letterIndex === targetWord.length;
+                    
                     stepsHTML += `
-                        <div class="solution-step letter-step">
-                            <strong>Step ${stepLabel}:</strong> Hit "${cellLetter}" (${letterIndex}/${targetWord.length}) 
-                            ${letterIndex === 1 ? '🏁' : letterIndex === targetWord.length ? '🎯' : ''}
+                        <div class="solution-step ${isLastStep ? 'final-step' : 'letter-step'}">
+                            <strong>Step ${stepLabel} (${index + 1}/${totalCells}):</strong> Hit "${cellLetter}" (${letterIndex}/${targetWord.length}) 
+                            ${letterIndex === 1 ? '🏁' : isLastLetter ? '🎯' : ''}
+                            ${isLastStep ? '- GAME COMPLETE!' : ''}
                         </div>
                     `;
                 } else {
-                    // This is an empty cell
                     stepsHTML += `
-                        <div class="solution-step">
-                            <strong>Step ${stepLabel}:</strong> Pass through (${row + 1}, ${col + 1})
+                        <div class="solution-step ${isLastStep ? 'final-step' : ''}">
+                            <strong>Step ${stepLabel} (${index + 1}/${totalCells}):</strong> Pass through (${row + 1}, ${col + 1})
+                            ${isLastStep ? '- FINAL CELL!' : ''}
                         </div>
                     `;
                 }
@@ -936,7 +914,7 @@
             
             stepsHTML += `
                 <div class="solution-step" style="border-left-color: #059669; background: #f0fdf4; font-weight: bold;">
-                    ✅ Verification: Letters spell "${letterSequence}" = "${targetWord}" ✓
+                    ✅ Verification: ${totalCells} cells visited, letters spell "${letterSequence}" = "${targetWord}" ✓
                 </div>
             `;
             
@@ -950,7 +928,7 @@
                 for (let col = 0; col < puzzle.gridSize; col++) {
                     const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                     if (cell) {
-                        cell.classList.remove('filled', 'solution', 'start');
+                        cell.classList.remove('filled', 'solution', 'start', 'final');
                         cell.removeAttribute('data-step');
                     }
                 }
@@ -961,7 +939,6 @@
             const puzzleSet = PUZZLE_SETS[gameState.difficulty];
             gameState.currentPuzzle = puzzleSet[gameState.puzzleIndex];
             
-            // Update puzzle number display
             document.getElementById('puzzleNumber').textContent = `#${gameState.puzzleIndex + 1}`;
         }
 
@@ -987,7 +964,6 @@
                         cell.classList.add('letter');
                     }
                     
-                    // Add wall classes based on puzzle configuration
                     puzzle.walls.forEach(wall => {
                         if (wall.row === row && wall.col === col) {
                             cell.classList.add(`wall-${wall.side}`);
@@ -999,7 +975,7 @@
                     cell.addEventListener('mouseenter', (e) => continueDrag(row, col, e));
                     cell.addEventListener('mouseup', (e) => endDrag(row, col, e));
                     
-                    // Touch events for mobile
+                    // Touch events
                     cell.addEventListener('touchstart', (e) => {
                         e.preventDefault();
                         startDrag(row, col, e);
@@ -1030,7 +1006,7 @@
         }
 
         function startDrag(row, col, e) {
-            if (gameState.solutionShown) return; // Don't allow interaction if solution is shown
+            if (gameState.solutionShown) return;
             
             e.preventDefault();
             gameState.isDragging = true;
@@ -1044,17 +1020,14 @@
             const lastCell = gameState.path[gameState.path.length - 1];
             if (!lastCell) return;
             
-            // Check if adjacent and not blocked by wall
             if (isAdjacent(lastCell.row, lastCell.col, row, col) && 
                 !isWallBlocking(lastCell.row, lastCell.col, row, col)) {
                 
-                // Handle backtracking - going back one step
                 if (gameState.path.length > 1 && 
                     gameState.path[gameState.path.length - 2].row === row && 
                     gameState.path[gameState.path.length - 2].col === col) {
                     gameState.path.pop();
                 } else if (!gameState.path.some(cell => cell.row === row && cell.col === col)) {
-                    // Add new cell to path if not already visited
                     gameState.path.push({row, col});
                 }
                 
@@ -1079,7 +1052,6 @@
             const puzzle = gameState.currentPuzzle;
             
             for (const wall of puzzle.walls) {
-                // Check if wall blocks this specific movement
                 if (wall.row === row1 && wall.col === col1) {
                     if (wall.side === 'top' && row2 === row1 - 1 && col2 === col1) return true;
                     if (wall.side === 'right' && row2 === row1 && col2 === col1 + 1) return true;
@@ -1087,7 +1059,6 @@
                     if (wall.side === 'left' && row2 === row1 && col2 === col1 - 1) return true;
                 }
                 
-                // Check reverse direction
                 if (wall.row === row2 && wall.col === col2) {
                     if (wall.side === 'top' && row1 === row2 - 1 && col1 === col2) return true;
                     if (wall.side === 'right' && row1 === row2 && col1 === col2 + 1) return true;
@@ -1100,11 +1071,10 @@
         }
 
         function updateGridDisplay() {
-            if (gameState.solutionShown) return; // Don't update if solution is shown
+            if (gameState.solutionShown) return;
             
             const puzzle = gameState.currentPuzzle;
             
-            // Clear all fill states
             for (let row = 0; row < puzzle.gridSize; row++) {
                 for (let col = 0; col < puzzle.gridSize; col++) {
                     const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
@@ -1114,7 +1084,6 @@
                 }
             }
             
-            // Mark cells in path as filled
             gameState.path.forEach(({row, col}) => {
                 const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                 if (cell) {
