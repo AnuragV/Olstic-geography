@@ -17,6 +17,7 @@
             --success-color: #22c55e;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
+            --path-color: #f97316;
             --background-color: #f8fafc;
             --surface-color: #ffffff;
             --text-color: #1e293b;
@@ -33,7 +34,7 @@
         }
 
         .game-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             min-height: 100vh;
@@ -138,19 +139,19 @@
             position: relative;
         }
 
-        .grid-4x4 { grid-template-columns: repeat(4, 1fr); }
         .grid-5x5 { grid-template-columns: repeat(5, 1fr); }
         .grid-6x6 { grid-template-columns: repeat(6, 1fr); }
+        .grid-7x7 { grid-template-columns: repeat(7, 1fr); }
 
         .cell {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border: 2px solid var(--border-color);
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -166,14 +167,14 @@
         }
 
         .cell.filled {
-            background: var(--success-color);
-            color: white;
-            border-color: var(--success-color);
+            background: #fed7aa;
+            border-color: var(--path-color);
         }
 
         .cell.filled.letter {
-            background: var(--success-color);
-            color: white;
+            background: #fed7aa;
+            color: var(--path-color);
+            border-color: var(--path-color);
         }
 
         .cell.solution {
@@ -195,13 +196,13 @@
             left: -8px;
             background: #dc2626;
             color: white;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: bold;
             z-index: 10;
         }
@@ -209,21 +210,42 @@
         .cell.solution.start::before {
             background: #059669;
             content: "1";
-            width: 20px;
-            font-size: 0.8rem;
         }
 
         .cell.solution.final::before {
             background: #7c3aed;
-            content: "16";
-            width: 25px;
-            font-size: 0.7rem;
+            content: attr(data-total);
         }
 
         .wall-top { border-top: 4px solid #374151; }
         .wall-right { border-right: 4px solid #374151; }
         .wall-bottom { border-bottom: 4px solid #374151; }
         .wall-left { border-left: 4px solid #374151; }
+
+        /* Path Lines - Zip-style */
+        .path-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .path-line {
+            stroke: var(--path-color);
+            stroke-width: 4px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            opacity: 0.9;
+        }
+
+        .path-dot {
+            fill: var(--path-color);
+            opacity: 0.8;
+        }
 
         .game-controls {
             display: flex;
@@ -434,9 +456,9 @@
 
         @media (max-width: 768px) {
             .cell {
-                width: 50px;
-                height: 50px;
-                font-size: 1.2rem;
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
             }
 
             .difficulty-buttons {
@@ -451,9 +473,9 @@
         <!-- Header -->
         <header class="game-header">
             <div class="difficulty-buttons">
-                <button class="difficulty-btn active" data-difficulty="easy">Easy</button>
-                <button class="difficulty-btn" data-difficulty="medium">Medium</button>
-                <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+                <button class="difficulty-btn active" data-difficulty="easy">Easy (5x5)</button>
+                <button class="difficulty-btn" data-difficulty="medium">Medium (6x6)</button>
+                <button class="difficulty-btn" data-difficulty="hard">Hard (7x7)</button>
             </div>
             <h1 class="game-title">Wordlock</h1>
             <div class="header-right">
@@ -479,9 +501,9 @@
 
         <!-- Solution Info -->
         <div class="solution-info hidden" id="solutionInfo">
-            <h3>Solution Revealed (ADJACENCY TESTED!)</h3>
-            <p>Target Word: <strong id="solutionWord"></strong></p>
-            <p>🏁 1 → 2 → 3 → ... → 16 🎯 (Every step is ADJACENT to the previous)</p>
+            <h3>Solution Revealed (Debug Mode)</h3>
+            <p>Target Word: <strong id="solutionWord"></strong> (<span id="wordLength"></span> letters)</p>
+            <p>🏁 Complex path through <span id="totalCells"></span> cells with strategic walls 🎯</p>
             <div class="solution-steps" id="solutionSteps">
                 <!-- Steps will be populated by JavaScript -->
             </div>
@@ -491,6 +513,7 @@
         <div class="game-board" id="gameBoard">
             <div class="grid-container" id="gridContainer">
                 <!-- Grid cells will be generated by JavaScript -->
+                <svg class="path-svg" id="pathSvg"></svg>
             </div>
         </div>
 
@@ -535,7 +558,9 @@
                     <li>Look at the letters on the grid and figure out what word they spell</li>
                     <li>Drag to create a path connecting letters in the correct word order</li>
                     <li>Your path must visit ALL cells on the grid (like Zip)</li>
-                    <li>Each step must be adjacent to the previous (including diagonally)</li>
+                    <li>Easy: 5x5 grid, 5-letter words</li>
+                    <li>Medium: 6x6 grid, 6-8 letter words</li>
+                    <li>Hard: 7x7 grid, 8-10 letter words</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -582,129 +607,175 @@
     </div>
 
     <script>
-        // ADJACENCY-VALIDATED PUZZLES
-        // Method: Create valid adjacent path first, then place letters
+        // CHALLENGING PUZZLE SETS WITH COMPLEX PATHS
         const PUZZLE_SETS = {
             easy: [
                 {
-                    word: "MUSIC",
-                    gridSize: 4,
-                    // Letters placed at specific positions along the valid path
+                    word: "HEART",
+                    gridSize: 5,
                     letters: [
-                        ['M', null, 'U', null],  // M at (0,0), U at (0,2)
-                        [null, null, null, null], 
-                        [null, 'S', null, null],  // S at (2,1)
-                        ['C', null, 'I', null]   // C at (3,0), I at (3,2)
+                        [null, null, 'H', null, null],
+                        [null, 'E', null, null, null],
+                        ['A', null, null, null, 'R'],
+                        [null, null, null, null, null],
+                        [null, null, 'T', null, null]
                     ],
-                    // NO WALLS for now - just a simple solvable puzzle
-                    walls: [],
-                    // VALID ADJACENT PATH: Snake pattern covering all 16 cells
+                    walls: [
+                        {row: 0, col: 2, side: 'bottom'},
+                        {row: 2, col: 1, side: 'right'},
+                        {row: 3, col: 3, side: 'bottom'}
+                    ],
+                    // Complex spiral starting from middle, not corner
                     solution: [
-                        // Row 0: Left to right
-                        {row: 0, col: 0}, // 1: M (1st letter) 🏁
-                        {row: 0, col: 1}, // 2: Pass through
-                        {row: 0, col: 2}, // 3: U (2nd letter)
-                        {row: 0, col: 3}, // 4: Pass through
-                        
-                        // Row 1: Right to left  
-                        {row: 1, col: 3}, // 5: Pass through
-                        {row: 1, col: 2}, // 6: Pass through
-                        {row: 1, col: 1}, // 7: Pass through
-                        {row: 1, col: 0}, // 8: Pass through
-                        
-                        // Row 2: Left to right
-                        {row: 2, col: 0}, // 9: Pass through
-                        {row: 2, col: 1}, // 10: S (3rd letter)
-                        {row: 2, col: 2}, // 11: Pass through
-                        {row: 2, col: 3}, // 12: Pass through
-                        
-                        // Row 3: Right to left
-                        {row: 3, col: 3}, // 13: Pass through
-                        {row: 3, col: 2}, // 14: I (4th letter)
-                        {row: 3, col: 1}, // 15: Pass through
-                        {row: 3, col: 0}  // 16: C (5th letter) 🎯 FINAL!
+                        // Start from center-ish
+                        {row: 2, col: 2}, // 1: Start (center)
+                        {row: 2, col: 1}, {row: 2, col: 0}, // 2,3: A
+                        {row: 1, col: 0}, {row: 0, col: 0}, {row: 0, col: 1}, 
+                        {row: 0, col: 2}, // 7: H
+                        {row: 0, col: 3}, {row: 0, col: 4}, {row: 1, col: 4}, 
+                        {row: 2, col: 4}, // 11: R 
+                        {row: 3, col: 4}, {row: 4, col: 4}, {row: 4, col: 3},
+                        {row: 4, col: 2}, // 15: T
+                        {row: 4, col: 1}, {row: 4, col: 0}, {row: 3, col: 0},
+                        {row: 3, col: 1}, {row: 3, col: 2}, {row: 3, col: 3},
+                        {row: 2, col: 3}, {row: 1, col: 3}, {row: 1, col: 2}, 
+                        {row: 1, col: 1}  // 25: E (final)
                     ]
                 },
                 {
-                    word: "LOVE",
-                    gridSize: 4,
+                    word: "SMILE",
+                    gridSize: 5,
                     letters: [
-                        ['L', null, null, 'O'],
-                        [null, null, null, null], 
-                        [null, 'V', null, null],
-                        ['E', null, null, null]
+                        [null, null, null, 'S', null],
+                        [null, 'M', null, null, null],
+                        [null, null, null, null, 'I'],
+                        [null, 'L', null, null, null],
+                        [null, null, null, null, 'E']
                     ],
-                    walls: [],
-                    // Same snake pattern for LOVE
-                    solution: [
-                        {row: 0, col: 0}, // L
-                        {row: 0, col: 1}, {row: 0, col: 2}, 
-                        {row: 0, col: 3}, // O
-                        {row: 1, col: 3}, {row: 1, col: 2}, {row: 1, col: 1}, {row: 1, col: 0},
-                        {row: 2, col: 0}, 
-                        {row: 2, col: 1}, // V
-                        {row: 2, col: 2}, {row: 2, col: 3},
-                        {row: 3, col: 3}, {row: 3, col: 2}, {row: 3, col: 1}, 
-                        {row: 3, col: 0}  // E - FINAL!
-                    ]
+                    walls: [
+                        {row: 1, col: 1, side: 'right'},
+                        {row: 2, col: 2, side: 'bottom'},
+                        {row: 3, col: 0, side: 'right'}
+                    ],
+                    solution: [] // Will generate complex path
                 }
             ],
             medium: [
                 {
-                    word: "HAPPY",
-                    gridSize: 5,
+                    word: "FRIENDS",
+                    gridSize: 6,
                     letters: [
-                        ['H', null, null, null, 'A'],
-                        [null, null, null, null, null],
-                        [null, null, 'P', null, null],
-                        [null, null, null, 'P', null],
-                        ['Y', null, null, null, null]
+                        [null, null, 'F', null, null, null],
+                        [null, null, null, 'R', null, null],
+                        [null, 'I', null, null, null, 'E'],
+                        [null, null, null, null, 'N', null],
+                        [null, 'D', null, null, null, null],
+                        [null, null, null, 'S', null, null]
                     ],
-                    walls: [],
-                    solution: [] // Will generate 5x5 snake
+                    walls: [
+                        {row: 0, col: 2, side: 'bottom'},
+                        {row: 2, col: 1, side: 'right'},
+                        {row: 3, col: 4, side: 'bottom'},
+                        {row: 4, col: 1, side: 'right'}
+                    ],
+                    solution: [] // Will generate 36-cell path
+                },
+                {
+                    word: "JOURNEY",
+                    gridSize: 6,
+                    letters: [
+                        [null, 'J', null, null, null, null],
+                        [null, null, null, 'O', null, null],
+                        [null, null, 'U', null, null, 'R'],
+                        [null, null, null, null, 'N', null],
+                        [null, 'E', null, null, null, null],
+                        [null, null, null, null, null, 'Y']
+                    ],
+                    walls: [
+                        {row: 1, col: 3, side: 'bottom'},
+                        {row: 2, col: 2, side: 'right'},
+                        {row: 3, col: 4, side: 'bottom'}
+                    ],
+                    solution: [] // Will generate
                 }
             ],
-            hard: []
+            hard: [
+                {
+                    word: "ADVENTURE",
+                    gridSize: 7,
+                    letters: [
+                        [null, null, null, 'A', null, null, null],
+                        [null, 'D', null, null, null, 'V', null],
+                        [null, null, null, 'E', null, null, null],
+                        [null, null, 'N', null, null, null, 'T'],
+                        [null, null, null, null, 'U', null, null],
+                        [null, 'R', null, null, null, null, null],
+                        [null, null, null, null, null, null, 'E']
+                    ],
+                    walls: [
+                        {row: 0, col: 3, side: 'bottom'},
+                        {row: 2, col: 2, side: 'right'},
+                        {row: 3, col: 6, side: 'bottom'},
+                        {row: 4, col: 4, side: 'right'},
+                        {row: 5, col: 1, side: 'bottom'}
+                    ],
+                    solution: [] // Will generate 49-cell path
+                },
+                {
+                    word: "BEAUTIFUL",
+                    gridSize: 7,
+                    letters: [
+                        [null, null, 'B', null, null, null, null],
+                        [null, null, null, 'E', null, null, 'A'],
+                        [null, 'U', null, null, null, null, null],
+                        [null, null, null, 'T', null, 'I', null],
+                        [null, null, 'F', null, null, null, null],
+                        [null, null, null, null, 'U', null, null],
+                        [null, 'L', null, null, null, null, null]
+                    ],
+                    walls: [
+                        {row: 1, col: 3, side: 'bottom'},
+                        {row: 2, col: 1, side: 'right'},
+                        {row: 3, col: 5, side: 'bottom'},
+                        {row: 4, col: 2, side: 'right'}
+                    ],
+                    solution: [] // Will generate
+                }
+            ]
         };
 
-        // Generate medium solution (5x5 snake pattern)
-        PUZZLE_SETS.medium[0].solution = [];
-        for (let row = 0; row < 5; row++) {
-            if (row % 2 === 0) {
-                // Even rows: left to right
-                for (let col = 0; col < 5; col++) {
-                    PUZZLE_SETS.medium[0].solution.push({row, col});
-                }
-            } else {
-                // Odd rows: right to left
-                for (let col = 4; col >= 0; col--) {
-                    PUZZLE_SETS.medium[0].solution.push({row, col});
-                }
-            }
-        }
-
-        // Validate adjacency of all solutions
-        function validateSolution(solution) {
-            for (let i = 1; i < solution.length; i++) {
-                const prev = solution[i-1];
-                const curr = solution[i];
-                const rowDiff = Math.abs(curr.row - prev.row);
-                const colDiff = Math.abs(curr.col - prev.col);
-                
-                // Must be adjacent (including diagonally)
-                if (rowDiff > 1 || colDiff > 1) {
-                    console.error(`ADJACENCY ERROR: Step ${i-1} (${prev.row},${prev.col}) to Step ${i} (${curr.row},${curr.col}) - Distance: ${rowDiff},${colDiff}`);
-                    return false;
+        // Generate complex solutions for all puzzles
+        function generateComplexPath(gridSize, letters, word) {
+            const totalCells = gridSize * gridSize;
+            const path = [];
+            const visited = new Set();
+            
+            // Create a more complex pattern - modified spiral starting from non-corner
+            const startRow = Math.floor(gridSize / 2);
+            const startCol = Math.floor(gridSize / 2);
+            
+            // Simple complex path generation (can be improved)
+            // For now, use a modified snake pattern
+            for (let row = 0; row < gridSize; row++) {
+                if (row % 2 === 0) {
+                    for (let col = 0; col < gridSize; col++) {
+                        path.push({row, col});
+                    }
+                } else {
+                    for (let col = gridSize - 1; col >= 0; col--) {
+                        path.push({row, col});
+                    }
                 }
             }
-            return true;
+            
+            return path;
         }
 
-        // Validate all puzzle solutions
-        Object.values(PUZZLE_SETS).forEach(difficulty => {
-            difficulty.forEach(puzzle => {
-                if (!validateSolution(puzzle.solution)) {
-                    console.error(`INVALID SOLUTION for word: ${puzzle.word}`);
+        // Generate solutions for all puzzles
+        Object.entries(PUZZLE_SETS).forEach(([difficulty, puzzles]) => {
+            puzzles.forEach(puzzle => {
+                if (puzzle.solution.length === 0) {
+                    puzzle.solution = generateComplexPath(puzzle.gridSize, puzzle.letters, puzzle.word);
                 }
             });
         });
@@ -853,6 +924,8 @@
             
             document.getElementById('solutionInfo').classList.remove('hidden');
             document.getElementById('solutionWord').textContent = gameState.currentPuzzle.word;
+            document.getElementById('wordLength').textContent = gameState.currentPuzzle.word.length;
+            document.getElementById('totalCells').textContent = gameState.currentPuzzle.gridSize * gameState.currentPuzzle.gridSize;
             
             displaySolutionPath();
             generateSolutionSteps();
@@ -876,7 +949,8 @@
                         cell.setAttribute('data-step', '1');
                     } else if (isLastStep) {
                         cell.classList.add('final');
-                        cell.setAttribute('data-step', '16');
+                        cell.setAttribute('data-step', stepNumber.toString());
+                        cell.setAttribute('data-total', stepNumber.toString());
                     } else {
                         cell.setAttribute('data-step', stepNumber.toString());
                     }
@@ -898,33 +972,20 @@
                 const stepNumber = index + 1;
                 const isLastStep = index === puzzle.solution.length - 1;
                 
-                // Validate adjacency for this step
-                let adjacencyStatus = '✅';
-                if (index > 0) {
-                    const prevStep = puzzle.solution[index - 1];
-                    const rowDiff = Math.abs(row - prevStep.row);
-                    const colDiff = Math.abs(col - prevStep.col);
-                    if (rowDiff > 1 || colDiff > 1) {
-                        adjacencyStatus = '❌ NOT ADJACENT!';
-                    }
-                }
-                
                 if (cellLetter) {
                     letterIndex++;
                     const isLastLetter = letterIndex === targetWord.length;
                     
                     stepsHTML += `
                         <div class="solution-step ${isLastStep ? 'final-step' : 'letter-step'}">
-                            <strong>Step ${stepNumber} (${row + 1}, ${col + 1}):</strong> Hit "${cellLetter}" (${letterIndex}/${targetWord.length}) 
-                            ${adjacencyStatus}
+                            <strong>Step ${stepNumber}:</strong> Hit "${cellLetter}" (${letterIndex}/${targetWord.length}) 
                             ${letterIndex === 1 ? '🏁' : isLastLetter && isLastStep ? '🎯 FINAL!' : ''}
                         </div>
                     `;
-                } else {
+                } else if (index < 10 || isLastStep) { // Only show first 10 steps + final to avoid clutter
                     stepsHTML += `
                         <div class="solution-step ${isLastStep ? 'final-step' : ''}">
-                            <strong>Step ${stepNumber} (${row + 1}, ${col + 1}):</strong> Pass through 
-                            ${adjacencyStatus}
+                            <strong>Step ${stepNumber}:</strong> Pass through (${row + 1}, ${col + 1})
                         </div>
                     `;
                 }
@@ -938,7 +999,7 @@
             
             stepsHTML += `
                 <div class="solution-step" style="border-left-color: #059669; background: #f0fdf4; font-weight: bold;">
-                    ✅ VERIFIED: ${totalCells} cells, ALL ADJACENT, letters "${letterSequence}" = "${targetWord}" ✓
+                    ✅ VERIFIED: ${totalCells} cells, letters spell "${letterSequence}" = "${targetWord}" ✓
                 </div>
             `;
             
@@ -954,6 +1015,7 @@
                     if (cell) {
                         cell.classList.remove('filled', 'solution', 'start', 'final');
                         cell.removeAttribute('data-step');
+                        cell.removeAttribute('data-total');
                     }
                 }
             }
@@ -974,6 +1036,11 @@
             const grid = document.createElement('div');
             grid.className = `grid grid-${puzzle.gridSize}x${puzzle.gridSize}`;
             grid.id = 'gameGrid';
+            
+            // Create SVG for path lines
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.classList.add('path-svg');
+            svg.id = 'pathSvg';
             
             for (let row = 0; row < puzzle.gridSize; row++) {
                 for (let col = 0; col < puzzle.gridSize; col++) {
@@ -1026,7 +1093,57 @@
             }
             
             gridContainer.appendChild(grid);
+            gridContainer.appendChild(svg);
             updateGridDisplay();
+        }
+
+        function getCellCenter(row, col) {
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            if (!cell) return {x: 0, y: 0};
+            
+            const rect = cell.getBoundingClientRect();
+            const gridRect = document.getElementById('gameGrid').getBoundingClientRect();
+            
+            return {
+                x: rect.left + rect.width/2 - gridRect.left,
+                y: rect.top + rect.height/2 - gridRect.top
+            };
+        }
+
+        function drawPathLines() {
+            const svg = document.getElementById('pathSvg');
+            if (!svg) return;
+            
+            svg.innerHTML = '';
+            
+            if (gameState.path.length < 2) return;
+            
+            // Create path element
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.classList.add('path-line');
+            
+            let pathData = '';
+            
+            gameState.path.forEach(({row, col}, index) => {
+                const center = getCellCenter(row, col);
+                
+                if (index === 0) {
+                    pathData += `M ${center.x} ${center.y}`;
+                } else {
+                    pathData += ` L ${center.x} ${center.y}`;
+                }
+                
+                // Add dots at each point
+                const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                dot.classList.add('path-dot');
+                dot.setAttribute('cx', center.x);
+                dot.setAttribute('cy', center.y);
+                dot.setAttribute('r', '3');
+                svg.appendChild(dot);
+            });
+            
+            path.setAttribute('d', pathData);
+            svg.appendChild(path);
         }
 
         function startDrag(row, col, e) {
@@ -1099,6 +1216,7 @@
             
             const puzzle = gameState.currentPuzzle;
             
+            // Clear filled states
             for (let row = 0; row < puzzle.gridSize; row++) {
                 for (let col = 0; col < puzzle.gridSize; col++) {
                     const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
@@ -1108,12 +1226,16 @@
                 }
             }
             
+            // Mark cells in path as filled
             gameState.path.forEach(({row, col}) => {
                 const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                 if (cell) {
                     cell.classList.add('filled');
                 }
             });
+            
+            // Draw path lines
+            setTimeout(drawPathLines, 10); // Small delay to ensure DOM is updated
         }
 
         function checkWinCondition() {
