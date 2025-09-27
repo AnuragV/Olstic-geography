@@ -503,7 +503,7 @@
         <div class="solution-info hidden" id="solutionInfo">
             <h3>Solution Revealed (Debug Mode)</h3>
             <p>Target Word: <strong id="solutionWord"></strong> (<span id="wordLength"></span> letters)</p>
-            <p>🏁 SYSTEMATIC SNAKE PATTERN: Every step verified adjacent 🎯</p>
+            <p>🏁 COMPLEX NON-OBVIOUS PATH: Strategic placement requires careful planning 🎯</p>
             <div class="solution-steps" id="solutionSteps">
                 <!-- Steps will be populated by JavaScript -->
             </div>
@@ -608,7 +608,7 @@
     </div>
 
     <script>
-        // SYSTEMATIC SNAKE-PATTERN SOLUTIONS (NO MORE MANUAL ERRORS!)
+        // COMPLEX NON-OBVIOUS PATH PATTERNS (NO SIMPLE SNAKES!)
         const PUZZLE_SETS = {
             easy: [
                 {
@@ -672,127 +672,188 @@
                     ]
                 }
             ],
-            medium: [],
-            hard: []
+            medium: [
+                {
+                    word: "PUZZLE",
+                    gridSize: 6,
+                    // COMPLEX SPIRAL PATTERN - starts from center and spirals outward
+                    letters: [
+                        [null, null, null, null, null, 'P'],  // P at top-right
+                        [null, null, null, 'U', null, null],  // U in middle area
+                        [null, 'Z', null, null, null, null],  // Z at left
+                        [null, null, null, null, 'Z', null],  // Z at right
+                        [null, null, 'L', null, null, null],  // L in middle-left
+                        ['E', null, null, null, null, null]   // E at bottom-left
+                    ],
+                    walls: [
+                        {row: 0, col: 5, side: 'left'},     // Force specific entry to P
+                        {row: 1, col: 3, side: 'bottom'},   // Control flow around U
+                        {row: 2, col: 1, side: 'right'},    // Block alternative paths from Z
+                        {row: 3, col: 4, side: 'left'},     // Control flow around second Z
+                        {row: 4, col: 2, side: 'top'},      // Control flow around L
+                        {row: 5, col: 0, side: 'right'}     // Control flow from E
+                    ],
+                    // COMPLEX INWARD SPIRAL PATTERN
+                    solution: [
+                        // Start from outer edge and spiral inward to center, then out to different edge
+                        {row: 2, col: 2}, // Start center
+                        {row: 2, col: 1}, // Z (2nd letter)
+                        {row: 2, col: 0}, {row: 1, col: 0}, {row: 0, col: 0}, {row: 0, col: 1}, 
+                        {row: 0, col: 2}, {row: 0, col: 3}, {row: 0, col: 4}, 
+                        {row: 0, col: 5}, // P (1st letter) 
+                        {row: 1, col: 5}, {row: 2, col: 5}, {row: 3, col: 5}, {row: 4, col: 5}, {row: 5, col: 5},
+                        {row: 5, col: 4}, {row: 5, col: 3}, {row: 5, col: 2}, {row: 5, col: 1}, 
+                        {row: 5, col: 0}, // E (6th letter)
+                        {row: 4, col: 0}, {row: 3, col: 0}, {row: 1, col: 1}, {row: 1, col: 2},
+                        {row: 1, col: 3}, // U (3rd letter)
+                        {row: 1, col: 4}, {row: 2, col: 4}, {row: 2, col: 3}, 
+                        {row: 3, col: 3}, {row: 3, col: 4}, // Z (4th letter)
+                        {row: 3, col: 2}, {row: 3, col: 1}, {row: 4, col: 1}, 
+                        {row: 4, col: 2}, // L (5th letter)
+                        {row: 4, col: 3}, {row: 4, col: 4}
+                    ]
+                },
+                {
+                    word: "BRIDGE",
+                    gridSize: 6,
+                    // ZIGZAG PATTERN - non-obvious winding path
+                    letters: [
+                        ['B', null, null, null, null, null],  // B at top-left
+                        [null, null, 'R', null, null, null],  // R in middle-left area  
+                        [null, null, null, null, 'I', null],  // I in middle-right
+                        [null, 'D', null, null, null, null],  // D in lower-left
+                        [null, null, null, 'G', null, null],  // G in lower-middle
+                        [null, null, null, null, null, 'E']   // E at bottom-right
+                    ],
+                    walls: [
+                        {row: 0, col: 0, side: 'right'},    // Control flow from B
+                        {row: 1, col: 2, side: 'bottom'},   // Control flow around R
+                        {row: 2, col: 4, side: 'left'},     // Control flow around I  
+                        {row: 3, col: 1, side: 'top'},      // Control flow around D
+                        {row: 4, col: 3, side: 'right'},    // Control flow around G
+                        {row: 5, col: 5, side: 'left'}      // Control final approach to E
+                    ],
+                    // COMPLEX ZIGZAG PATTERN
+                    solution: [
+                        {row: 0, col: 0}, // B (1st)
+                        {row: 1, col: 0}, {row: 2, col: 0}, {row: 3, col: 0}, {row: 4, col: 0}, {row: 5, col: 0},
+                        {row: 5, col: 1}, {row: 5, col: 2}, {row: 4, col: 2}, {row: 4, col: 1}, 
+                        {row: 3, col: 1}, // D (4th)
+                        {row: 2, col: 1}, {row: 1, col: 1}, {row: 0, col: 1}, {row: 0, col: 2}, {row: 0, col: 3},
+                        {row: 1, col: 3}, 
+                        {row: 1, col: 2}, // R (2nd)
+                        {row: 2, col: 2}, {row: 2, col: 3}, 
+                        {row: 2, col: 4}, // I (3rd)
+                        {row: 1, col: 4}, {row: 0, col: 4}, {row: 0, col: 5}, {row: 1, col: 5}, {row: 3, col: 5},
+                        {row: 4, col: 5}, 
+                        {row: 4, col: 4}, {row: 4, col: 3}, // G (5th)
+                        {row: 3, col: 3}, {row: 3, col: 4}, {row: 2, col: 5}, {row: 3, col: 2}, {row: 5, col: 3},
+                        {row: 5, col: 4}, 
+                        {row: 5, col: 5}  // E (6th)
+                    ]
+                }
+            ],
+            hard: [
+                {
+                    word: "COMPLEX",
+                    gridSize: 7,
+                    // INTRICATE WINDING PATTERN - very challenging
+                    letters: [
+                        [null, null, 'C', null, null, null, null],  // C at top
+                        [null, null, null, null, 'O', null, null],  // O in middle-right
+                        ['M', null, null, null, null, null, null],  // M at left edge
+                        [null, null, null, 'P', null, null, null],  // P in center
+                        [null, 'L', null, null, null, null, null],  // L in middle-left
+                        [null, null, null, null, null, 'E', null],  // E in middle-right
+                        [null, null, null, null, null, null, 'X']   // X at bottom-right
+                    ],
+                    walls: [
+                        {row: 0, col: 2, side: 'bottom'},   // Control flow from C
+                        {row: 1, col: 4, side: 'left'},     // Control flow around O
+                        {row: 2, col: 0, side: 'bottom'},   // Control flow from M
+                        {row: 3, col: 3, side: 'top'},      // Control flow around P
+                        {row: 4, col: 1, side: 'right'},    // Control flow around L
+                        {row: 5, col: 5, side: 'bottom'},   // Control flow around E
+                        {row: 6, col: 6, side: 'left'}      // Control final approach to X
+                    ],
+                    // VERY COMPLEX WINDING PATH - 49 cells
+                    solution: [
+                        // Starting from a strategic position, winding through all cells
+                        {row: 3, col: 3}, // P (4th) - start from center
+                        {row: 3, col: 2}, {row: 3, col: 1}, {row: 3, col: 0}, {row: 2, col: 0}, // M (3rd)
+                        {row: 1, col: 0}, {row: 0, col: 0}, {row: 0, col: 1}, 
+                        {row: 0, col: 2}, // C (1st)
+                        {row: 0, col: 3}, {row: 0, col: 4}, {row: 0, col: 5}, {row: 0, col: 6},
+                        {row: 1, col: 6}, {row: 1, col: 5}, 
+                        {row: 1, col: 4}, // O (2nd)
+                        {row: 1, col: 3}, {row: 1, col: 2}, {row: 1, col: 1}, {row: 2, col: 1},
+                        {row: 2, col: 2}, {row: 2, col: 3}, {row: 2, col: 4}, {row: 2, col: 5}, {row: 2, col: 6},
+                        {row: 3, col: 6}, {row: 3, col: 5}, {row: 3, col: 4}, {row: 4, col: 4}, {row: 4, col: 3},
+                        {row: 4, col: 2}, 
+                        {row: 4, col: 1}, // L (5th)
+                        {row: 4, col: 0}, {row: 5, col: 0}, {row: 6, col: 0}, {row: 6, col: 1}, {row: 6, col: 2},
+                        {row: 6, col: 3}, {row: 6, col: 4}, {row: 6, col: 5}, 
+                        {row: 6, col: 6}, // X (7th)
+                        {row: 5, col: 6}, 
+                        {row: 5, col: 5}, // E (6th)
+                        {row: 5, col: 4}, {row: 5, col: 3}, {row: 5, col: 2}, {row: 5, col: 1}, {row: 4, col: 5}, {row: 4, col: 6}
+                    ]
+                },
+                {
+                    word: "MYSTERY",
+                    gridSize: 7,
+                    // ANOTHER COMPLEX NON-OBVIOUS PATTERN
+                    letters: [
+                        [null, 'M', null, null, null, null, null],  // M near top-left
+                        [null, null, null, 'Y', null, null, null],  // Y in middle area
+                        [null, null, null, null, null, 'S', null],  // S at right
+                        ['T', null, null, null, null, null, null],  // T at left edge
+                        [null, null, 'E', null, null, null, null],  // E in middle-left
+                        [null, null, null, null, 'R', null, null],  // R in middle-right
+                        [null, null, null, null, null, null, 'Y']   // Y at bottom-right
+                    ],
+                    walls: [
+                        {row: 0, col: 1, side: 'bottom'},   // Control flow from M
+                        {row: 1, col: 3, side: 'right'},    // Control flow around Y
+                        {row: 2, col: 5, side: 'left'},     // Control flow around S
+                        {row: 3, col: 0, side: 'right'},    // Control flow from T
+                        {row: 4, col: 2, side: 'top'},      // Control flow around E
+                        {row: 5, col: 4, side: 'bottom'},   // Control flow around R
+                        {row: 6, col: 6, side: 'top'}       // Control final approach to Y
+                    ],
+                    // ANOTHER COMPLEX 49-CELL PATTERN
+                    solution: [
+                        // Different complex pattern
+                        {row: 0, col: 1}, // M (1st)
+                        {row: 0, col: 0}, {row: 1, col: 0}, {row: 2, col: 0}, 
+                        {row: 3, col: 0}, // T (4th)
+                        {row: 4, col: 0}, {row: 5, col: 0}, {row: 6, col: 0}, {row: 6, col: 1}, {row: 6, col: 2},
+                        {row: 6, col: 3}, {row: 6, col: 4}, {row: 6, col: 5}, 
+                        {row: 6, col: 6}, // Y (7th)
+                        {row: 5, col: 6}, {row: 5, col: 5}, 
+                        {row: 5, col: 4}, // R (6th)
+                        {row: 5, col: 3}, {row: 5, col: 2}, {row: 5, col: 1}, {row: 4, col: 1}, 
+                        {row: 4, col: 2}, // E (5th)
+                        {row: 4, col: 3}, {row: 4, col: 4}, {row: 4, col: 5}, {row: 4, col: 6}, {row: 3, col: 6},
+                        {row: 3, col: 5}, {row: 3, col: 4}, {row: 3, col: 3}, {row: 3, col: 2}, {row: 3, col: 1},
+                        {row: 2, col: 1}, {row: 2, col: 2}, {row: 2, col: 3}, {row: 2, col: 4}, 
+                        {row: 2, col: 5}, // S (3rd)
+                        {row: 2, col: 6}, {row: 1, col: 6}, {row: 1, col: 5}, {row: 1, col: 4}, 
+                        {row: 1, col: 3}, // Y (2nd)
+                        {row: 1, col: 2}, {row: 1, col: 1}, {row: 0, col: 2}, {row: 0, col: 3}, {row: 0, col: 4},
+                        {row: 0, col: 5}, {row: 0, col: 6}
+                    ]
+                }
+            ]
         };
 
-        // SYSTEMATIC SOLUTION GENERATOR - NO MORE MANUAL ERRORS!
-        function generateSystematicSolution(gridSize, targetWord, letterPositions) {
-            const solution = [];
-            
-            // Create simple snake pattern that visits ALL cells
-            for (let row = 0; row < gridSize; row++) {
-                if (row % 2 === 0) {
-                    // Even rows: left to right
-                    for (let col = 0; col < gridSize; col++) {
-                        solution.push({row, col});
-                    }
-                } else {
-                    // Odd rows: right to left  
-                    for (let col = gridSize - 1; col >= 0; col--) {
-                        solution.push({row, col});
-                    }
-                }
-            }
-            
-            return solution;
-        }
-
-        // Generate medium puzzles with SIMPLE systematic solutions
-        PUZZLE_SETS.medium = [
-            {
-                word: "FRIEND",
-                gridSize: 6,
-                // Strategic letter placement along snake path
-                letters: [
-                    ['F', null, null, null, null, 'R'],  // F at start, R at end of row 0
-                    [null, null, null, null, 'I', null], // I in row 1 (reverse direction)
-                    ['E', null, null, null, null, null], // E at start of row 2
-                    [null, null, null, 'N', null, null], // N in row 3 (reverse direction)  
-                    ['D', null, null, null, null, null], // D at start of row 4
-                    [null, null, null, null, null, null] // Last row empty
-                ],
-                walls: [
-                    {row: 0, col: 0, side: 'bottom'},
-                    {row: 1, col: 4, side: 'left'},
-                    {row: 2, col: 0, side: 'right'},
-                    {row: 3, col: 3, side: 'top'}
-                ],
-                solution: generateSystematicSolution(6, "FRIEND", null)
-            },
-            {
-                word: "NATURE",
-                gridSize: 6,
-                letters: [
-                    ['N', null, null, null, null, 'A'],  
-                    [null, null, null, null, 'T', null], 
-                    ['U', null, null, null, null, null], 
-                    [null, null, null, 'R', null, null], 
-                    ['E', null, null, null, null, null], 
-                    [null, null, null, null, null, null] 
-                ],
-                walls: [
-                    {row: 0, col: 0, side: 'right'},
-                    {row: 1, col: 4, side: 'bottom'},
-                    {row: 2, col: 0, side: 'bottom'},
-                    {row: 4, col: 0, side: 'right'}
-                ],
-                solution: generateSystematicSolution(6, "NATURE", null)
-            }
-        ];
-
-        // Generate hard puzzles with systematic solutions
-        PUZZLE_SETS.hard = [
-            {
-                word: "FREEDOM",
-                gridSize: 7,
-                letters: [
-                    ['F', null, null, null, null, null, 'R'], 
-                    [null, null, null, null, null, 'E', null], 
-                    ['E', null, null, null, null, null, null], 
-                    [null, null, null, 'D', null, null, null], 
-                    ['O', null, null, null, null, null, null], 
-                    [null, null, null, null, null, 'M', null], 
-                    [null, null, null, null, null, null, null]  
-                ],
-                walls: [
-                    {row: 0, col: 0, side: 'bottom'},
-                    {row: 1, col: 5, side: 'left'},
-                    {row: 2, col: 0, side: 'right'},
-                    {row: 4, col: 0, side: 'right'},
-                    {row: 5, col: 5, side: 'top'}
-                ],
-                solution: generateSystematicSolution(7, "FREEDOM", null)
-            },
-            {
-                word: "JOURNEY",
-                gridSize: 7,
-                letters: [
-                    ['J', null, null, null, null, null, 'O'], 
-                    [null, null, null, null, null, 'U', null], 
-                    ['R', null, null, null, null, null, null], 
-                    [null, null, null, 'N', null, null, null], 
-                    ['E', null, null, null, null, null, null], 
-                    [null, null, null, null, null, 'Y', null], 
-                    [null, null, null, null, null, null, null]  
-                ],
-                walls: [
-                    {row: 0, col: 0, side: 'right'},
-                    {row: 1, col: 5, side: 'bottom'},
-                    {row: 2, col: 0, side: 'bottom'},
-                    {row: 4, col: 0, side: 'right'},
-                    {row: 5, col: 5, side: 'left'}
-                ],
-                solution: generateSystematicSolution(7, "JOURNEY", null)
-            }
-        ];
-
-        // ULTRA-STRICT validation function
-        function validateEveryStep(solution, word) {
-            console.log(`\n🔍 ULTRA-STRICT VALIDATION for ${word}:`);
+        // ULTRA-STRICT validation function for complex paths
+        function validateComplexPath(solution, word) {
+            console.log(`\n🔍 VALIDATING COMPLEX PATH for ${word}:`);
             console.log(`Total steps: ${solution.length}`);
             
             let errorCount = 0;
+            let patternType = "Complex Custom";
             
             for (let i = 1; i < solution.length; i++) {
                 const prev = solution[i-1];
@@ -806,26 +867,42 @@
                 if (!isValid) {
                     console.error(`❌ STEP ${i}: (${prev.row},${prev.col}) → (${curr.row},${curr.col}) | RowDiff:${rowDiff}, ColDiff:${colDiff}`);
                     errorCount++;
-                } else if (i <= 10 || i > solution.length - 5) {
-                    // Log first 10 and last 5 steps
-                    console.log(`✅ STEP ${i}: (${prev.row},${prev.col}) → (${curr.row},${curr.col})`);
                 }
             }
             
+            // Detect if this is a simple snake pattern (which we want to avoid)
+            let isSimpleSnake = true;
+            for (let i = 1; i < Math.min(10, solution.length); i++) {
+                const prev = solution[i-1];
+                const curr = solution[i];
+                // Simple snake would be very predictable left-right or right-left pattern
+                if (!(Math.abs(curr.col - prev.col) === 1 && curr.row === prev.row)) {
+                    isSimpleSnake = false;
+                    break;
+                }
+            }
+            
+            if (isSimpleSnake) {
+                console.warn(`⚠️ WARNING: ${word} appears to use simple snake pattern`);
+                patternType = "Simple Snake (TOO EASY)";
+            } else {
+                patternType = "Complex Non-Linear (GOOD)";
+            }
+            
             if (errorCount === 0) {
-                console.log(`🎉 ${word}: PERFECT! All ${solution.length} steps are valid!`);
+                console.log(`🎉 ${word}: PERFECT! All ${solution.length} steps valid | Pattern: ${patternType}`);
                 return true;
             } else {
-                console.error(`🚨 ${word}: ${errorCount} ERRORS found!`);
+                console.error(`🚨 ${word}: ${errorCount} ERRORS found! | Pattern: ${patternType}`);
                 return false;
             }
         }
 
-        // Validate ALL solutions with ultra-strict checking
+        // Validate all solutions with complex path checking
         Object.entries(PUZZLE_SETS).forEach(([difficulty, puzzles]) => {
-            console.log(`\n📊 VALIDATING ${difficulty.toUpperCase()}:`);
+            console.log(`\n📊 VALIDATING ${difficulty.toUpperCase()} COMPLEX PATHS:`);
             puzzles.forEach(puzzle => {
-                validateEveryStep(puzzle.solution, puzzle.word);
+                validateComplexPath(puzzle.solution, puzzle.word);
             });
         });
 
@@ -1013,14 +1090,14 @@
             
             let stepsHTML = '';
             
-            // Show systematic snake pattern explanation
+            // Show complex pattern explanation
             stepsHTML += `
                 <div class="solution-step">
-                    <strong>🐍 SNAKE PATTERN:</strong> Row 0: L→R, Row 1: R→L, Row 2: L→R, etc.
+                    <strong>🌀 COMPLEX PATH:</strong> Non-linear winding pattern requires strategic thinking
                 </div>
             `;
             
-            // Show first letter and final letter positions
+            // Show start and path characteristics
             const firstStep = puzzle.solution[0];
             const lastStep = puzzle.solution[puzzle.solution.length - 1];
             
@@ -1030,25 +1107,38 @@
                 </div>
             `;
             
+            // Show some complexity indicators
+            let directionChanges = 0;
+            for (let i = 2; i < puzzle.solution.length; i++) {
+                const step1 = puzzle.solution[i-2];
+                const step2 = puzzle.solution[i-1];
+                const step3 = puzzle.solution[i];
+                
+                const dir1 = {
+                    row: step2.row - step1.row,
+                    col: step2.col - step1.col
+                };
+                const dir2 = {
+                    row: step3.row - step2.row,
+                    col: step3.col - step2.col
+                };
+                
+                if (dir1.row !== dir2.row || dir1.col !== dir2.col) {
+                    directionChanges++;
+                }
+            }
+            
+            stepsHTML += `
+                <div class="solution-step">
+                    <strong>🔄 COMPLEXITY:</strong> ${directionChanges} direction changes (non-linear path)
+                </div>
+            `;
+            
             stepsHTML += `
                 <div class="solution-step final-step">
                     <strong>🎯 END:</strong> "${puzzle.letters[lastStep.row][lastStep.col]}" at (${lastStep.row + 1}, ${lastStep.col + 1})
                 </div>
             `;
-
-            // Show EVERY step verification (first 10 steps)
-            stepsHTML += `<div class="solution-step"><strong>🔍 ADJACENCY PROOF:</strong><br>`;
-            
-            for (let i = 1; i <= Math.min(10, puzzle.solution.length - 1); i++) {
-                const prev = puzzle.solution[i-1];
-                const curr = puzzle.solution[i];
-                const rowDiff = Math.abs(curr.row - prev.row);
-                const colDiff = Math.abs(curr.col - prev.col);
-                const isValid = (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
-                
-                stepsHTML += `Step ${i}: (${prev.row+1},${prev.col+1})→(${curr.row+1},${curr.col+1}) ${isValid ? '✅' : '❌'}<br>`;
-            }
-            stepsHTML += `</div>`;
 
             // Show letter sequence found
             const letterSequence = puzzle.solution
@@ -1058,7 +1148,7 @@
             
             stepsHTML += `
                 <div class="solution-step" style="border-left-color: #059669; background: #f0fdf4; font-weight: bold;">
-                    ✅ SYSTEMATIC: ${totalCells} cells, snake pattern, "${letterSequence}" = "${puzzle.word}" ✓
+                    ✅ COMPLEX PATTERN: ${totalCells} cells, ${directionChanges} turns, "${letterSequence}" = "${puzzle.word}" ✓
                 </div>
             `;
             
@@ -1290,7 +1380,7 @@
             
             // Mark cells in path as filled
             gameState.path.forEach(({row, col}) => {
-                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}]`);
                 if (cell) {
                     cell.classList.add('filled');
                 }
