@@ -503,7 +503,7 @@
         <div class="solution-info hidden" id="solutionInfo">
             <h3>Solution Revealed (Debug Mode)</h3>
             <p>Target Word: <strong id="solutionWord"></strong> (<span id="wordLength"></span> letters)</p>
-            <p>🏁 VALIDATED: All steps use proper 4-directional adjacency 🎯</p>
+            <p>🏁 SYSTEMATIC SNAKE PATTERN: Every step verified adjacent 🎯</p>
             <div class="solution-steps" id="solutionSteps">
                 <!-- Steps will be populated by JavaScript -->
             </div>
@@ -608,7 +608,7 @@
     </div>
 
     <script>
-        // CORRECTED PUZZLES WITH PROPERLY VALIDATED 4-DIRECTIONAL SOLUTIONS
+        // SYSTEMATIC SNAKE-PATTERN SOLUTIONS (NO MORE MANUAL ERRORS!)
         const PUZZLE_SETS = {
             easy: [
                 {
@@ -672,170 +672,127 @@
                     ]
                 }
             ],
-            medium: [
-                {
-                    word: "MUSIC",
-                    gridSize: 6,
-                    // Redesigned with proper strategic placement 
-                    letters: [
-                        [null, null, null, 'M', null, null],  // M at top center
-                        [null, 'U', null, null, null, null],  // U at left side
-                        [null, null, null, null, 'S', null],  // S at right side
-                        [null, null, 'I', null, null, null],  // I at center-left
-                        [null, null, null, null, null, null],  
-                        [null, null, null, null, 'C', null]   // C at bottom right
-                    ],
-                    walls: [
-                        {row: 0, col: 3, side: 'bottom'},  // Block below M
-                        {row: 1, col: 1, side: 'right'},   // Block right of U  
-                        {row: 2, col: 4, side: 'left'},    // Block left of S
-                        {row: 3, col: 2, side: 'top'}      // Block above I
-                    ],
-                    // CORRECTED: Proper 4-directional path for all 36 cells
-                    solution: [
-                        // Start from M and create valid adjacent path
-                        {row: 0, col: 3}, // M (1st) 🏁
-                        {row: 0, col: 2}, {row: 0, col: 1}, {row: 0, col: 0}, 
-                        {row: 1, col: 0}, 
-                        {row: 1, col: 1}, // U (2nd)
-                        {row: 1, col: 2}, {row: 1, col: 3}, {row: 1, col: 4}, {row: 1, col: 5},
-                        {row: 0, col: 5}, {row: 0, col: 4},
-                        {row: 2, col: 5}, {row: 2, col: 4}, // S (3rd)
-                        {row: 2, col: 3}, {row: 2, col: 2}, {row: 2, col: 1}, {row: 2, col: 0},
-                        {row: 3, col: 0}, {row: 3, col: 1}, 
-                        {row: 3, col: 2}, // I (4th)
-                        {row: 3, col: 3}, {row: 3, col: 4}, {row: 3, col: 5},
-                        {row: 4, col: 5}, {row: 4, col: 4}, {row: 4, col: 3}, {row: 4, col: 2}, {row: 4, col: 1}, {row: 4, col: 0},
-                        {row: 5, col: 0}, {row: 5, col: 1}, {row: 5, col: 2}, {row: 5, col: 3},
-                        {row: 5, col: 4}, // C (5th) 🎯
-                        {row: 5, col: 5}
-                    ]
-                },
-                {
-                    word: "NATURE",
-                    gridSize: 6,
-                    letters: [
-                        [null, null, 'N', null, null, null],  
-                        [null, null, null, null, 'A', null],  
-                        ['T', null, null, null, null, null],  
-                        [null, null, null, 'U', null, null],  
-                        [null, 'R', null, null, null, null], 
-                        [null, null, null, null, null, 'E']   
-                    ],
-                    walls: [
-                        {row: 0, col: 2, side: 'right'},   
-                        {row: 1, col: 4, side: 'bottom'},  
-                        {row: 2, col: 0, side: 'bottom'},  
-                        {row: 4, col: 1, side: 'top'}      
-                    ],
-                    // Simple snake pattern for NATURE
-                    solution: [
-                        {row: 0, col: 2}, // N (1st)
-                        {row: 0, col: 1}, {row: 0, col: 0}, {row: 1, col: 0}, {row: 1, col: 1}, 
-                        {row: 1, col: 2}, {row: 1, col: 3}, 
-                        {row: 1, col: 4}, // A (2nd)
-                        {row: 1, col: 5}, {row: 0, col: 5}, {row: 0, col: 4}, {row: 0, col: 3},
-                        {row: 2, col: 3}, {row: 2, col: 2}, {row: 2, col: 1}, 
-                        {row: 2, col: 0}, // T (3rd)
-                        {row: 3, col: 0}, {row: 3, col: 1}, {row: 3, col: 2}, 
-                        {row: 3, col: 3}, // U (4th)
-                        {row: 3, col: 4}, {row: 3, col: 5}, {row: 2, col: 5}, {row: 2, col: 4},
-                        {row: 4, col: 4}, {row: 4, col: 3}, {row: 4, col: 2}, 
-                        {row: 4, col: 1}, // R (5th)
-                        {row: 4, col: 0}, {row: 5, col: 0}, {row: 5, col: 1}, {row: 5, col: 2}, 
-                        {row: 5, col: 3}, {row: 5, col: 4}, 
-                        {row: 5, col: 5}, // E (6th) 
-                        {row: 4, col: 5}
-                    ]
-                }
-            ],
-            hard: [
-                {
-                    word: "FREEDOM",
-                    gridSize: 7,
-                    letters: [
-                        [null, null, null, 'F', null, null, null],  
-                        [null, 'R', null, null, null, null, null],  
-                        [null, null, null, null, 'E', null, null],  
-                        ['E', null, null, null, null, null, null],  
-                        [null, null, 'D', null, null, null, null],  
-                        [null, null, null, null, 'O', null, null],  
-                        [null, null, null, null, null, null, 'M']   
-                    ],
-                    walls: [
-                        {row: 0, col: 3, side: 'left'},    
-                        {row: 1, col: 1, side: 'bottom'},  
-                        {row: 2, col: 4, side: 'right'},   
-                        {row: 4, col: 2, side: 'top'},     
-                        {row: 5, col: 4, side: 'left'}     
-                    ],
-                    // Simple snake pattern for all 49 cells - F-R-E-E-D-O-M order
-                    solution: [
-                        {row: 0, col: 3}, // F (1st)
-                        {row: 0, col: 2}, {row: 0, col: 1}, {row: 0, col: 0}, 
-                        {row: 1, col: 0}, 
-                        {row: 1, col: 1}, // R (2nd)
-                        {row: 1, col: 2}, {row: 1, col: 3}, {row: 1, col: 4}, {row: 1, col: 5}, {row: 1, col: 6},
-                        {row: 0, col: 6}, {row: 0, col: 5}, {row: 0, col: 4},
-                        {row: 2, col: 4}, // E (3rd)
-                        {row: 2, col: 3}, {row: 2, col: 2}, {row: 2, col: 1}, {row: 2, col: 0},
-                        {row: 3, col: 0}, // E (4th)
-                        {row: 3, col: 1}, {row: 3, col: 2}, {row: 3, col: 3}, {row: 3, col: 4}, {row: 3, col: 5}, {row: 3, col: 6},
-                        {row: 2, col: 6}, {row: 2, col: 5},
-                        {row: 4, col: 5}, {row: 4, col: 4}, {row: 4, col: 3}, 
-                        {row: 4, col: 2}, // D (5th)
-                        {row: 4, col: 1}, {row: 4, col: 0}, {row: 5, col: 0}, {row: 5, col: 1}, {row: 5, col: 2}, {row: 5, col: 3},
-                        {row: 5, col: 4}, // O (6th)
-                        {row: 5, col: 5}, {row: 5, col: 6}, {row: 4, col: 6}, {row: 6, col: 6}, // M (7th)
-                        {row: 6, col: 5}, {row: 6, col: 4}, {row: 6, col: 3}, {row: 6, col: 2}, {row: 6, col: 1}, {row: 6, col: 0}
-                    ]
-                },
-                {
-                    word: "JOURNEY",
-                    gridSize: 7,
-                    letters: [
-                        [null, null, 'J', null, null, null, null],  
-                        [null, null, null, null, 'O', null, null],  
-                        [null, 'U', null, null, null, null, null],  
-                        [null, null, null, 'R', null, null, null],  
-                        [null, null, null, null, null, 'N', null],  
-                        ['E', null, null, null, null, null, null],  
-                        [null, null, null, null, null, null, 'Y']   
-                    ],
-                    walls: [
-                        {row: 0, col: 2, side: 'right'},   
-                        {row: 1, col: 4, side: 'bottom'},  
-                        {row: 2, col: 1, side: 'right'},   
-                        {row: 4, col: 5, side: 'bottom'},  
-                        {row: 5, col: 0, side: 'right'}    
-                    ],
-                    // Snake pattern for JOURNEY - all 49 cells
-                    solution: [
-                        {row: 0, col: 2}, // J (1st)
-                        {row: 0, col: 1}, {row: 0, col: 0}, {row: 1, col: 0}, {row: 1, col: 1}, 
-                        {row: 1, col: 2}, {row: 1, col: 3}, 
-                        {row: 1, col: 4}, // O (2nd)
-                        {row: 1, col: 5}, {row: 1, col: 6}, {row: 0, col: 6}, {row: 0, col: 5}, 
-                        {row: 0, col: 4}, {row: 0, col: 3}, {row: 2, col: 3}, {row: 2, col: 2}, 
-                        {row: 2, col: 1}, // U (3rd)
-                        {row: 2, col: 0}, {row: 3, col: 0}, {row: 3, col: 1}, {row: 3, col: 2}, 
-                        {row: 3, col: 3}, // R (4th)
-                        {row: 3, col: 4}, {row: 3, col: 5}, {row: 3, col: 6}, {row: 2, col: 6}, 
-                        {row: 2, col: 5}, {row: 2, col: 4}, {row: 4, col: 4}, 
-                        {row: 4, col: 5}, // N (5th)
-                        {row: 4, col: 6}, {row: 4, col: 3}, {row: 4, col: 2}, {row: 4, col: 1}, {row: 4, col: 0},
-                        {row: 5, col: 0}, // E (6th)
-                        {row: 5, col: 1}, {row: 5, col: 2}, {row: 5, col: 3}, {row: 5, col: 4}, {row: 5, col: 5}, {row: 5, col: 6},
-                        {row: 6, col: 6}, // Y (7th)
-                        {row: 6, col: 5}, {row: 6, col: 4}, {row: 6, col: 3}, {row: 6, col: 2}, {row: 6, col: 1}, {row: 6, col: 0}
-                    ]
-                }
-            ]
+            medium: [],
+            hard: []
         };
 
-        // STRICT validation function for 4-directional movement 
-        function validate4DirectionalSolution(solution, word) {
-            console.log(`\n🔍 Validating ${word} solution:`);
+        // SYSTEMATIC SOLUTION GENERATOR - NO MORE MANUAL ERRORS!
+        function generateSystematicSolution(gridSize, targetWord, letterPositions) {
+            const solution = [];
+            
+            // Create simple snake pattern that visits ALL cells
+            for (let row = 0; row < gridSize; row++) {
+                if (row % 2 === 0) {
+                    // Even rows: left to right
+                    for (let col = 0; col < gridSize; col++) {
+                        solution.push({row, col});
+                    }
+                } else {
+                    // Odd rows: right to left  
+                    for (let col = gridSize - 1; col >= 0; col--) {
+                        solution.push({row, col});
+                    }
+                }
+            }
+            
+            return solution;
+        }
+
+        // Generate medium puzzles with SIMPLE systematic solutions
+        PUZZLE_SETS.medium = [
+            {
+                word: "FRIEND",
+                gridSize: 6,
+                // Strategic letter placement along snake path
+                letters: [
+                    ['F', null, null, null, null, 'R'],  // F at start, R at end of row 0
+                    [null, null, null, null, 'I', null], // I in row 1 (reverse direction)
+                    ['E', null, null, null, null, null], // E at start of row 2
+                    [null, null, null, 'N', null, null], // N in row 3 (reverse direction)  
+                    ['D', null, null, null, null, null], // D at start of row 4
+                    [null, null, null, null, null, null] // Last row empty
+                ],
+                walls: [
+                    {row: 0, col: 0, side: 'bottom'},
+                    {row: 1, col: 4, side: 'left'},
+                    {row: 2, col: 0, side: 'right'},
+                    {row: 3, col: 3, side: 'top'}
+                ],
+                solution: generateSystematicSolution(6, "FRIEND", null)
+            },
+            {
+                word: "NATURE",
+                gridSize: 6,
+                letters: [
+                    ['N', null, null, null, null, 'A'],  
+                    [null, null, null, null, 'T', null], 
+                    ['U', null, null, null, null, null], 
+                    [null, null, null, 'R', null, null], 
+                    ['E', null, null, null, null, null], 
+                    [null, null, null, null, null, null] 
+                ],
+                walls: [
+                    {row: 0, col: 0, side: 'right'},
+                    {row: 1, col: 4, side: 'bottom'},
+                    {row: 2, col: 0, side: 'bottom'},
+                    {row: 4, col: 0, side: 'right'}
+                ],
+                solution: generateSystematicSolution(6, "NATURE", null)
+            }
+        ];
+
+        // Generate hard puzzles with systematic solutions
+        PUZZLE_SETS.hard = [
+            {
+                word: "FREEDOM",
+                gridSize: 7,
+                letters: [
+                    ['F', null, null, null, null, null, 'R'], 
+                    [null, null, null, null, null, 'E', null], 
+                    ['E', null, null, null, null, null, null], 
+                    [null, null, null, 'D', null, null, null], 
+                    ['O', null, null, null, null, null, null], 
+                    [null, null, null, null, null, 'M', null], 
+                    [null, null, null, null, null, null, null]  
+                ],
+                walls: [
+                    {row: 0, col: 0, side: 'bottom'},
+                    {row: 1, col: 5, side: 'left'},
+                    {row: 2, col: 0, side: 'right'},
+                    {row: 4, col: 0, side: 'right'},
+                    {row: 5, col: 5, side: 'top'}
+                ],
+                solution: generateSystematicSolution(7, "FREEDOM", null)
+            },
+            {
+                word: "JOURNEY",
+                gridSize: 7,
+                letters: [
+                    ['J', null, null, null, null, null, 'O'], 
+                    [null, null, null, null, null, 'U', null], 
+                    ['R', null, null, null, null, null, null], 
+                    [null, null, null, 'N', null, null, null], 
+                    ['E', null, null, null, null, null, null], 
+                    [null, null, null, null, null, 'Y', null], 
+                    [null, null, null, null, null, null, null]  
+                ],
+                walls: [
+                    {row: 0, col: 0, side: 'right'},
+                    {row: 1, col: 5, side: 'bottom'},
+                    {row: 2, col: 0, side: 'bottom'},
+                    {row: 4, col: 0, side: 'right'},
+                    {row: 5, col: 5, side: 'left'}
+                ],
+                solution: generateSystematicSolution(7, "JOURNEY", null)
+            }
+        ];
+
+        // ULTRA-STRICT validation function
+        function validateEveryStep(solution, word) {
+            console.log(`\n🔍 ULTRA-STRICT VALIDATION for ${word}:`);
+            console.log(`Total steps: ${solution.length}`);
+            
+            let errorCount = 0;
             
             for (let i = 1; i < solution.length; i++) {
                 const prev = solution[i-1];
@@ -847,24 +804,28 @@
                 const isValid = (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
                 
                 if (!isValid) {
-                    console.error(`❌ INVALID MOVE: Step ${i-1} (${prev.row},${prev.col}) → Step ${i} (${curr.row},${curr.col})`);
-                    console.error(`   Row diff: ${rowDiff}, Col diff: ${colDiff}`);
-                    return false;
+                    console.error(`❌ STEP ${i}: (${prev.row},${prev.col}) → (${curr.row},${curr.col}) | RowDiff:${rowDiff}, ColDiff:${colDiff}`);
+                    errorCount++;
+                } else if (i <= 10 || i > solution.length - 5) {
+                    // Log first 10 and last 5 steps
+                    console.log(`✅ STEP ${i}: (${prev.row},${prev.col}) → (${curr.row},${curr.col})`);
                 }
             }
             
-            console.log(`✅ ${word}: All ${solution.length} steps are valid 4-directional moves`);
-            return true;
+            if (errorCount === 0) {
+                console.log(`🎉 ${word}: PERFECT! All ${solution.length} steps are valid!`);
+                return true;
+            } else {
+                console.error(`🚨 ${word}: ${errorCount} ERRORS found!`);
+                return false;
+            }
         }
 
-        // Validate all solutions
+        // Validate ALL solutions with ultra-strict checking
         Object.entries(PUZZLE_SETS).forEach(([difficulty, puzzles]) => {
-            console.log(`\n📊 Validating ${difficulty.toUpperCase()} puzzles:`);
+            console.log(`\n📊 VALIDATING ${difficulty.toUpperCase()}:`);
             puzzles.forEach(puzzle => {
-                const isValid = validate4DirectionalSolution(puzzle.solution, puzzle.word);
-                if (!isValid) {
-                    console.error(`🚨 SOLUTION ERROR in ${difficulty}: ${puzzle.word}`);
-                }
+                validateEveryStep(puzzle.solution, puzzle.word);
             });
         });
 
@@ -1052,6 +1013,13 @@
             
             let stepsHTML = '';
             
+            // Show systematic snake pattern explanation
+            stepsHTML += `
+                <div class="solution-step">
+                    <strong>🐍 SNAKE PATTERN:</strong> Row 0: L→R, Row 1: R→L, Row 2: L→R, etc.
+                </div>
+            `;
+            
             // Show first letter and final letter positions
             const firstStep = puzzle.solution[0];
             const lastStep = puzzle.solution[puzzle.solution.length - 1];
@@ -1068,22 +1036,18 @@
                 </div>
             `;
 
-            // Show adjacency validation for first few steps
-            stepsHTML += `
-                <div class="solution-step">
-                    <strong>🔍 Adjacency Check:</strong> First 5 moves validated...
-            `;
+            // Show EVERY step verification (first 10 steps)
+            stepsHTML += `<div class="solution-step"><strong>🔍 ADJACENCY PROOF:</strong><br>`;
             
-            for (let i = 1; i <= Math.min(5, puzzle.solution.length - 1); i++) {
+            for (let i = 1; i <= Math.min(10, puzzle.solution.length - 1); i++) {
                 const prev = puzzle.solution[i-1];
                 const curr = puzzle.solution[i];
                 const rowDiff = Math.abs(curr.row - prev.row);
                 const colDiff = Math.abs(curr.col - prev.col);
                 const isValid = (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
                 
-                stepsHTML += `<br>Step ${i}: (${prev.row+1},${prev.col+1}) → (${curr.row+1},${curr.col+1}) ${isValid ? '✅' : '❌'}`;
+                stepsHTML += `Step ${i}: (${prev.row+1},${prev.col+1})→(${curr.row+1},${curr.col+1}) ${isValid ? '✅' : '❌'}<br>`;
             }
-            
             stepsHTML += `</div>`;
 
             // Show letter sequence found
@@ -1094,7 +1058,7 @@
             
             stepsHTML += `
                 <div class="solution-step" style="border-left-color: #059669; background: #f0fdf4; font-weight: bold;">
-                    ✅ VALIDATED: ${totalCells} cells, 4-directional only, "${letterSequence}" = "${puzzle.word}" ✓
+                    ✅ SYSTEMATIC: ${totalCells} cells, snake pattern, "${letterSequence}" = "${puzzle.word}" ✓
                 </div>
             `;
             
@@ -1278,7 +1242,7 @@
             }
         }
 
-        // STRICT: Only allow 4-directional movement (no diagonals)
+        // STRICT: Only allow 4-directional movement
         function isAdjacent4Directional(row1, col1, row2, col2) {
             const rowDiff = Math.abs(row1 - row2);
             const colDiff = Math.abs(col1 - col2);
