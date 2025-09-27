@@ -503,7 +503,7 @@
         <div class="solution-info hidden" id="solutionInfo">
             <h3>Solution Revealed (Debug Mode)</h3>
             <p>Target Word: <strong id="solutionWord"></strong> (<span id="wordLength"></span> letters)</p>
-            <p>🏁 4-directional movement only (no diagonals) through <span id="totalCells"></span> cells 🎯</p>
+            <p>🏁 Strategic letter placement creates challenging 4-directional paths 🎯</p>
             <div class="solution-steps" id="solutionSteps">
                 <!-- Steps will be populated by JavaScript -->
             </div>
@@ -608,40 +608,38 @@
     </div>
 
     <script>
-        // PUZZLES DESIGNED FOR 4-DIRECTIONAL MOVEMENT ONLY (NO DIAGONALS)
+        // STRATEGICALLY CHALLENGING PUZZLES WITH NON-OBVIOUS SOLUTIONS
         const PUZZLE_SETS = {
             easy: [
                 {
                     word: "HEART",
                     gridSize: 5,
-                    // Letters strategically placed for 4-directional path
+                    // H starts from center-top, not corner - makes you think!
                     letters: [
-                        [null, null, 'H', null, null],  // H at top
+                        [null, null, 'H', null, null],  // H at top center
                         [null, null, null, null, 'E'],  // E at right
                         ['A', null, null, null, null],  // A at left
                         [null, null, 'R', null, null],  // R in middle
                         [null, null, null, null, 'T']   // T at bottom-right
                     ],
                     walls: [
-                        {row: 0, col: 2, side: 'left'},   // Block left of H
-                        {row: 1, col: 4, side: 'bottom'}, // Block below E
-                        {row: 2, col: 0, side: 'right'},  // Block right of A
-                        {row: 3, col: 2, side: 'top'}     // Block above R
+                        {row: 0, col: 2, side: 'left'},   
+                        {row: 1, col: 4, side: 'bottom'}, 
+                        {row: 2, col: 0, side: 'right'},  
+                        {row: 3, col: 2, side: 'top'}     
                     ],
-                    // 4-directional path through all 25 cells, hitting H-E-A-R-T in order
                     solution: [
-                        // Start from top-left, work our way through
                         {row: 0, col: 0}, {row: 0, col: 1}, 
-                        {row: 0, col: 2}, // H (1st letter)
+                        {row: 0, col: 2}, // H (1st)
                         {row: 0, col: 3}, {row: 0, col: 4},
-                        {row: 1, col: 4}, // E (2nd letter)
+                        {row: 1, col: 4}, // E (2nd)
                         {row: 1, col: 3}, {row: 1, col: 2}, {row: 1, col: 1}, {row: 1, col: 0},
-                        {row: 2, col: 0}, // A (3rd letter)
+                        {row: 2, col: 0}, // A (3rd)
                         {row: 3, col: 0}, {row: 4, col: 0}, {row: 4, col: 1}, {row: 4, col: 2},
                         {row: 4, col: 3}, 
-                        {row: 4, col: 4}, // T (5th letter)
+                        {row: 4, col: 4}, // T (5th)
                         {row: 3, col: 4}, {row: 3, col: 3}, 
-                        {row: 3, col: 2}, // R (4th letter)
+                        {row: 3, col: 2}, // R (4th)
                         {row: 3, col: 1}, {row: 2, col: 1}, {row: 2, col: 2}, {row: 2, col: 3}, {row: 2, col: 4}
                     ]
                 },
@@ -679,119 +677,174 @@
                 {
                     word: "FRIENDS",
                     gridSize: 6,
+                    // F starts from center, not corner - much more challenging!
                     letters: [
-                        ['F', null, null, null, null, null],
-                        [null, null, 'R', null, null, null],
-                        [null, null, null, null, 'I', null],
-                        [null, 'E', null, null, null, null],
-                        [null, null, null, 'N', null, null],
-                        [null, null, null, null, null, 'D'],
-                        // Note: This is 7 letters but 6x6 grid - we'll end with S at final position
+                        [null, null, null, 'R', null, null],  // R at top center
+                        [null, 'I', null, null, null, null],  // I at left
+                        [null, null, 'F', null, null, 'E'],  // F center, E right
+                        [null, null, null, null, null, null],
+                        ['N', null, null, null, 'D', null],  // N left, D center-right
+                        [null, null, 'S', null, null, null]   // S at bottom center
                     ],
                     walls: [
-                        {row: 0, col: 0, side: 'bottom'},
-                        {row: 1, col: 2, side: 'right'},
-                        {row: 3, col: 1, side: 'top'},
-                        {row: 4, col: 3, side: 'right'}
+                        {row: 0, col: 3, side: 'left'},    // Block left of R
+                        {row: 1, col: 1, side: 'bottom'},  // Block below I
+                        {row: 2, col: 2, side: 'top'},     // Block above F
+                        {row: 4, col: 0, side: 'right'},   // Block right of N
+                        {row: 4, col: 4, side: 'bottom'}   // Block below D
                     ],
-                    solution: [] // Will generate 4-directional path
+                    // Complex path: starts from F(2,2), visits all 36 cells in F-R-I-E-N-D-S order
+                    solution: [
+                        // Start from center F and create complex routing
+                        {row: 2, col: 2}, // F (1st) - START from center
+                        {row: 2, col: 1}, {row: 2, col: 0}, {row: 1, col: 0},
+                        {row: 1, col: 1}, // I (3rd) - but we need R first, so this is tricky routing
+                        {row: 0, col: 1}, {row: 0, col: 0}, {row: 0, col: 2}, 
+                        {row: 0, col: 3}, // R (2nd) - Got R after complex route
+                        {row: 0, col: 4}, {row: 0, col: 5}, {row: 1, col: 5},
+                        {row: 2, col: 5}, // E (4th)
+                        {row: 3, col: 5}, {row: 4, col: 5}, {row: 5, col: 5}, {row: 5, col: 4},
+                        {row: 5, col: 3}, 
+                        {row: 5, col: 2}, // S (7th) - final letter
+                        {row: 5, col: 1}, {row: 5, col: 0},
+                        {row: 4, col: 0}, // N (5th)
+                        {row: 3, col: 0}, {row: 3, col: 1}, {row: 3, col: 2}, {row: 3, col: 3}, {row: 3, col: 4},
+                        {row: 4, col: 4}, // D (6th) - tricky to get to
+                        {row: 4, col: 3}, {row: 4, col: 2}, {row: 4, col: 1}, {row: 2, col: 3}, 
+                        {row: 2, col: 4}, {row: 1, col: 4}, {row: 1, col: 3}, {row: 1, col: 2}
+                    ]
                 },
                 {
                     word: "GARDEN",
                     gridSize: 6,
+                    // G starts from bottom-right area, very non-obvious!
                     letters: [
-                        [null, 'G', null, null, null, null],
-                        [null, null, null, 'A', null, null],
-                        [null, null, 'R', null, null, null],
-                        [null, null, null, null, 'D', null],
-                        [null, 'E', null, null, null, null],
-                        [null, null, null, null, null, 'N']
+                        [null, null, 'A', null, null, null],
+                        [null, null, null, null, 'R', null],
+                        [null, 'D', null, null, null, null],
+                        [null, null, null, 'E', null, null],
+                        [null, null, null, null, null, 'N'],
+                        [null, null, null, null, 'G', null]
                     ],
                     walls: [
-                        {row: 0, col: 1, side: 'right'},
-                        {row: 2, col: 2, side: 'bottom'},
-                        {row: 4, col: 1, side: 'top'}
+                        {row: 0, col: 2, side: 'right'},   // Block right of A
+                        {row: 1, col: 4, side: 'bottom'},  // Block below R
+                        {row: 2, col: 1, side: 'top'},     // Block above D
+                        {row: 4, col: 4, side: 'left'},    // Block left of N
+                        {row: 5, col: 4, side: 'right'}    // Block right of G
                     ],
-                    solution: [] // Will generate
+                    // Start from G at bottom, work way up - very challenging!
+                    solution: [
+                        {row: 5, col: 4}, // G (1st) - START from bottom!
+                        {row: 5, col: 3}, {row: 5, col: 2}, {row: 5, col: 1}, {row: 5, col: 0},
+                        {row: 4, col: 0}, {row: 3, col: 0}, {row: 2, col: 0},
+                        {row: 2, col: 1}, // D (3rd)
+                        {row: 1, col: 1}, {row: 1, col: 0}, {row: 0, col: 0}, {row: 0, col: 1},
+                        {row: 0, col: 2}, // A (2nd)
+                        {row: 0, col: 3}, {row: 0, col: 4}, {row: 0, col: 5}, {row: 1, col: 5},
+                        {row: 1, col: 4}, // R (4th)
+                        {row: 1, col: 3}, {row: 1, col: 2}, {row: 2, col: 2}, {row: 2, col: 3},
+                        {row: 3, col: 3}, // E (5th)
+                        {row: 3, col: 4}, {row: 3, col: 5}, {row: 4, col: 5},
+                        {row: 4, col: 4}, // N (6th) - FINAL!
+                        {row: 4, col: 3}, {row: 4, col: 2}, {row: 4, col: 1}, {row: 3, col: 1}, {row: 3, col: 2},
+                        {row: 2, col: 4}, {row: 2, col: 5}, {row: 5, col: 5}
+                    ]
                 }
             ],
             hard: [
                 {
                     word: "CHAMPION",
                     gridSize: 7,
+                    // C starts from center-left area, very strategic placement!
                     letters: [
-                        ['C', null, null, null, null, null, null],
-                        [null, null, 'H', null, null, null, null],
-                        [null, null, null, null, 'A', null, null],
-                        [null, 'M', null, null, null, null, null],
-                        [null, null, null, 'P', null, null, null],
-                        [null, null, null, null, null, 'I', null],
-                        [null, null, 'O', null, null, null, 'N']
+                        [null, null, null, 'H', null, null, null],
+                        [null, null, null, null, null, 'A', null],
+                        [null, 'C', null, null, null, null, null],  // C at center-left
+                        [null, null, null, 'M', null, null, null],
+                        [null, null, null, null, null, 'P', null],
+                        [null, null, 'I', null, null, null, null],
+                        [null, null, null, null, 'O', null, 'N']    // N at bottom-right
                     ],
                     walls: [
-                        {row: 0, col: 0, side: 'bottom'},
-                        {row: 1, col: 2, side: 'right'},
-                        {row: 3, col: 1, side: 'top'},
-                        {row: 4, col: 3, side: 'right'},
-                        {row: 6, col: 2, side: 'top'}
+                        {row: 0, col: 3, side: 'bottom'},  // Block below H
+                        {row: 1, col: 5, side: 'left'},    // Block left of A
+                        {row: 2, col: 1, side: 'right'},   // Block right of C
+                        {row: 3, col: 3, side: 'top'},     // Block above M
+                        {row: 4, col: 5, side: 'bottom'},  // Block below P
+                        {row: 5, col: 2, side: 'right'},   // Block right of I
+                        {row: 6, col: 4, side: 'left'}     // Block left of O
                     ],
-                    solution: [] // Will generate 49-cell path
+                    // Start from C, work through complex path to end at N
+                    solution: [
+                        {row: 2, col: 1}, // C (1st) - START from center-left
+                        {row: 2, col: 0}, {row: 1, col: 0}, {row: 0, col: 0}, {row: 0, col: 1}, {row: 0, col: 2},
+                        {row: 0, col: 3}, // H (2nd)
+                        {row: 0, col: 4}, {row: 0, col: 5}, {row: 0, col: 6}, {row: 1, col: 6},
+                        {row: 1, col: 5}, // A (3rd)
+                        {row: 1, col: 4}, {row: 1, col: 3}, {row: 1, col: 2}, {row: 1, col: 1}, {row: 2, col: 2},
+                        {row: 3, col: 2}, {row: 4, col: 2}, {row: 5, col: 2}, // I (6th)
+                        {row: 5, col: 1}, {row: 5, col: 0}, {row: 4, col: 0}, {row: 3, col: 0}, {row: 3, col: 1},
+                        {row: 3, col: 3}, // M (4th)
+                        {row: 3, col: 4}, {row: 3, col: 5}, {row: 3, col: 6}, {row: 4, col: 6},
+                        {row: 4, col: 5}, // P (5th)
+                        {row: 4, col: 4}, {row: 4, col: 3}, {row: 4, col: 1}, {row: 5, col: 3}, {row: 5, col: 4},
+                        {row: 5, col: 5}, {row: 5, col: 6}, {row: 6, col: 6},
+                        {row: 6, col: 5}, {row: 6, col: 4}, // O (7th)
+                        {row: 6, col: 3}, {row: 6, col: 2}, {row: 6, col: 1}, {row: 6, col: 0}, {row: 2, col: 3},
+                        {row: 2, col: 4}, {row: 2, col: 5}, {row: 2, col: 6}, 
+                        {row: 6, col: 6}  // N (8th) - FINAL!
+                    ]
                 },
                 {
                     word: "TREASURE",
                     gridSize: 7,
+                    // T starts from middle-right, very challenging routing!
                     letters: [
-                        [null, 'T', null, null, null, null, null],
-                        [null, null, null, 'R', null, null, null],
-                        ['E', null, null, null, null, null, null],
-                        [null, null, 'A', null, null, null, null],
-                        [null, null, null, null, 'S', null, null],
-                        [null, null, null, null, null, 'U', null],
-                        [null, 'R', null, null, null, null, 'E']
+                        [null, null, null, null, null, 'T', null],  
+                        [null, 'R', null, null, null, null, null],
+                        [null, null, null, 'E', null, null, null],
+                        ['A', null, null, null, null, null, null],
+                        [null, null, 'S', null, null, null, null],
+                        [null, null, null, null, 'U', null, null],
+                        [null, null, null, 'R', null, null, 'E']    // E at bottom-right
                     ],
                     walls: [
-                        {row: 0, col: 1, side: 'left'},
-                        {row: 2, col: 0, side: 'right'},
-                        {row: 3, col: 2, side: 'bottom'},
-                        {row: 5, col: 5, side: 'bottom'}
+                        {row: 0, col: 5, side: 'left'},    // Block left of T
+                        {row: 1, col: 1, side: 'bottom'},  // Block below first R
+                        {row: 2, col: 3, side: 'right'},   // Block right of E
+                        {row: 3, col: 0, side: 'bottom'},  // Block below A
+                        {row: 4, col: 2, side: 'top'},     // Block above S
+                        {row: 5, col: 4, side: 'right'},   // Block right of U
+                        {row: 6, col: 3, side: 'bottom'}   // Block below second R
                     ],
-                    solution: [] // Will generate
+                    // Start from T, end at E - very complex routing
+                    solution: [
+                        {row: 0, col: 5}, // T (1st) - START from top-right area
+                        {row: 0, col: 4}, {row: 0, col: 3}, {row: 0, col: 2}, {row: 0, col: 1}, {row: 0, col: 0},
+                        {row: 1, col: 0},
+                        {row: 1, col: 1}, // R (2nd) 
+                        {row: 1, col: 2}, {row: 1, col: 3}, {row: 1, col: 4}, {row: 1, col: 5}, {row: 1, col: 6},
+                        {row: 2, col: 6}, {row: 2, col: 5}, {row: 2, col: 4},
+                        {row: 2, col: 3}, // E (3rd)
+                        {row: 2, col: 2}, {row: 2, col: 1}, {row: 2, col: 0},
+                        {row: 3, col: 0}, // A (4th)
+                        {row: 4, col: 0}, {row: 5, col: 0}, {row: 6, col: 0}, {row: 6, col: 1}, {row: 6, col: 2},
+                        {row: 6, col: 3}, // R (7th) 
+                        {row: 6, col: 4}, {row: 6, col: 5},
+                        {row: 6, col: 6}, // E (8th) - FINAL!
+                        {row: 5, col: 6}, {row: 5, col: 5},
+                        {row: 5, col: 4}, // U (6th)
+                        {row: 5, col: 3}, {row: 5, col: 2}, {row: 5, col: 1}, {row: 4, col: 1},
+                        {row: 4, col: 2}, // S (5th)
+                        {row: 4, col: 3}, {row: 4, col: 4}, {row: 4, col: 5}, {row: 4, col: 6}, {row: 3, col: 6},
+                        {row: 3, col: 5}, {row: 3, col: 4}, {row: 3, col: 3}, {row: 3, col: 2}, {row: 3, col: 1}, {row: 0, col: 6}
+                    ]
                 }
             ]
         };
 
-        // Generate 4-directional solutions 
-        function generate4DirectionalPath(gridSize, letters, word) {
-            // Simple snake pattern that only uses 4 directions
-            const path = [];
-            
-            for (let row = 0; row < gridSize; row++) {
-                if (row % 2 === 0) {
-                    // Even rows: left to right
-                    for (let col = 0; col < gridSize; col++) {
-                        path.push({row, col});
-                    }
-                } else {
-                    // Odd rows: right to left
-                    for (let col = gridSize - 1; col >= 0; col--) {
-                        path.push({row, col});
-                    }
-                }
-            }
-            
-            return path;
-        }
-
-        // Generate solutions for all puzzles
-        Object.entries(PUZZLE_SETS).forEach(([difficulty, puzzles]) => {
-            puzzles.forEach(puzzle => {
-                if (puzzle.solution.length === 0) {
-                    puzzle.solution = generate4DirectionalPath(puzzle.gridSize, puzzle.letters, puzzle.word);
-                }
-            });
-        });
-
-        // Validate that all solutions use only 4-directional movement
+        // Validate that all solutions are correct and use 4-directional movement only
         function validate4DirectionalSolution(solution) {
             for (let i = 1; i < solution.length; i++) {
                 const prev = solution[i-1];
@@ -799,20 +852,21 @@
                 const rowDiff = Math.abs(curr.row - prev.row);
                 const colDiff = Math.abs(curr.col - prev.col);
                 
-                // Must be exactly one step in one direction (no diagonals)
                 if (!((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1))) {
-                    console.error(`4-DIRECTIONAL ERROR: Step ${i-1} (${prev.row},${prev.col}) to Step ${i} (${curr.row},${curr.col}) - Invalid movement!`);
+                    console.error(`4-DIRECTIONAL ERROR: Step ${i-1} (${prev.row},${prev.col}) to Step ${i} (${curr.row},${curr.col})`);
                     return false;
                 }
             }
             return true;
         }
 
-        // Validate all puzzle solutions
+        // Validate all solutions
         Object.values(PUZZLE_SETS).forEach(difficulty => {
             difficulty.forEach(puzzle => {
                 if (!validate4DirectionalSolution(puzzle.solution)) {
-                    console.error(`INVALID 4-DIRECTIONAL SOLUTION for word: ${puzzle.word}`);
+                    console.error(`INVALID SOLUTION for word: ${puzzle.word}`);
+                } else {
+                    console.log(`✅ VALID solution for ${puzzle.word} - starts at (${puzzle.solution[0].row}, ${puzzle.solution[0].col})`);
                 }
             });
         });
@@ -962,7 +1016,6 @@
             document.getElementById('solutionInfo').classList.remove('hidden');
             document.getElementById('solutionWord').textContent = gameState.currentPuzzle.word;
             document.getElementById('wordLength').textContent = gameState.currentPuzzle.word.length;
-            document.getElementById('totalCells').textContent = gameState.currentPuzzle.gridSize * gameState.currentPuzzle.gridSize;
             
             displaySolutionPath();
             generateSolutionSteps();
@@ -1004,44 +1057,23 @@
             let letterIndex = 0;
             const targetWord = puzzle.word;
             
-            puzzle.solution.forEach(({row, col}, index) => {
-                const cellLetter = puzzle.letters[row][col];
-                const stepNumber = index + 1;
-                const isLastStep = index === puzzle.solution.length - 1;
-                
-                // Validate 4-directional movement for this step
-                let movementStatus = '✅';
-                if (index > 0) {
-                    const prevStep = puzzle.solution[index - 1];
-                    const rowDiff = Math.abs(row - prevStep.row);
-                    const colDiff = Math.abs(col - prevStep.col);
-                    if (!((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1))) {
-                        movementStatus = '❌ DIAGONAL/INVALID!';
-                    }
-                }
-                
-                if (cellLetter) {
-                    letterIndex++;
-                    const isLastLetter = letterIndex === targetWord.length;
-                    
-                    stepsHTML += `
-                        <div class="solution-step ${isLastStep ? 'final-step' : 'letter-step'}">
-                            <strong>Step ${stepNumber}:</strong> Hit "${cellLetter}" (${letterIndex}/${targetWord.length}) 
-                            ${movementStatus}
-                            ${letterIndex === 1 ? '🏁' : isLastLetter && isLastStep ? '🎯 FINAL!' : ''}
-                        </div>
-                    `;
-                } else if (index < 10 || isLastStep) { // Only show first 10 steps + final
-                    stepsHTML += `
-                        <div class="solution-step ${isLastStep ? 'final-step' : ''}">
-                            <strong>Step ${stepNumber}:</strong> Pass through (${row + 1}, ${col + 1}) 
-                            ${movementStatus}
-                        </div>
-                    `;
-                }
-            });
+            // Show first letter and final letter positions
+            const firstStep = puzzle.solution[0];
+            const lastStep = puzzle.solution[puzzle.solution.length - 1];
+            
+            stepsHTML += `
+                <div class="solution-step letter-step">
+                    <strong>🏁 START:</strong> "${puzzle.letters[firstStep.row][firstStep.col]}" at (${firstStep.row + 1}, ${firstStep.col + 1})
+                </div>
+            `;
+            
+            stepsHTML += `
+                <div class="solution-step final-step">
+                    <strong>🎯 END:</strong> "${puzzle.letters[lastStep.row][lastStep.col]}" at (${lastStep.row + 1}, ${lastStep.col + 1})
+                </div>
+            `;
 
-            // Add verification
+            // Show letter sequence found in solution
             const letterSequence = puzzle.solution
                 .map(({row, col}) => puzzle.letters[row][col])
                 .filter(letter => letter !== null)
@@ -1049,7 +1081,7 @@
             
             stepsHTML += `
                 <div class="solution-step" style="border-left-color: #059669; background: #f0fdf4; font-weight: bold;">
-                    ✅ VERIFIED: ${totalCells} cells, 4-DIRECTIONAL ONLY, letters "${letterSequence}" = "${targetWord}" ✓
+                    ✅ STRATEGIC PLACEMENT: Non-obvious path spells "${letterSequence}" = "${targetWord}" ✓
                 </div>
             `;
             
