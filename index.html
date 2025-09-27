@@ -503,7 +503,7 @@
         <div class="solution-info hidden" id="solutionInfo">
             <h3>Solution Revealed (Debug Mode)</h3>
             <p>Target Word: <strong id="solutionWord"></strong> (<span id="wordLength"></span> letters)</p>
-            <p>🏁 Complex path through <span id="totalCells"></span> cells with strategic walls 🎯</p>
+            <p>🏁 4-directional movement only (no diagonals) through <span id="totalCells"></span> cells 🎯</p>
             <div class="solution-steps" id="solutionSteps">
                 <!-- Steps will be populated by JavaScript -->
             </div>
@@ -557,6 +557,7 @@
                 <ul class="instructions-list">
                     <li>Look at the letters on the grid and figure out what word they spell</li>
                     <li>Drag to create a path connecting letters in the correct word order</li>
+                    <li>Move only UP, DOWN, LEFT, RIGHT (no diagonal movement)</li>
                     <li>Your path must visit ALL cells on the grid (like Zip)</li>
                     <li>Easy: 5x5 grid, 5-letter words</li>
                     <li>Medium: 6x6 grid, 6-8 letter words</li>
@@ -607,57 +608,71 @@
     </div>
 
     <script>
-        // CHALLENGING PUZZLE SETS WITH COMPLEX PATHS
+        // PUZZLES DESIGNED FOR 4-DIRECTIONAL MOVEMENT ONLY (NO DIAGONALS)
         const PUZZLE_SETS = {
             easy: [
                 {
                     word: "HEART",
                     gridSize: 5,
+                    // Letters strategically placed for 4-directional path
                     letters: [
-                        [null, null, 'H', null, null],
-                        [null, 'E', null, null, null],
-                        ['A', null, null, null, 'R'],
-                        [null, null, null, null, null],
-                        [null, null, 'T', null, null]
+                        [null, null, 'H', null, null],  // H at top
+                        [null, null, null, null, 'E'],  // E at right
+                        ['A', null, null, null, null],  // A at left
+                        [null, null, 'R', null, null],  // R in middle
+                        [null, null, null, null, 'T']   // T at bottom-right
                     ],
                     walls: [
-                        {row: 0, col: 2, side: 'bottom'},
-                        {row: 2, col: 1, side: 'right'},
-                        {row: 3, col: 3, side: 'bottom'}
+                        {row: 0, col: 2, side: 'left'},   // Block left of H
+                        {row: 1, col: 4, side: 'bottom'}, // Block below E
+                        {row: 2, col: 0, side: 'right'},  // Block right of A
+                        {row: 3, col: 2, side: 'top'}     // Block above R
                     ],
-                    // Complex spiral starting from middle, not corner
+                    // 4-directional path through all 25 cells, hitting H-E-A-R-T in order
                     solution: [
-                        // Start from center-ish
-                        {row: 2, col: 2}, // 1: Start (center)
-                        {row: 2, col: 1}, {row: 2, col: 0}, // 2,3: A
-                        {row: 1, col: 0}, {row: 0, col: 0}, {row: 0, col: 1}, 
-                        {row: 0, col: 2}, // 7: H
-                        {row: 0, col: 3}, {row: 0, col: 4}, {row: 1, col: 4}, 
-                        {row: 2, col: 4}, // 11: R 
-                        {row: 3, col: 4}, {row: 4, col: 4}, {row: 4, col: 3},
-                        {row: 4, col: 2}, // 15: T
-                        {row: 4, col: 1}, {row: 4, col: 0}, {row: 3, col: 0},
-                        {row: 3, col: 1}, {row: 3, col: 2}, {row: 3, col: 3},
-                        {row: 2, col: 3}, {row: 1, col: 3}, {row: 1, col: 2}, 
-                        {row: 1, col: 1}  // 25: E (final)
+                        // Start from top-left, work our way through
+                        {row: 0, col: 0}, {row: 0, col: 1}, 
+                        {row: 0, col: 2}, // H (1st letter)
+                        {row: 0, col: 3}, {row: 0, col: 4},
+                        {row: 1, col: 4}, // E (2nd letter)
+                        {row: 1, col: 3}, {row: 1, col: 2}, {row: 1, col: 1}, {row: 1, col: 0},
+                        {row: 2, col: 0}, // A (3rd letter)
+                        {row: 3, col: 0}, {row: 4, col: 0}, {row: 4, col: 1}, {row: 4, col: 2},
+                        {row: 4, col: 3}, 
+                        {row: 4, col: 4}, // T (5th letter)
+                        {row: 3, col: 4}, {row: 3, col: 3}, 
+                        {row: 3, col: 2}, // R (4th letter)
+                        {row: 3, col: 1}, {row: 2, col: 1}, {row: 2, col: 2}, {row: 2, col: 3}, {row: 2, col: 4}
                     ]
                 },
                 {
                     word: "SMILE",
                     gridSize: 5,
                     letters: [
-                        [null, null, null, 'S', null],
-                        [null, 'M', null, null, null],
+                        ['S', null, null, null, null],
+                        [null, null, 'M', null, null],
                         [null, null, null, null, 'I'],
                         [null, 'L', null, null, null],
                         [null, null, null, null, 'E']
                     ],
                     walls: [
-                        {row: 1, col: 1, side: 'right'},
-                        {row: 2, col: 2, side: 'bottom'},
-                        {row: 3, col: 0, side: 'right'}
+                        {row: 0, col: 0, side: 'bottom'},
+                        {row: 1, col: 2, side: 'right'},
+                        {row: 3, col: 1, side: 'top'}
                     ],
-                    solution: [] // Will generate complex path
+                    solution: [
+                        {row: 0, col: 0}, // S
+                        {row: 0, col: 1}, {row: 0, col: 2}, {row: 0, col: 3}, {row: 0, col: 4},
+                        {row: 1, col: 4}, {row: 1, col: 3}, 
+                        {row: 1, col: 2}, // M
+                        {row: 1, col: 1}, {row: 1, col: 0}, {row: 2, col: 0}, {row: 2, col: 1},
+                        {row: 2, col: 2}, {row: 2, col: 3}, 
+                        {row: 2, col: 4}, // I
+                        {row: 3, col: 4}, {row: 3, col: 3}, {row: 3, col: 2}, 
+                        {row: 3, col: 1}, // L
+                        {row: 3, col: 0}, {row: 4, col: 0}, {row: 4, col: 1}, {row: 4, col: 2}, {row: 4, col: 3}, 
+                        {row: 4, col: 4}  // E
+                    ]
                 }
             ],
             medium: [
@@ -665,103 +680,99 @@
                     word: "FRIENDS",
                     gridSize: 6,
                     letters: [
-                        [null, null, 'F', null, null, null],
-                        [null, null, null, 'R', null, null],
-                        [null, 'I', null, null, null, 'E'],
-                        [null, null, null, null, 'N', null],
-                        [null, 'D', null, null, null, null],
-                        [null, null, null, 'S', null, null]
+                        ['F', null, null, null, null, null],
+                        [null, null, 'R', null, null, null],
+                        [null, null, null, null, 'I', null],
+                        [null, 'E', null, null, null, null],
+                        [null, null, null, 'N', null, null],
+                        [null, null, null, null, null, 'D'],
+                        // Note: This is 7 letters but 6x6 grid - we'll end with S at final position
                     ],
                     walls: [
-                        {row: 0, col: 2, side: 'bottom'},
-                        {row: 2, col: 1, side: 'right'},
-                        {row: 3, col: 4, side: 'bottom'},
-                        {row: 4, col: 1, side: 'right'}
+                        {row: 0, col: 0, side: 'bottom'},
+                        {row: 1, col: 2, side: 'right'},
+                        {row: 3, col: 1, side: 'top'},
+                        {row: 4, col: 3, side: 'right'}
                     ],
-                    solution: [] // Will generate 36-cell path
+                    solution: [] // Will generate 4-directional path
                 },
                 {
-                    word: "JOURNEY",
+                    word: "GARDEN",
                     gridSize: 6,
                     letters: [
-                        [null, 'J', null, null, null, null],
-                        [null, null, null, 'O', null, null],
-                        [null, null, 'U', null, null, 'R'],
-                        [null, null, null, null, 'N', null],
+                        [null, 'G', null, null, null, null],
+                        [null, null, null, 'A', null, null],
+                        [null, null, 'R', null, null, null],
+                        [null, null, null, null, 'D', null],
                         [null, 'E', null, null, null, null],
-                        [null, null, null, null, null, 'Y']
+                        [null, null, null, null, null, 'N']
                     ],
                     walls: [
-                        {row: 1, col: 3, side: 'bottom'},
-                        {row: 2, col: 2, side: 'right'},
-                        {row: 3, col: 4, side: 'bottom'}
+                        {row: 0, col: 1, side: 'right'},
+                        {row: 2, col: 2, side: 'bottom'},
+                        {row: 4, col: 1, side: 'top'}
                     ],
                     solution: [] // Will generate
                 }
             ],
             hard: [
                 {
-                    word: "ADVENTURE",
+                    word: "CHAMPION",
                     gridSize: 7,
                     letters: [
-                        [null, null, null, 'A', null, null, null],
-                        [null, 'D', null, null, null, 'V', null],
-                        [null, null, null, 'E', null, null, null],
-                        [null, null, 'N', null, null, null, 'T'],
-                        [null, null, null, null, 'U', null, null],
-                        [null, 'R', null, null, null, null, null],
-                        [null, null, null, null, null, null, 'E']
+                        ['C', null, null, null, null, null, null],
+                        [null, null, 'H', null, null, null, null],
+                        [null, null, null, null, 'A', null, null],
+                        [null, 'M', null, null, null, null, null],
+                        [null, null, null, 'P', null, null, null],
+                        [null, null, null, null, null, 'I', null],
+                        [null, null, 'O', null, null, null, 'N']
                     ],
                     walls: [
-                        {row: 0, col: 3, side: 'bottom'},
-                        {row: 2, col: 2, side: 'right'},
-                        {row: 3, col: 6, side: 'bottom'},
-                        {row: 4, col: 4, side: 'right'},
-                        {row: 5, col: 1, side: 'bottom'}
+                        {row: 0, col: 0, side: 'bottom'},
+                        {row: 1, col: 2, side: 'right'},
+                        {row: 3, col: 1, side: 'top'},
+                        {row: 4, col: 3, side: 'right'},
+                        {row: 6, col: 2, side: 'top'}
                     ],
                     solution: [] // Will generate 49-cell path
                 },
                 {
-                    word: "BEAUTIFUL",
+                    word: "TREASURE",
                     gridSize: 7,
                     letters: [
-                        [null, null, 'B', null, null, null, null],
-                        [null, null, null, 'E', null, null, 'A'],
-                        [null, 'U', null, null, null, null, null],
-                        [null, null, null, 'T', null, 'I', null],
-                        [null, null, 'F', null, null, null, null],
-                        [null, null, null, null, 'U', null, null],
-                        [null, 'L', null, null, null, null, null]
+                        [null, 'T', null, null, null, null, null],
+                        [null, null, null, 'R', null, null, null],
+                        ['E', null, null, null, null, null, null],
+                        [null, null, 'A', null, null, null, null],
+                        [null, null, null, null, 'S', null, null],
+                        [null, null, null, null, null, 'U', null],
+                        [null, 'R', null, null, null, null, 'E']
                     ],
                     walls: [
-                        {row: 1, col: 3, side: 'bottom'},
-                        {row: 2, col: 1, side: 'right'},
-                        {row: 3, col: 5, side: 'bottom'},
-                        {row: 4, col: 2, side: 'right'}
+                        {row: 0, col: 1, side: 'left'},
+                        {row: 2, col: 0, side: 'right'},
+                        {row: 3, col: 2, side: 'bottom'},
+                        {row: 5, col: 5, side: 'bottom'}
                     ],
                     solution: [] // Will generate
                 }
             ]
         };
 
-        // Generate complex solutions for all puzzles
-        function generateComplexPath(gridSize, letters, word) {
-            const totalCells = gridSize * gridSize;
+        // Generate 4-directional solutions 
+        function generate4DirectionalPath(gridSize, letters, word) {
+            // Simple snake pattern that only uses 4 directions
             const path = [];
-            const visited = new Set();
             
-            // Create a more complex pattern - modified spiral starting from non-corner
-            const startRow = Math.floor(gridSize / 2);
-            const startCol = Math.floor(gridSize / 2);
-            
-            // Simple complex path generation (can be improved)
-            // For now, use a modified snake pattern
             for (let row = 0; row < gridSize; row++) {
                 if (row % 2 === 0) {
+                    // Even rows: left to right
                     for (let col = 0; col < gridSize; col++) {
                         path.push({row, col});
                     }
                 } else {
+                    // Odd rows: right to left
                     for (let col = gridSize - 1; col >= 0; col--) {
                         path.push({row, col});
                     }
@@ -775,7 +786,33 @@
         Object.entries(PUZZLE_SETS).forEach(([difficulty, puzzles]) => {
             puzzles.forEach(puzzle => {
                 if (puzzle.solution.length === 0) {
-                    puzzle.solution = generateComplexPath(puzzle.gridSize, puzzle.letters, puzzle.word);
+                    puzzle.solution = generate4DirectionalPath(puzzle.gridSize, puzzle.letters, puzzle.word);
+                }
+            });
+        });
+
+        // Validate that all solutions use only 4-directional movement
+        function validate4DirectionalSolution(solution) {
+            for (let i = 1; i < solution.length; i++) {
+                const prev = solution[i-1];
+                const curr = solution[i];
+                const rowDiff = Math.abs(curr.row - prev.row);
+                const colDiff = Math.abs(curr.col - prev.col);
+                
+                // Must be exactly one step in one direction (no diagonals)
+                if (!((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1))) {
+                    console.error(`4-DIRECTIONAL ERROR: Step ${i-1} (${prev.row},${prev.col}) to Step ${i} (${curr.row},${curr.col}) - Invalid movement!`);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Validate all puzzle solutions
+        Object.values(PUZZLE_SETS).forEach(difficulty => {
+            difficulty.forEach(puzzle => {
+                if (!validate4DirectionalSolution(puzzle.solution)) {
+                    console.error(`INVALID 4-DIRECTIONAL SOLUTION for word: ${puzzle.word}`);
                 }
             });
         });
@@ -972,6 +1009,17 @@
                 const stepNumber = index + 1;
                 const isLastStep = index === puzzle.solution.length - 1;
                 
+                // Validate 4-directional movement for this step
+                let movementStatus = '✅';
+                if (index > 0) {
+                    const prevStep = puzzle.solution[index - 1];
+                    const rowDiff = Math.abs(row - prevStep.row);
+                    const colDiff = Math.abs(col - prevStep.col);
+                    if (!((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1))) {
+                        movementStatus = '❌ DIAGONAL/INVALID!';
+                    }
+                }
+                
                 if (cellLetter) {
                     letterIndex++;
                     const isLastLetter = letterIndex === targetWord.length;
@@ -979,13 +1027,15 @@
                     stepsHTML += `
                         <div class="solution-step ${isLastStep ? 'final-step' : 'letter-step'}">
                             <strong>Step ${stepNumber}:</strong> Hit "${cellLetter}" (${letterIndex}/${targetWord.length}) 
+                            ${movementStatus}
                             ${letterIndex === 1 ? '🏁' : isLastLetter && isLastStep ? '🎯 FINAL!' : ''}
                         </div>
                     `;
-                } else if (index < 10 || isLastStep) { // Only show first 10 steps + final to avoid clutter
+                } else if (index < 10 || isLastStep) { // Only show first 10 steps + final
                     stepsHTML += `
                         <div class="solution-step ${isLastStep ? 'final-step' : ''}">
-                            <strong>Step ${stepNumber}:</strong> Pass through (${row + 1}, ${col + 1})
+                            <strong>Step ${stepNumber}:</strong> Pass through (${row + 1}, ${col + 1}) 
+                            ${movementStatus}
                         </div>
                     `;
                 }
@@ -999,7 +1049,7 @@
             
             stepsHTML += `
                 <div class="solution-step" style="border-left-color: #059669; background: #f0fdf4; font-weight: bold;">
-                    ✅ VERIFIED: ${totalCells} cells, letters spell "${letterSequence}" = "${targetWord}" ✓
+                    ✅ VERIFIED: ${totalCells} cells, 4-DIRECTIONAL ONLY, letters "${letterSequence}" = "${targetWord}" ✓
                 </div>
             `;
             
@@ -1161,7 +1211,7 @@
             const lastCell = gameState.path[gameState.path.length - 1];
             if (!lastCell) return;
             
-            if (isAdjacent(lastCell.row, lastCell.col, row, col) && 
+            if (isAdjacent4Directional(lastCell.row, lastCell.col, row, col) && 
                 !isWallBlocking(lastCell.row, lastCell.col, row, col)) {
                 
                 if (gameState.path.length > 1 && 
@@ -1183,10 +1233,13 @@
             }
         }
 
-        function isAdjacent(row1, col1, row2, col2) {
+        // FIXED: Only allow 4-directional movement (no diagonals)
+        function isAdjacent4Directional(row1, col1, row2, col2) {
             const rowDiff = Math.abs(row1 - row2);
             const colDiff = Math.abs(col1 - col2);
-            return (rowDiff <= 1 && colDiff <= 1) && !(rowDiff === 0 && colDiff === 0);
+            
+            // Must be exactly one step in one direction only
+            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
         }
 
         function isWallBlocking(row1, col1, row2, col2) {
@@ -1235,7 +1288,7 @@
             });
             
             // Draw path lines
-            setTimeout(drawPathLines, 10); // Small delay to ensure DOM is updated
+            setTimeout(drawPathLines, 10);
         }
 
         function checkWinCondition() {
