@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pointed — India Edition (ET Weekly)</title>
+  <style>
+    /* Clean Pointed-like styling (inspired by Bloomberg Pointed) */
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa9bd;--accent:#16a34a;--danger:#ef4444;--glass:rgba(255,255,255,0.04)}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef8;background:linear-gradient(180deg,#071023 0%, #091426 100%);}
+    .wrap{max-width:980px;margin:28px auto;padding:24px}
+    header{display:flex;align-items:center;gap:16px}
+    .logo{background:var(--glass);padding:10px 14px;border-radius:8px;font-weight:700}
+    h1{margin:0;font-size:20px}
+    .controls{margin-top:18px;display:flex;gap:12px;flex-wrap:wrap}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.6);}
+    .weights{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+    label{display:block;font-size:13px;color:var(--muted);}
+    input[type=number]{width:84px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff}
+    .sumline{margin-top:8px;color:var(--muted);font-size:13px}
+    #startBtn{margin-left:auto;padding:10px 14px;border-radius:9px;background:#0ea5a4;border:none;color:#051014;font-weight:700;cursor:pointer}
+    main{margin-top:18px}
+    .questionCard{padding:20px;border-radius:12px;margin-top:12px}
+    .qheader{display:flex;align-items:center;gap:12px}
+    .category{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.03);font-weight:700}
+    .qtext{margin-top:10px;font-size:18px}
+    .options{margin-top:14px;display:grid;gap:8px}
+    .opt{padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;background:transparent}
+    .opt.correct{background:rgba(22,163,74,0.15);border-color:rgba(22,163,74,0.3)}
+    .opt.wrong{background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.25)}
+    .scoreBox{margin-top:14px;color:var(--muted)}
+    .leverage{display:flex;gap:10px;margin-top:12px}
+    .levBtn{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);cursor:pointer}
+    footer{margin-top:18px;display:flex;gap:12px;align-items:center}
+    .summary{margin-left:auto;color:var(--muted)}
+    @media(max-width:640px){.weights{grid-template-columns:1fr}
+      .wrap{padding:12px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">POINTED • India</div>
+      <div>
+        <h1>Weekly quiz — based on Economic Times (19 Nov 2025)</h1>
+        <div style="color:var(--muted);font-size:13px">10 questions • Allocate weights then play • One-time leverages: 0.5×, 2×, 3×</div>
+      </div>
+      <button id="startBtn" class="card">Start Quiz</button>
+    </header>
+
+    <div class="controls">
+      <div class="card" style="flex:1">
+        <strong>Allocate category weights (min 5, max 30). Total must be 100.</strong>
+        <div class="weights" id="weightsGrid"></div>
+        <div class="sumline">Sum: <span id="sumDisplay">0</span> / 100</div>
+      </div>
+      <div class="card" style="width:320px">
+        <strong>Rules & Scoring</strong>
+        <div class="scoreBox">Base points per question: <b id="basePoints">10</b> pts (scaled by category weight).<br>
+        Wrong answer subtracts same points. Use leverages once each: 0.5× (half), 2×, 3×.</div>
+        <div style="margin-top:10px">Leverages left:</div>
+        <div class="leverage">
+          <button class="levBtn" id="levHalf">0.5×</button>
+          <button class="levBtn" id="lev2x">2×</button>
+          <button class="levBtn" id="lev3x">3×</button>
+        </div>
+      </div>
+    </div>
+
+    <main id="gameArea"></main>
+
+    <footer>
+      <div class="card">Questions sourced from: Economic Times, Nov 19 2025 (epaper)</div>
+      <div class="summary">Score: <span id="score">0</span></div>
+    </footer>
+  </div>
+
+  <script>
+    // ======= QUESTIONS (will be visible in the page code) ======
+    const QUESTIONS = [
+      // Politics
+      {id:1, category:'Politics', text:'Top Maoist commander Madavi Hidma was reported killed in an encounter. Which of the following is true about the operation as reported?',
+       choices:[
+         'It took place at the Andhra Pradesh-Chhattisgarh-Telangana trijunction and included Hidma\'s wife among the deceased',
+         'It occurred in northern Kashmir during counterinsurgency operations',
+         'Hidma escaped and remains at large',
+         'It was a joint Indo-US operation'
+       ], answer:0, citeKey:'Q1'},
+
+      // Politics / Environment law
+      {id:2, category:'Domestic policies', text:'The Supreme Court revived a mechanism allowing retrospective environmental clearances (EC). What did the majority opinion permit?',
+       choices:[
+         'Granting retrospective ECs for projects that began without approval',
+         'Banning all retrospective clearances permanently',
+         'Ordering demolition of all projects with delayed ECs immediately',
+         'Allowing retrospective EC only for central government projects'
+       ], answer:0, citeKey:'Q2'},
+
+      // Markets / Corporate
+      {id:3, category:'Markets', text:'Creditors of Jaiprakash Associates picked which bidder at the electronic auction, and why was this notable?',
+       choices:[
+         'Adani Enterprises — chosen for higher upfront payments despite a lower NPV than Vedanta\'s bid',
+         'Vedanta — as the highest financial value bid',
+         'NTPC — due to strategic government backing',
+         'An international consortium — for global expertise'
+       ], answer:0, citeKey:'Q3'},
+
+      // Economy / Energy
+      {id:4, category:'Economy', text:'Reports said Russian crude loadings for India plunged around what fraction in early November, and what was the likely reason?',
+       choices:[
+         'They fell by about two-thirds due to refiners\' caution amid US sanctions',
+         'They rose by 50% because of discounted cargoes',
+         'They remained unchanged, with steady long-term contracts',
+         'They doubled because India sought strategic stocks'
+       ], answer:0, citeKey:'Q4'},
+
+      // International
+      {id:5, category:'International', text:'The UN Security Council adopted a US-drafted resolution tied to a 20-point plan for Gaza. What key step did the resolution authorise?',
+       choices:[
+         'An international stabilisation force and a transitional governance body',
+         'Immediate full withdrawal of Israeli forces without conditions',
+         'The annexation of Gaza by neighbouring states',
+         'Unilateral recognition of Hamas as a sovereign government'
+       ], answer:0, citeKey:'Q5'},
+
+      // Domestic policy / Travel
+      {id:6, category:'Domestic policies', text:'Iran suspended visa-free entry for Indian citizens starting Nov 22. What was the stated reason?',
+       choices:[
+         'Misuse of the waiver by organised traffickers who lured Indians with fake job offers',
+         'A diplomatic row over trade tariffs',
+         'Concerns over pilgrim overcrowding',
+         'An earthquake recovery measure'
+       ], answer:0, citeKey:'Q6'},
+
+      // Brands & Startups
+      {id:7, category:'Brands & Startups', text:'Which international beverage investor was reported in talks to exit its stake in B9 (Bira) amid the brewer\'s troubles?',
+       choices:[
+         'Kirin Holdings of Japan',
+         'Heineken of the Netherlands',
+         'Anheuser-Busch InBev',
+         'Diageo'
+       ], answer:0, citeKey:'Q7'},
+
+      // Tech / AI investments
+      {id:8, category:'Economy/Tech', text:'Microsoft and Nvidia were reported to be committing to invest up to a combined amount in Anthropic. What was the headline figure, and why is this significant?',
+       choices:[
+         'Up to $15 billion — tying big cloud and chip providers closer to an AI developer',
+         '$1 billion — a small strategic partnership',
+         '$100 billion — an acquisition plan',
+         'No investment; only computing contracts'
+       ], answer:0, citeKey:'Q8'},
+
+      // Sports
+      {id:9, category:'Sports', text:'Indian boxer Preeti Pawar stunned which accomplished opponent to reach the World Boxing Cup final?',
+       choices:[
+         'Olympic medallist and three-time world champion Huang Hsiao-Wen of Chinese Taipei',
+         'Katie Taylor of Ireland',
+         'Mary Kom',
+         'Claressa Shields'
+       ], answer:0, citeKey:'Q9'},
+
+      // Tech / Regulation
+      {id:10, category:'Tech & Data', text:'Government plans to set up a search-and-selection panel by December for which board related to the new digital personal data framework?',
+       choices:[
+         'Data Protection Board of India (DPBI)',
+         'National Cybersecurity Board',
+         'Telecom Regulatory Authority',
+         'Central Bank Digital Currency Board'
+       ], answer:0, citeKey:'Q10'}
+    ];
+
+    // ======= Internal state ======
+    const categories = [...new Set(QUESTIONS.map(q=>q.category))];
+    const weights = {}; categories.forEach(c=>weights[c]=Math.round(100/categories.length));
+    const base = 10; let totalScore = 0; let currentQ = 0; let usedLevers={halfx:false,t2:false,t3:false};
+
+    // build weights UI
+    const wg = document.getElementById('weightsGrid');
+    categories.forEach(cat=>{
+      const div = document.createElement('div'); div.className='';
+      div.innerHTML = `<label>${cat}</label><input type="number" min=5 max=30 value="${weights[cat]}" data-cat="${cat}">`;
+      wg.appendChild(div);
+    });
+    function updateSum(){
+      const inputs = wg.querySelectorAll('input'); let s=0; inputs.forEach(i=>s+=Number(i.value)); document.getElementById('sumDisplay').innerText=s; return s;
+    }
+    wg.addEventListener('input',()=>{updateSum();}); updateSum();
+
+    // leverages
+    document.getElementById('levHalf').addEventListener('click',()=>{ if(usedLevers.halfx) return alert('Already used'); currentLever='half';});
+    document.getElementById('lev2x').addEventListener('click',()=>{ if(usedLevers.t2) return alert('Already used'); currentLever='x2';});
+    document.getElementById('lev3x').addEventListener('click',()=>{ if(usedLevers.t3) return alert('Already used'); currentLever='x3';});
+    let currentLever = null;
+
+    // start quiz
+    document.getElementById('startBtn').addEventListener('click',()=>{
+      // validate sum
+      const s = updateSum(); if(s!==100){alert('Weights must add up to 100');return}
+      // capture weights
+      wg.querySelectorAll('input').forEach(i=>weights[i.dataset.cat]=Number(i.value));
+      document.getElementById('gameArea').innerHTML=''; currentQ=0; totalScore=0; document.getElementById('score').innerText='0'; showQuestion();
+    });
+
+    function calculatePointsForCategory(cat){
+      // base * (weight/10) where weight 10 is base multiplier; mimic description: weight 5 halves, 20 doubles, so multiplier = weight/10
+      return base * (weights[cat]/10);
+    }
+
+    function showQuestion(){
+      if(currentQ>=QUESTIONS.length){
+        document.getElementById('gameArea').innerHTML = `<div class='card questionCard'><h2>Quiz complete</h2><p>Your final score: <b>${totalScore}</b></p></div>`; return;
+      }
+      const q = QUESTIONS[currentQ];
+      const ga=document.getElementById('gameArea'); ga.innerHTML='';
+      const card = document.createElement('div'); card.className='card questionCard';
+      card.innerHTML = `<div class='qheader'><div class='category'>${q.category}</div><div style='margin-left:auto;color:var(--muted)'>Q ${currentQ+1} of ${QUESTIONS.length}</div></div>
+                        <div class='qtext'>${q.text}</div>
+                        <div class='options' id='opts'></div>
+                        <div class='scoreBox'>Possible points for correct answer (before leverage): <b>${calculatePointsForCategory(q.category)}</b></div>`;
+      ga.appendChild(card);
+      const opts = card.querySelector('#opts');
+      q.choices.forEach((c,i)=>{
+        const b = document.createElement('div'); b.className='opt'; b.innerText = c; b.addEventListener('click',()=>selectOption(b,i,q)); opts.appendChild(b);
+      });
+    }
+
+    function selectOption(el,index,q){
+      // prevent double selection
+      if(el.classList.contains('correct')||el.classList.contains('wrong')) return;
+      const pts = calculatePointsForCategory(q.category);
+      // apply leverage if any
+      let multiplier = 1;
+      if(currentLever==='half'){ multiplier = 0.5; usedLevers.halfx=true; document.getElementById('levHalf').innerText='0.5× ✓'; }
+      if(currentLever==='x2'){ multiplier = 2; usedLevers.t2=true; document.getElementById('lev2x').innerText='2× ✓'; }
+      if(currentLever==='x3'){ multiplier = 3; usedLevers.t3=true; document.getElementById('lev3x').innerText='3× ✓'; }
+      currentLever = null;
+
+      const finalPts = Math.round(pts * multiplier);
+      const allOpts = document.querySelectorAll('.opt');
+      // mark correct and wrong
+      allOpts.forEach((o,idx)=>{
+        if(idx===q.answer){ o.classList.add('correct'); }
+        if(idx!==q.answer && o!==el) o.style.opacity='0.8';
+      });
+      if(index===q.answer){
+        el.classList.add('correct'); totalScore += finalPts; showPointChange(+finalPts);
+      } else {
+        el.classList.add('wrong'); totalScore -= finalPts; showPointChange(-finalPts);
+      }
+      document.getElementById('score').innerText = totalScore;
+      // move to next question after a short pause
+      setTimeout(()=>{ currentQ++; showQuestion(); }, 1100);
+    }
+
+    function showPointChange(delta){
+      const box = document.createElement('div'); box.style.marginTop='10px'; box.style.fontWeight='700'; box.style.color = delta>0 ? 'var(--accent)' : 'var(--danger)'; box.innerText = (delta>0?'+':'')+delta+' pts'; document.querySelector('.questionCard').appendChild(box);
+    }
+
+    // expose QUESTIONS for debugging in console
+    window.POINTED_Q = QUESTIONS;
+  </script>
+</body>
+</html>
