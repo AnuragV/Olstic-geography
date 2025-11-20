@@ -247,117 +247,147 @@ updateSum();
 
 /* QUESTIONS (same content as before but category names updated to match new list) */
 let QUESTIONS = [
+  // 1 — Politics (factual)
   {
-    id:1, category:'Politics',
-    text: "Operations in Andhra Pradesh around Maredumilli reported the death of several Maoists after back-to-back encounters. Which logistical or reporting detail complicated immediate confirmation?",
-    choices:[
-      {t:"The rugged trijunction terrain and delayed forensic access meant early reports included unverified identities", correct:true},
-      {t:"All state agencies immediately released detailed DNA reports confirming identities", correct:false},
-      {t:"An international monitoring mission had already published its findings", correct:false},
-      {t:"A public broadcast from the insurgent group confirmed the event in real-time", correct:false}
+    id: 1,
+    category: 'Politics',
+    text: "A series of encounters near Maredumilli led to media reports about multiple Maoist fatalities. In which state did these encounters take place?",
+    choices: [
+      { t: "Andhra Pradesh", correct: true },
+      { t: "Chhattisgarh", correct: false },
+      { t: "Telangana", correct: false },
+      { t: "Odisha", correct: false }
     ],
-    explain:"Initial coverage noted that rugged terrain and security constraints delayed on-site verification; subsequent police briefings clarified identities after forensic checks (reports emphasised caution in early claims)."
+    explain: "The Maredumilli encounters were reported in Andhra Pradesh; the area is near the trijunction with Chhattisgarh and Telangana, which complicated immediate reporting."
   },
+
+  // 2 — Domestic developments (factual)
   {
-    id:2, category:'Domestic developments',
-    text: "A deported suspect with transnational links was taken into custody upon arrival. In such cases, what is a common legal step countries often take next?",
-    choices:[
-      {t:"National investigative agencies remand the suspect for questioning while examining international cooperation requests", correct:true},
-      {t:"The suspect is automatically repatriated to a third country without formal charge", correct:false},
-      {t:"All charges are dismissed due to diplomatic immunity", correct:false},
-      {t:"Courts immediately order public trials within 24 hours", correct:false}
+    id: 2,
+    category: 'Domestic developments',
+    text: "A deported suspect with alleged transnational links was taken into custody on arrival. Which central investigative agency is typically tasked with such cases in India?",
+    choices: [
+      { t: "National Investigation Agency (NIA)", correct: true },
+      { t: "Enforcement Directorate (ED)", correct: false },
+      { t: "Central Bureau of Investigation (CBI)", correct: false },
+      { t: "National Crime Records Bureau (NCRB)", correct: false }
     ],
-    explain:"When deportees arrive with suspected links to organised crime, agencies like the NIA typically remand them for questioning while coordinating with foreign counterparts to gather evidence; this is standard operational procedure."
+    explain: "The NIA investigates terrorism and related transnational security threats; deportees with such links are often handed to national investigative agencies for follow-up."
   },
+
+  // 3 — Markets (factual + reason)
   {
-    id:3, category:'Markets',
-    text: "When a global bank looks to sell its retail arm in a market, why might domestic bidders offering higher upfront cash be preferred by creditors over higher long-term valuations?",
-    choices:[
-      {t:"Immediate liquidity improves recovery rates for creditors and reduces execution risk compared with speculative future value", correct:true},
-      {t:"Creditors typically prefer lower upfront cash because it leaves room for renegotiation", correct:false},
-      {t:"Regulators always block bidders who offer high upfront cash", correct:false},
-      {t:"Upfront cash is irrelevant to creditor decisions in insolvency sales", correct:false}
+    id: 3,
+    category: 'Markets',
+    text: "In a recent bank/asset distress sale, creditors picked a bidder who offered higher immediate cash. Which practical advantage explains that choice most directly?",
+    choices: [
+      { t: "Higher upfront cash improves immediate recovery certainty for creditors", correct: true },
+      { t: "Higher cash offers reduce the need for regulatory approvals", correct: false },
+      { t: "Immediate cash automatically reduces the buyer's tax bill", correct: false },
+      { t: "Upfront cash guarantees better long-term synergies", correct: false }
     ],
-    explain:"Creditors often prioritise higher upfront payments in distress sales because immediate cash improves recoveries and reduces execution risk, even if another bid has a higher long-term NPV."
+    explain: "Creditors prioritise certainty and speed of recovery; immediate cash reduces execution risk compared with offers that promise higher but uncertain future payments."
   },
+
+  // 4 — Economy (factual)
   {
-    id:4, category:'Economy',
-    text: "Refiners adjusted sourcing ahead of potential constraints on some supply lines. How do shifts in tanker bookings act as an early market signal?",
-    choices:[
-      {t:"A jump in bookings from alternate regions suggests buyers are pre-booking alternative cargoes to hedge supply risk", correct:true},
-      {t:"Tanker bookings are unrelated to refinery purchasing strategies", correct:false},
-      {t:"Fewer bookings always indicate higher demand", correct:false},
-      {t:"Booking patterns only reflect seasonal demand and never policy risk", correct:false}
+    id: 4,
+    category: 'Economy',
+    text: "Reports said Indian refiners sharply cut loadings of Russian crude in early November. What was the commonly reported reason for that decline?",
+    choices: [
+      { t: "Logistical uncertainty and caution over sanctions-related risks", correct: true },
+      { t: "Domestic refinery closures due to maintenance", correct: false },
+      { t: "A sudden drop in domestic demand for crude", correct: false },
+      { t: "A formal ban on Russian crude imports", correct: false }
     ],
-    explain:"An uptick in tanker bookings from a different region typically indicates refiners are securing alternate cargoes to reduce exposure ahead of supply uncertainty."
+    explain: "Coverage attributed the fall to refiners' caution around logistics and potential sanctions exposure, not to a formal import ban or immediate demand collapse."
   },
+
+  // 5 — International developments (factual)
   {
-    id:5, category:'International developments',
-    text: "Leaders travelling to summits frequently hold regional group meetings on the sidelines. What is a strategic reason for attending an additional IBSA-style meeting alongside a G20 summit?",
-    choices:[
-      {t:"To strengthen trilateral coordination on regional trade and development priorities among like-minded partners", correct:true},
-      {t:"Because G20 agendas ban bilaterals, so leaders must meet separately", correct:false},
-      {t:"IBSA meetings are ceremonial and have no strategic outcomes", correct:false},
-      {t:"G20 summits automatically dissolve regional groupings", correct:false}
+    id: 5,
+    category: 'International developments',
+    text: "A G20 sideline was used to hold a small trilateral meeting (IBSA-style). What is the usual diplomatic purpose of such side-group meetings?",
+    choices: [
+      { t: "To coordinate positions and build support on regional priorities ahead of larger negotiations", correct: true },
+      { t: "To replace the core summit documents with smaller agreements", correct: false },
+      { t: "To indicate member withdrawal from the larger summit", correct: false },
+      { t: "To elect the summit's permanent secretariat", correct: false }
     ],
-    explain:"Attending IBSA or similar meetings alongside larger summits helps countries coordinate regional priorities and form concerted positions on trade, development and geopolitical issues."
+    explain: "Smaller meetings let like-minded countries align on trade, development or security issues and form coordinated positions for the broader summit discussions."
   },
+
+  // 6 — Sports (factual)
   {
-    id:6, category:'Brands',
-    text: "Startups in agritech often raise capital to build both offline and digital distribution. Why is omnichannel expansion attractive for such firms?",
-    choices:[
-      {t:"It combines local retail reach with digital data-driven services, improving farmer trust and unit economics", correct:true},
-      {t:"Omnichannel models are only marketing buzzwords with no measurable impact", correct:false},
-      {t:"Digital-only strategies always outperform omnichannel in rural markets", correct:false},
-      {t:"Omnichannel expansion eliminates all operational complexity", correct:false}
+    id: 6,
+    category: 'Sports',
+    text: "An Indian boxer (Preeti Pawar) upset a top-seeded opponent to reach a major final. Which country was the opponent reported to be from?",
+    choices: [
+      { t: "Chinese Taipei", correct: true },
+      { t: "Kazakhstan", correct: false },
+      { t: "England", correct: false },
+      { t: "USA", correct: false }
     ],
-    explain:"Omnichannel strategies let agritech firms reach farmers where they shop while using digital tools to personalise offerings and improve economics — a commonly stated use of fresh capital."
+    explain: "Reports described the opponent as a highly credentialed boxer from Chinese Taipei — an Olympic medallist — whom Preeti Pawar defeated to advance."
   },
+
+  // 7 — Brands (factual)
   {
-    id:7, category:'Startups & Tech',
-    text: "When early-stage investors partially exit via market trades, what signal can this send to the market and why might it be done?",
-    choices:[
-      {t:"A small open-market sale can signal profit taking or portfolio rebalancing without implying loss of faith in the company", correct:true},
-      {t:"Such sales are always a sign the investor has lost confidence and will exit fully immediately", correct:false},
-      {t:"It legally forces the company to buy back shares the next day", correct:false},
-      {t:"It requires immediate regulatory approval for the investor to retain any stake", correct:false}
+    id: 7,
+    category: 'Brands',
+    text: "An international beverage company was reported to be exploring an exit from an Indian brewer (B9/Bira). Which investor was named in those reports?",
+    choices: [
+      { t: "Kirin Holdings (Japan)", correct: true },
+      { t: "Diageo (UK)", correct: false },
+      { t: "Heineken (Netherlands)", correct: false },
+      { t: "Molson Coors (Canada)", correct: false }
     ],
-    explain:"Investors may sell small stakes in open markets to realise gains or rebalance portfolios; such moves do not necessarily imply a loss of confidence but are normal liquidity events."
+    explain: "Coverage identified Kirin Holdings as the investor in discussions about an exit from the brewer, reflecting strategic re-evaluations in the sector."
   },
+
+  // 8 — Startups & Tech (factual)
   {
-    id:8, category:'Sports',
-    text: "In multi-nation sporting events, athletes often progress through rounds to medal contention. What does consistent progression to late rounds typically indicate about a country's sporting program?",
-    choices:[
-      {t:"It reflects depth in talent and improving competitive exposure at international levels", correct:true},
-      {t:"It always indicates over-investment in sport funds", correct:false},
-      {t:"It guarantees Olympic medals in the next cycle", correct:false},
-      {t:"It suggests domestic leagues are being cancelled", correct:false}
+    id: 8,
+    category: 'Startups & Tech',
+    text: "A report stated an early-stage investor had sold a portion of its stake in a large startup via market trades. What is a neutral, fact-based interpretation of such partial sales?",
+    choices: [
+      { t: "They can represent portfolio rebalancing or partial liquidity rather than a full loss of confidence", correct: true },
+      { t: "They legally force the startup to appoint new directors immediately", correct: false },
+      { t: "They mandate that the startup must go public within 30 days", correct: false },
+      { t: "They are proof the company is insolvent", correct: false }
     ],
-    explain:"Repeated appearances in late rounds often point to better talent pipelines, coaching and international exposure, even if they don't guarantee medals immediately."
+    explain: "Small open-market sales by investors typically provide liquidity or rebalance holdings; context and scale determine whether they signal concern or normal portfolio management."
   },
+
+  // 9 — Domestic developments (factual)
   {
-    id:9, category:'Domestic developments',
-    text: "Integrating ESG measures into audits is becoming common. Why might auditing state-run listed firms against ESG reporting frameworks be useful for stakeholders?",
-    choices:[
-      {t:"It improves transparency around environmental and governance risks that affect long-term shareholder value", correct:true},
-      {t:"It reduces the need for any corporate reporting at all", correct:false},
-      {t:"It prevents firms from publishing any financial data", correct:false},
-      {t:"It is only relevant to small startups and not to large utilities", correct:false}
+    id: 9,
+    category: 'Domestic developments',
+    text: "Policy reports said the government planned to set up a selection panel by December for which new board created under the digital personal data framework?",
+    choices: [
+      { t: "Data Protection Board of India (DPBI)", correct: true },
+      { t: "National Cybersecurity Council", correct: false },
+      { t: "Digital Economy Authority", correct: false },
+      { t: "Central Data Tribunal", correct: false }
     ],
-    explain:"ESG benchmarking provides investors and policymakers with information about long-term risks and sustainability practices, helping align public firms with contemporary reporting norms."
+    explain: "Policy updates indicated a panel would be formed to select members for the Data Protection Board envisaged under the draft digital personal data rules."
   },
+
+  // 10 — Markets (factual)
   {
-    id:10, category:'Markets',
-    text: "Market indices reaching new levels often prompt analyst commentary. What is a balanced interpretation of an index move to a new high?",
-    choices:[
-      {t:"It can signal momentum and investor confidence but should be assessed alongside valuations and macro indicators", correct:true},
-      {t:"A new high always means the market is undervalued", correct:false},
-      {t:"Once a new high is reached, markets never correct", correct:false},
-      {t:"New highs automatically trigger circuit breakers", correct:false}
+    id: 10,
+    category: 'Markets',
+    text: "A market commentary noted an index hitting a new high. Which is the most balanced factual takeaway from a new-index-high story?",
+    choices: [
+      { t: "It signals momentum but should be evaluated with valuations, flows and macro data before concluding durability", correct: true },
+      { t: "It proves all stocks in the index are undervalued", correct: false },
+      { t: "It means regulators will always intervene", correct: false },
+      { t: "It guarantees dividends will rise next quarter", correct: false }
     ],
-    explain:"Analysts view new highs as evidence of momentum or optimism; prudent interpretation combines that with valuations, flows and macro context to judge sustainability."
+    explain: "New highs indicate momentum and sentiment; prudent analysis weighs them against valuations, capital flows and macro context rather than assuming permanence."
   }
 ];
+
 
 /* shuffle choices & questions */
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } }
