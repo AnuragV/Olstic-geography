@@ -4,76 +4,102 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>TimesMaster — India (ET)</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
-  /* TimesMaster — single-file styles */
+  /* TimesMaster — updated with leaderboard and refined UX */
   :root{
-    --bg:#f3f4f6;
+    --bg:#f6f7f9;
     --panel:#ffffff;
     --muted:#6b7280;
     --accent:#ff7a18; /* orange */
+    --accent-2:#ff9b4a;
     --green:#16a34a;
     --danger:#ef4444;
     --lightgreen:#ecfdf5;
-    --card-shadow: 0 8px 24px rgba(15,23,42,0.06);
+    --card-shadow: 0 12px 30px rgba(15,23,42,0.08);
+    --glass: rgba(255,255,255,0.6);
   }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:#0f1724}
-  /* subtle faded newspaper background (CSS pattern, not external asset) */
+  @font-face{
+    font-family:InterVar; 
+    src: local('Inter'), local('Inter var'), local('Segoe UI');
+  }
+  html,body{height:100%;margin:0;font-family:InterVar,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#0f1724;background:var(--bg);-webkit-font-smoothing:antialiased}
+  /* subtle faded newspaper background */
   body::before{
     content:"";
     position:fixed;inset:0;z-index:0;
     background-image:
       linear-gradient(transparent 0 60%, rgba(255,255,255,0.6) 60%),
       repeating-linear-gradient(90deg, rgba(0,0,0,0.02) 0 1px, transparent 1px 20px);
-    opacity:0.55;
-    pointer-events:none;
+    opacity:0.45;pointer-events:none;
   }
-  .wrap{max-width:1024px;margin:28px auto;padding:20px;position:relative;z-index:1}
+  .wrap{max-width:1100px;margin:28px auto;padding:20px;position:relative;z-index:1}
   header{display:flex;align-items:center;gap:12px}
-  .logo{font-weight:800;color:var(--accent);font-size:20px}
+  .logo{font-weight:900;color:var(--accent);font-size:22px;letter-spacing:0.6px}
   .sub{color:var(--muted);font-size:13px}
   .card{background:var(--panel);border-radius:12px;padding:18px;box-shadow:var(--card-shadow);border:1px solid rgba(15,23,42,0.03)}
-  /* front page instructions boxes */
+  /* FRONT / SETUP */
   .introRow{display:flex;gap:12px;margin-top:18px}
-  .box{flex:1;padding:18px;border-radius:12px;color:#fff;font-weight:700;min-height:110px;display:flex;flex-direction:column;justify-content:space-between}
-  .box p{margin:0;font-weight:500;opacity:0.95}
+  .box{flex:1;padding:18px;border-radius:12px;color:#fff;font-weight:800;min-height:110px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .18s cubic-bezier(.2,.9,.3,1)}
+  .box:hover{transform:translateY(-6px)}
+  .box p{margin:0;font-weight:600;opacity:0.95}
   .box--wager{background:linear-gradient(135deg,#ff7a18,#ffb86c)}
   .box--leverage{background:linear-gradient(135deg,#6ee7b7,#10b981)}
   .box--answer{background:linear-gradient(135deg,#60a5fa,#6366f1)}
   .allocArea{display:grid;grid-template-columns:1fr 360px;gap:12px;margin-top:18px}
   .allocList{padding:12px;display:grid;gap:10px}
   .catRow{display:flex;gap:12px;align-items:center}
-  .catIndex{width:36px;height:36px;border-radius:8px;background:#f8fafc;color:#0f1724;display:flex;align-items:center;justify-content:center;font-weight:800}
-  .catName{width:220px;font-weight:700}
+  .catIndex{width:36px;height:36px;border-radius:8px;background:#fff;color:#0f1724;display:flex;align-items:center;justify-content:center;font-weight:900;box-shadow:0 6px 20px rgba(15,23,42,0.04)}
+  .catName{width:220px;font-weight:800}
   .sliderWrap{display:flex;align-items:center;gap:8px;flex:1}
-  .valBox{width:88px;text-align:center;padding:8px;border-radius:8px;background:#fbfdfe;border:1px solid rgba(15,23,42,0.04)}
-  input[type=range]{width:100%}
+  .valBox{width:88px;text-align:center;padding:8px;border-radius:8px;background:#fbfdfe;border:1px solid rgba(15,23,42,0.04);font-weight:700}
+  input[type=range]{width:100%;height:32px;appearance:none;background:transparent}
+  input[type=range]::-webkit-slider-runnable-track{height:8px;background:linear-gradient(90deg,#eee,#f7f7f7);border-radius:8px}
+  input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);margin-top:-5px;box-shadow:0 6px 16px rgba(255,122,24,0.18);cursor:pointer;transition:transform .12s}
+  input[type=range]::-webkit-slider-thumb:active{transform:scale(1.06)}
   .startWrap{display:flex;align-items:center;justify-content:flex-end;margin-top:12px}
-  .btnStart{padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-weight:800;cursor:pointer}
-  /* quiz screen */
+  .btnStart{padding:10px 16px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;border:none;border-radius:10px;font-weight:900;cursor:pointer;box-shadow:0 8px 20px rgba(255,122,24,0.14);transition:transform .14s}
+  .btnStart:hover{transform:translateY(-4px)}
+  /* Leaderboard box */
+  .leaderCard{margin-top:12px;padding:12px;border-radius:10px}
+  .leaderTitle{font-weight:800;margin-bottom:8px}
+  .leaderList{display:flex;flex-direction:column;gap:8px}
+  .leaderRow{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:linear-gradient(180deg,#fff,#fcfcfc);border:1px solid rgba(15,23,42,0.03);font-weight:700}
+  /* QUIZ */
   #quizScreen{display:none;margin-top:20px}
   .qTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-  .qMid{display:flex;justify-content:center;align-items:center;gap:8px;font-weight:800}
+  .qMid{display:flex;justify-content:center;align-items:center;gap:8px;font-weight:900}
   .qCard{background:transparent;padding:18px;border-radius:12px}
-  .qText{font-size:20px;margin-bottom:12px}
+  .qText{font-size:20px;margin-bottom:12px;line-height:1.3}
   .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .opt{background:#fff;padding:14px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);cursor:pointer;display:flex;gap:12px;align-items:flex-start}
-  .optLabel{width:34px;height:34px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0f1724}
-  .opt.correct{background:var(--lightgreen);border-color:rgba(16,185,129,0.18)}
-  .opt.wrong{background:#fff1f0;border-color:rgba(239,68,68,0.12)}
-  .scoreBox{font-weight:800}
-  .explain{margin-top:12px;padding:14px;border-radius:10px;background:var(--lightgreen);border:1px solid rgba(16,185,129,0.08);display:none}
+  .opt{background:#fff;padding:14px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:transform .12s, box-shadow .12s}
+  .opt:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(15,23,42,0.06)}
+  .optLabel{width:34px;height:34px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:900;color:#0f1724;flex-shrink:0}
+  .opt.correct{background:var(--lightgreen);border-color:rgba(16,185,129,0.12);box-shadow:inset 0 -4px 0 rgba(16,185,129,0.04)}
+  .opt.wrong{background:#fff1f0;border-color:rgba(239,68,68,0.06)}
+  .scoreBox{font-weight:900}
+  .explain{margin-top:12px;padding:14px;border-radius:10px;background:var(--lightgreen);border:1px solid rgba(16,185,129,0.08);display:none;animation:fadeIn .22s ease}
   .explain h4{margin:0 0 8px 0}
-  .hedges{display:flex;gap:12px;justify-content:center;margin-top:18px}
-  .diamond{width:72px;height:72px;transform:rotate(45deg);display:flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;border-radius:10px;box-shadow:0 8px 18px rgba(15,23,42,0.08);cursor:pointer}
-  .diamond span{transform:rotate(-45deg);font-weight:900}
-  .diamond.used{background:#e6e7eb;color:#9aa0aa;cursor:default}
-  .hedgeNotice{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;padding:10px 14px;border-radius:8px;background:var(--accent);color:#fff;display:none;z-index:50}
+  .hedges{display:flex;gap:18px;justify-content:center;margin-top:18px}
+  .diamond{width:72px;height:72px;transform:rotate(45deg);display:flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;border-radius:10px;box-shadow:0 12px 28px rgba(15,23,42,0.08);cursor:pointer;transition:transform .12s, opacity .12s}
+  .diamond:active{transform:rotate(45deg) scale(0.98)}
+  .diamond span{transform:rotate(-45deg);font-weight:900;display:block}
+  .diamond.used{background:#e6e7eb;color:#9aa0aa;cursor:default;opacity:0.9}
+  .hedgeNotice{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;padding:10px 14px;border-radius:8px;background:var(--accent);color:#fff;display:none;z-index:50;box-shadow:0 8px 20px rgba(15,23,42,0.06)}
   .countdown{margin-top:8px;color:var(--muted);font-weight:700}
   .progressDots{display:flex;gap:8px}
   .dot{width:14px;height:14px;border-radius:50%;background:#e6eef8;border:1px solid rgba(2,6,23,0.06)}
   .dot.correct{background:var(--green)}
   .dot.wrong{background:var(--danger)}
-  footer{margin-top:18px;display:flex;justify-content:space-between;align-items:center;color:var(--muted)}
+  /* Username modal */
+  .modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(15,23,42,0.4);display:flex;align-items:center;justify-content:center;z-index:60;display:none}
+  .modalCard{background:var(--panel);padding:20px;border-radius:12px;min-width:320px;box-shadow:var(--card-shadow)}
+  .modalCard input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);margin-top:10px}
+  .modalCard .modalBtns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+  .btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:800}
+  .btnCancel{background:#f3f4f6;color:#0f1724}
+  .btnPrimary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   @media(max-width:880px){ .allocArea{grid-template-columns:1fr} .options{grid-template-columns:1fr} .catName{width:140px} .valBox{width:64px} .diamond{width:56px;height:56px} }
 </style>
 </head>
@@ -82,7 +108,7 @@
     <header>
       <div class="logo">TimesMaster</div>
       <div style="flex:1">
-        <div style="font-weight:700">10 questions • 8 categories based on ET • One-time leverages</div>
+        <div style="font-weight:900">10 questions • 8 categories based on ET • One-time leverages</div>
         <div class="sub">Wager, leverage, learn — answer smartly</div>
       </div>
     </header>
@@ -104,20 +130,29 @@
         </div>
       </div>
 
-      <div class="allocArea" style="margin-top:18px">
-        <div class="card allocList" id="allocListCard">
-          <div style="font-weight:800;margin-bottom:8px">Allocate weights (stops: 50%,100%,150%,200%)</div>
+      <div style="display:flex;gap:12px;margin-top:18px">
+        <div style="flex:1" class="card">
+          <div style="font-weight:800;margin-bottom:10px">Allocate weights (stops: 50%,100%,150%,200%)</div>
           <div id="allocList" class="allocList"></div>
         </div>
-        <div class="card" style="display:flex;flex-direction:column;justify-content:space-between">
-          <div>
-            <div style="font-weight:800">Allocation summary</div>
-            <div class="sub" style="margin-top:8px">Default: all categories 100% (10 pts)</div>
-            <div class="sumline" style="margin-top:12px">Sum: <span id="sumDisplay">0</span> / 800%</div>
-            <div style="margin-top:10px;color:var(--muted);font-size:13px">Note: total must equal 800% (8 categories × 100%)</div>
+
+        <div style="width:320px;display:flex;flex-direction:column;gap:12px">
+          <div class="card leaderCard">
+            <div class="leaderTitle">Top 5 — Leaderboard</div>
+            <div id="leaderBoard" class="leaderList"></div>
+            <div style="margin-top:8px;color:var(--muted);font-size:13px">Scores saved locally on this browser.</div>
           </div>
-          <div class="startWrap">
-            <button id="startBtn" class="btnStart">Start Quiz</button>
+
+          <div class="card" style="padding:12px;display:flex;flex-direction:column;gap:8px;justify-content:space-between">
+            <div>
+              <div style="font-weight:900">Allocation summary</div>
+              <div class="sub" style="margin-top:8px">Default: all categories 100% (10 pts)</div>
+              <div class="sumline" style="margin-top:12px">Sum: <span id="sumDisplay">0</span> / 800%</div>
+              <div style="margin-top:10px;color:var(--muted);font-size:13px">Total must equal 800% (8 categories × 100%)</div>
+            </div>
+            <div class="startWrap">
+              <button id="startBtn" class="btnStart">Start Quiz</button>
+            </div>
           </div>
         </div>
       </div>
@@ -148,16 +183,29 @@
     </section>
 
     <div class="hedgeNotice" id="hedgeNotice">Hedge applied</div>
-    <footer>
+    <footer style="margin-top:18px">
       <div></div>
-      <div class="sub">Questions sourced from: Economic Times (20 Nov 2025). :contentReference[oaicite:1]{index=1}</div>
+      <div class="sub">Questions sourced from: Economic Times (20 Nov 2025)</div>
     </footer>
   </div>
 
-<script>
-/* TimesMaster — JS logic */
+  <!-- Username modal -->
+  <div class="modal" id="usernameModal" aria-hidden="true">
+    <div class="modalCard card">
+      <div style="font-weight:900">Enter a username</div>
+      <div style="color:var(--muted);font-size:13px;margin-top:8px">This will be used on the leaderboard (top-5 saved locally).</div>
+      <input id="usernameInput" placeholder="Your name (max 20 chars)" maxlength="20" />
+      <div class="modalBtns" style="margin-top:12px">
+        <button class="btn btnCancel" id="usernameCancel">Cancel</button>
+        <button class="btn btnPrimary" id="usernameSave">Save & Start</button>
+      </div>
+    </div>
+  </div>
 
-/* --- Categories (renamed & numbered) --- */
+<script>
+/* TimesMaster — updated JS with leaderboard & UX micro-animations */
+
+/* Categories renamed and numbered */
 const categories = [
   '1. Domestic developments',
   '2. Politics',
@@ -169,17 +217,19 @@ const categories = [
   '8. Economy'
 ];
 
-/* Snap stops mapping: slider index 0..3 -> percent */
+/* Snap stops map: slider index 0..3 -> percent */
 const SNAP = [50,100,150,200]; // corresponds to 5/10/15/20 points for base 10
-const BASE = 10; // base points so pts = BASE * (snap/100)
+const BASE = 10; // base points (points = BASE * snap/100)
 
-/* weights state (percents), default 100 for each (i.e., 100%) */
-const weights = {}; categories.forEach(c=>weights[c]=100);
+/* weights default */
+const weights = {};
+categories.forEach(c=>weights[c]=100);
 
 /* Build allocation UI */
 const allocList = document.getElementById('allocList');
 categories.forEach((cat,i)=>{
   const row = document.createElement('div'); row.className='catRow';
+  row.style.padding = '8px 0';
   row.innerHTML = `
     <div class="catIndex">${i+1}</div>
     <div class="catName">${cat}</div>
@@ -190,6 +240,7 @@ categories.forEach((cat,i)=>{
   `;
   allocList.appendChild(row);
 });
+
 function updateSum(){
   let s=0;
   document.querySelectorAll('.slider').forEach(sl=>{
@@ -203,13 +254,10 @@ function updateSum(){
   return s;
 }
 allocList.addEventListener('input', updateSum);
-updateSum(); // initialize
+updateSum();
 
-/* --- Questions: created from ET (20 Nov 2025) content.
-   Each question has: id, category (must match one of categories), text, choices: [{t,correct}], explain (short), cite (we include file citation) */
-
+/* QUESTIONS — drawn from ET (20 Nov 2025) PDF (same as previously prepared) */
 let QUESTIONS = [
-  // 1 Politics (Madvi Hidma / Maredumilli)
   {
     id:1, category:'2. Politics',
     text: "Operations in Andhra Pradesh around Maredumilli reported the death of several Maoists after back-to-back encounters. Which detail was reported in follow-ups?",
@@ -219,10 +267,8 @@ let QUESTIONS = [
       {t:"The incident was a cross-border operation coordinated with a foreign army", correct:false},
       {t:"Subsequent inquiry found the deaths were due to friendly fire with no insurgent casualties", correct:false}
     ],
-    explain:"ET coverage described follow-up operations near Maredumilli and said senior insurgents and others (including relatives) were reported killed; the police called it a continuation of previous encounters. :contentReference[oaicite:2]{index=2}"
+    explain:"Coverage described follow-up operations near Maredumilli naming senior insurgents and associates among casualties; police treated it as a continuation of earlier encounters."
   },
-
-  // 2 Domestic developments (NIA/Anmol Bishnoi arrest)
   {
     id:2, category:'1. Domestic developments',
     text: "Anmol Bishnoi, linked to a high-profile gang, was recently arrested after deportation from the US. What did reports say about his custody?",
@@ -232,10 +278,8 @@ let QUESTIONS = [
       {t:"He was extradited to another country for trial", correct:false},
       {t:"He was granted interim bail by a city court within hours", correct:false}
     ],
-    explain:"ET reported the NIA took Anmol Bishnoi into custody after deportation, remanding him for further probe in cases linked to organized terror. :contentReference[oaicite:3]{index=3}"
+    explain:"ET reported NIA took custody of Anmol Bishnoi after his deportation for continued probe in terror-linked cases."
   },
-
-  // 3 Markets (Deutsche Bank India sale)
   {
     id:3, category:'3. Markets',
     text: "Deutsche Bank was reported selling its India retail & wealth business. What was notable about the potential buyer race?",
@@ -245,10 +289,8 @@ let QUESTIONS = [
       {t:"The sale was blocked by regulators due to national security concerns", correct:false},
       {t:"The business was being merged into a government-owned bank instead of sold", correct:false}
     ],
-    explain:"ET said Kotak and Federal were in the race to buy Deutsche Bank's India retail & wealth business as the German lender restructures globally. :contentReference[oaicite:4]{index=4}"
+    explain:"ET noted Kotak and Federal in the race for Deutsche Bank's India retail & wealth business as part of the bank's global restructuring."
   },
-
-  // 4 Economy (Russian crude / tanker bookings)
   {
     id:4, category:'8. Economy',
     text: "Indian refiners shifted buying patterns ahead of sanction deadlines on some Russian oil. What market signal did ET note?",
@@ -258,10 +300,8 @@ let QUESTIONS = [
       {t:"Refiners began buying exclusively from Russian state traders", correct:false},
       {t:"International freight rates collapsed due to oversupply", correct:false}
     ],
-    explain:"ET reported a spike in bookings for ships from the Gulf and said refiners were securing alternate supplies ahead of wind-down deadlines on certain Russian sellers. :contentReference[oaicite:5]{index=5}"
+    explain:"ET referenced a rise in bookings for Gulf shipments as refiners secured alternate supplies ahead of deadlines affecting some Russian sellers."
   },
-
-  // 5 International developments (G20 attendance / PM Modi)
   {
     id:5, category:'4. International developments',
     text: "PM Modi was scheduled to attend the G20 Leaders' summit in Johannesburg. Which additional meeting was noted alongside the G20?",
@@ -271,10 +311,8 @@ let QUESTIONS = [
       {t:"He would sign a defence pact transferring aircraft to South Africa", correct:false},
       {t:"A non-aligned movement conference was planned instead", correct:false}
     ],
-    explain:"ET mentioned PM Modi would attend the G20 summit and also participate in the IBSA leaders' meeting in South Africa. :contentReference[oaicite:6]{index=6}"
+    explain:"ET mentioned the PM's attendance at G20 and also the IBSA leaders' meeting in South Africa."
   },
-
-  // 6 Brands (AgroStar funding — Brands/startups blend)
   {
     id:6, category:'6. Brands',
     text: "AgroStar raised new funding as ET reported. What was the stated use for the fresh capital?",
@@ -284,10 +322,8 @@ let QUESTIONS = [
       {t:"To buy a global FMCG brand and rebrand it", correct:false},
       {t:"To pivot completely away from agriculture into hardware manufacturing", correct:false}
     ],
-    explain:"ET reported AgroStar raised funding to expand omnichannel distribution, product innovation and build AI tools for farmers. :contentReference[oaicite:7]{index=7}"
+    explain:"ET covered that AgroStar planned to use funds to expand omnichannel distribution, product innovation and AI tools."
   },
-
-  // 7 Startups & Tech (Paytm stake sale / Elevation)
   {
     id:7, category:'7. Startups & Tech',
     text: "Elevation Capital sold a small stake in Paytm in market trades. What was notable about this divestment?",
@@ -297,10 +333,8 @@ let QUESTIONS = [
       {t:"The sale was forced by a regulatory seizure of shares", correct:false},
       {t:"The transaction was a private placement not visible on exchanges", correct:false}
     ],
-    explain:"ET noted Elevation Capital sold nearly 2% in Paytm in an open-market transaction — its first sale since the company's IPO. :contentReference[oaicite:8]{index=8}"
+    explain:"ET reported Elevation sold ~2% in Paytm via open-market trades — its first sale post-IPO."
   },
-
-  // 8 Sports (national sports or boxing — we will craft from inferred content)
   {
     id:8, category:'5. Sports',
     text: "ET's sports coverage highlighted competitive outcomes. Which type of event did the paper report Indian athletes making gains in recently?",
@@ -310,10 +344,8 @@ let QUESTIONS = [
       {t:"A discontinued cricket tournament replaced by a chess league", correct:false},
       {t:"A mass marathon cancelled nationwide", correct:false}
     ],
-    explain:"ET covered boxing results and other sporting events where Indian athletes progressed to late stages in competitions. (Sports briefs in the paper). :contentReference[oaicite:9]{index=9}"
+    explain:"Sports briefs covered boxing and international tournaments where Indian athletes advanced to later stages."
   },
-
-  // 9 Domestic developments (CAG & ESG / oil partnership)
   {
     id:9, category:'1. Domestic developments',
     text: "The CAG announced steps to integrate ESG reporting criteria. Which sector's reporting did it say it would assess?",
@@ -323,10 +355,8 @@ let QUESTIONS = [
       {t:"It announced no plans to review any government-linked entities", correct:false},
       {t:"It mandated immediate carbon taxes for all companies", correct:false}
     ],
-    explain:"ET reported the CAG will benchmark about 30 listed state-run companies' compliance against Sebi's BRSR reporting framework. :contentReference[oaicite:10]{index=10}"
+    explain:"ET reported CAG would benchmark listed state-run companies' compliance with Sebi's BRSR ESG reporting."
   },
-
-  // 10 Markets / Economy (Bank Nifty & flows)
   {
     id:10, category:'3. Markets',
     text: "Market briefs in ET noted which milestone for Bank Nifty and what implication?",
@@ -336,31 +366,24 @@ let QUESTIONS = [
       {t:"Markets closed permanently for a national holiday", correct:false},
       {t:"All banks were nationalised again by the federal government", correct:false}
     ],
-    explain:"ET's market pages highlighted Bank Nifty reaching new highs (around 59k) and commentary about potential upside. :contentReference[oaicite:11]{index=11}"
+    explain:"ET markets desk highlighted Bank Nifty near 59k, with commentary suggesting potential further gains."
   }
 ];
 
-/* Shuffle choices for each question so correct answers are not always same position */
+/* shuffle choices & questions to avoid same-order biases */
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } }
 QUESTIONS.forEach(q=>shuffle(q.choices));
-shuffle(QUESTIONS); // shuffle order of q's
+shuffle(QUESTIONS);
 
 /* --- Quiz state --- */
 let current = 0;
 let score = 0;
-let used = {hHalf:false,h2:false,h3:false}; // hedges used
-let currentHedge = null; // 'half','2','3'
+let used = {hHalf:false,h2:false,h3:false};
+let currentHedge = null;
 let countdownTimer = null;
 
-/* Build progress dots */
+/* DOM refs */
 const progressDots = document.getElementById('progressDots');
-function buildDots(){
-  progressDots.innerHTML='';
-  for(let i=0;i<QUESTIONS.length;i++){ const d=document.createElement('div'); d.className='dot'; d.id='dot'+i; progressDots.appendChild(d); }
-}
-buildDots();
-
-/* Render question */
 const qText = document.getElementById('qText');
 const optsBox = document.getElementById('opts');
 const qCategory = document.getElementById('qCategory');
@@ -369,18 +392,26 @@ const scoreBox = document.getElementById('score');
 const explainBox = document.getElementById('explain');
 const explainText = document.getElementById('explainText');
 const countdownEl = document.getElementById('countdown');
+const leaderBoardEl = document.getElementById('leaderBoard');
+
+function buildDots(){
+  progressDots.innerHTML = '';
+  for(let i=0;i<QUESTIONS.length;i++){
+    const d = document.createElement('div'); d.className='dot'; d.id='dot'+i; progressDots.appendChild(d);
+  }
+}
+buildDots();
 
 function calculatePoints(cat){
-  // cat is e.g. '1. Domestic developments' — find weight
-  const pct = weights[cat] || 100; // SNAP values are 50/100/150/200
+  const pct = weights[cat] || 100; // 50/100/150/200
   return Math.round(BASE * (pct/100));
 }
 
+/* render question */
 function showQuestion(){
-  // stop any existing timers
-  if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; countdownEl.style.display='none'; }
+  if(countdownTimer){ clearInterval(countdownTimer); countdownTimer = null; countdownEl.style.display='none'; }
   if(current >= QUESTIONS.length){
-    document.getElementById('quizScreen').innerHTML = `<div class="card" style="padding:24px"><h2>Quiz complete</h2><p>Your final score: <b>${score}</b></p></div>`;
+    endQuiz();
     return;
   }
   const q = QUESTIONS[current];
@@ -390,9 +421,9 @@ function showQuestion(){
   optsBox.innerHTML = '';
   explainBox.style.display = 'none';
   explainText.innerText = '';
-  // render options
-  q.choices.forEach((ch,idx)=>{
-    const o = document.createElement('div'); o.className='opt';
+
+  q.choices.forEach((ch, idx)=>{
+    const o = document.createElement('div'); o.className = 'opt';
     o.innerHTML = `<div class="optLabel">${String.fromCharCode(65+idx)}</div><div>${ch.t}</div>`;
     o.addEventListener('click', ()=> selectOption(o, idx, q));
     optsBox.appendChild(o);
@@ -401,26 +432,20 @@ function showQuestion(){
   document.getElementById('dot'+current).classList.remove('correct','wrong');
 }
 
-/* Option selection */
+/* select option */
 function selectOption(el, idx, q){
-  // prevent repeat
-  if(el.classList.contains('correct') || el.classList.contains('wrong')) return;
-
-  // compute base points
-  const pts = calculatePoints(q.category); // 5/10/15/20
+  if(el.classList.contains('correct')||el.classList.contains('wrong')) return;
+  const pts = calculatePoints(q.category);
   let multiplier = 1;
   if(currentHedge === 'half'){ multiplier = 0.5; used.hHalf = true; document.getElementById('hedHalf').classList.add('used'); }
   if(currentHedge === '2'){ multiplier = 2; used.h2 = true; document.getElementById('hed2x').classList.add('used'); }
   if(currentHedge === '3'){ multiplier = 3; used.h3 = true; document.getElementById('hed3x').classList.add('used'); }
   if(currentHedge){ showHedgeNotice(); currentHedge = null; }
+
   const finalPts = Math.round(pts * multiplier);
 
-  // reveal correct and fade others
-  const allOpts = document.querySelectorAll('.opt');
-  allOpts.forEach((o,i)=>{
-    if(q.choices[i].correct) o.classList.add('correct');
-    else if(o !== el) o.style.opacity = '0.7';
-  });
+  const all = document.querySelectorAll('.opt');
+  all.forEach((o, i)=>{ if(q.choices[i].correct) o.classList.add('correct'); else if(o !== el) o.style.opacity = '0.6'; });
 
   if(q.choices[idx].correct){
     el.classList.add('correct');
@@ -435,11 +460,10 @@ function selectOption(el, idx, q){
   }
   scoreBox.innerText = score;
 
-  // show explainer
   explainText.innerText = q.explain;
   explainBox.style.display = 'block';
 
-  // start 10-second countdown, show remaining seconds
+  // countdown 10s
   let sec = 10;
   countdownEl.style.display = 'block';
   countdownEl.innerText = `Next question loading in ${sec} seconds`;
@@ -447,32 +471,26 @@ function selectOption(el, idx, q){
     sec--;
     countdownEl.innerText = `Next question loading in ${sec} seconds`;
     if(sec <= 0){
-      clearInterval(countdownTimer);
-      countdownTimer = null;
-      countdownEl.style.display = 'none';
-      current++;
-      showQuestion();
+      clearInterval(countdownTimer); countdownTimer = null; countdownEl.style.display = 'none';
+      current++; showQuestion();
     }
-  },1000);
+  }, 1000);
 }
 
-/* update dot color */
+/* helper UI updates */
 function updateDot(i, state){ const d = document.getElementById('dot'+i); if(d){ d.classList.remove('correct','wrong'); d.classList.add(state); } }
-
-/* show delta */
 function showDelta(txt){
-  const el = document.createElement('div'); el.style.marginTop='8px'; el.style.fontWeight='800'; el.style.fontSize='16px';
+  const el = document.createElement('div'); el.style.marginTop='8px'; el.style.fontWeight='900'; el.style.fontSize='15px';
   el.style.color = txt.startsWith('+') ? 'var(--green)' : 'var(--danger)';
   el.innerText = `${txt} pts`;
   document.querySelector('.qCard').appendChild(el);
-  setTimeout(()=>{ try{ el.remove() }catch(e){} }, 2500);
+  setTimeout(()=>{ try{ el.remove() } catch(e){} }, 2400);
 }
 
-/* Hedge handlers (pledged names: 1/2×,2×,3× centered) */
+/* hedges handlers */
 document.getElementById('hedHalf').addEventListener('click', ()=>{
   if(used.hHalf) return;
   currentHedge = 'half';
-  // visual feedback applied when used on selection
   document.getElementById('hedHalf').classList.add('active');
 });
 document.getElementById('hed2x').addEventListener('click', ()=>{
@@ -488,26 +506,107 @@ document.getElementById('hed3x').addEventListener('click', ()=>{
 
 function showHedgeNotice(){ const n = document.getElementById('hedgeNotice'); n.style.display='block'; setTimeout(()=>n.style.display='none',2000); }
 
-/* START button */
-document.getElementById('startBtn').addEventListener('click', ()=>{
-  // validate sum: must be exactly 800% (8*100)
+/* START flow: show username modal */
+const startBtn = document.getElementById('startBtn');
+const usernameModal = document.getElementById('usernameModal');
+const usernameInput = document.getElementById('usernameInput');
+const usernameSave = document.getElementById('usernameSave');
+const usernameCancel = document.getElementById('usernameCancel');
+let currentUser = null;
+
+startBtn.addEventListener('click', ()=>{
+  // validate allocation sum (must equal 800)
   const s = updateSum();
-  if(s !== 800){
-    alert('Please ensure total weights equal 800% (8 categories × 100%). Current: ' + s + '%');
-    return;
-  }
-  // capture slider-derived percent values into weights object with category names (matching earlier)
-  document.getElementById('setup').style.display='none';
-  document.getElementById('quizScreen').style.display='block';
+  if(s !== 800){ alert('Please ensure total weights equal 800% (8 categories × 100%). Current: ' + s + '%'); return; }
+  // open username modal
+  usernameModal.style.display = 'flex';
+  usernameInput.value = localStorage.getItem('timesmaster_lastuser') || '';
+  usernameInput.focus();
+});
+
+usernameCancel.addEventListener('click', ()=>{
+  usernameModal.style.display = 'none';
+});
+
+usernameSave.addEventListener('click', ()=>{
+  const name = usernameInput.value.trim() || 'Guest';
+  currentUser = name.substring(0,20);
+  localStorage.setItem('timesmaster_lastuser', currentUser);
+  usernameModal.style.display = 'none';
+  // hide setup, show quiz
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
   buildDots();
   current = 0; score = 0; scoreBox.innerText = '0';
-  // reset hedges UI
-  document.getElementById('hedHalf').classList.remove('used'); document.getElementById('hed2x').classList.remove('used'); document.getElementById('hed3x').classList.remove('used');
+  // reset hedges UI and used flags
   used = {hHalf:false,h2:false,h3:false}; currentHedge = null;
+  document.getElementById('hedHalf').classList.remove('used'); document.getElementById('hed2x').classList.remove('used'); document.getElementById('hed3x').classList.remove('used');
+  // show first question
   showQuestion();
 });
 
-/* updateSum used elsewhere */
+/* Leaderboard: localStorage key: 'timesmaster_leaderboard' - array of {name,score,date} sorted desc */
+function getLeaderboard(){
+  try{
+    const raw = localStorage.getItem('timesmaster_leaderboard');
+    if(!raw) return [];
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed)) return [];
+    return parsed;
+  }catch(e){ return []; }
+}
+function saveToLeaderboard(entry){
+  const list = getLeaderboard();
+  list.push(entry);
+  list.sort((a,b)=>b.score - a.score);
+  const top = list.slice(0,5);
+  localStorage.setItem('timesmaster_leaderboard', JSON.stringify(top));
+  renderLeaderboard();
+}
+function renderLeaderboard(){
+  const list = getLeaderboard();
+  leaderBoardEl.innerHTML = '';
+  if(list.length === 0){
+    leaderBoardEl.innerHTML = '<div style="color:var(--muted)">No scores yet — be the first!</div>';
+    return;
+  }
+  list.forEach((it, idx)=>{
+    const r = document.createElement('div'); r.className = 'leaderRow';
+    r.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><div style="width:28px;height:28;border-radius:6px;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-weight:900">${idx+1}</div><div>${it.name}</div></div><div style="font-weight:900">${it.score}</div>`;
+    leaderBoardEl.appendChild(r);
+  });
+}
+renderLeaderboard();
+
+/* End quiz: show final screen and ask to save score */
+function endQuiz(){
+  // clear UI and show completion card with option to save
+  const container = document.getElementById('quizScreen');
+  container.innerHTML = `<div class="card" style="padding:20px"><h2 style="margin-top:0">Quiz complete</h2><p>Your final score: <b>${score}</b></p>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+      <button id="saveScoreBtn" class="btn btnPrimary">Save to leaderboard</button>
+      <button id="playAgainBtn" class="btn btnCancel">Play again</button>
+    </div>
+  </div>`;
+  // hook buttons
+  document.getElementById('saveScoreBtn').addEventListener('click', ()=>{
+    // require username (if not present prompt again)
+    if(!currentUser){
+      usernameModal.style.display='flex';
+      usernameInput.focus();
+      return;
+    }
+    saveToLeaderboard({name:currentUser, score:score, date:(new Date()).toISOString()});
+    alert('Saved to leaderboard!');
+    // return to setup
+    setTimeout(()=>{ location.reload(); }, 700);
+  });
+  document.getElementById('playAgainBtn').addEventListener('click', ()=>{
+    location.reload();
+  });
+}
+
+/* helper: updateSum helper used earlier; re-declared for scope */
 function updateSum(){
   let s=0;
   document.querySelectorAll('.slider').forEach(sl=>{
@@ -519,6 +618,13 @@ function updateSum(){
   document.getElementById('sumDisplay').innerText = s + '%';
   return s;
 }
+
+/* On load: small micro animation hint for hedges */
+setTimeout(()=>{
+  const h = document.querySelectorAll('.diamond');
+  h.forEach(d => { d.style.transform = 'rotate(45deg) translateY(-6px)'; setTimeout(()=>d.style.transform='rotate(45deg)', 260); });
+}, 700);
+
 </script>
 </body>
 </html>
