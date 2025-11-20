@@ -4,27 +4,20 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>TimesMaster — India (ET)</title>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
-  /* TimesMaster — updated with leaderboard and refined UX */
+  /* TimesMaster — refined per your requested tweaks */
   :root{
     --bg:#f6f7f9;
     --panel:#ffffff;
     --muted:#6b7280;
-    --accent:#ff7a18; /* orange */
+    --accent:#ff7a18;
     --accent-2:#ff9b4a;
     --green:#16a34a;
     --danger:#ef4444;
     --lightgreen:#ecfdf5;
     --card-shadow: 0 12px 30px rgba(15,23,42,0.08);
-    --glass: rgba(255,255,255,0.6);
   }
-  @font-face{
-    font-family:InterVar; 
-    src: local('Inter'), local('Inter var'), local('Segoe UI');
-  }
-  html,body{height:100%;margin:0;font-family:InterVar,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#0f1724;background:var(--bg);-webkit-font-smoothing:antialiased}
-  /* subtle faded newspaper background */
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#0f1724;background:var(--bg);-webkit-font-smoothing:antialiased}
   body::before{
     content:"";
     position:fixed;inset:0;z-index:0;
@@ -34,11 +27,10 @@
     opacity:0.45;pointer-events:none;
   }
   .wrap{max-width:1100px;margin:28px auto;padding:20px;position:relative;z-index:1}
-  header{display:flex;align-items:center;gap:12px}
   .logo{font-weight:900;color:var(--accent);font-size:22px;letter-spacing:0.6px}
-  .sub{color:var(--muted);font-size:13px}
+  .panelTitle{font-weight:900;font-size:18px;text-align:center;margin-top:6px}
+  .subTitle{font-weight:800;font-size:16px;text-align:center;color:var(--muted);margin-top:6px}
   .card{background:var(--panel);border-radius:12px;padding:18px;box-shadow:var(--card-shadow);border:1px solid rgba(15,23,42,0.03)}
-  /* FRONT / SETUP */
   .introRow{display:flex;gap:12px;margin-top:18px}
   .box{flex:1;padding:18px;border-radius:12px;color:#fff;font-weight:800;min-height:110px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .18s cubic-bezier(.2,.9,.3,1)}
   .box:hover{transform:translateY(-6px)}
@@ -49,8 +41,7 @@
   .allocArea{display:grid;grid-template-columns:1fr 360px;gap:12px;margin-top:18px}
   .allocList{padding:12px;display:grid;gap:10px}
   .catRow{display:flex;gap:12px;align-items:center}
-  .catIndex{width:36px;height:36px;border-radius:8px;background:#fff;color:#0f1724;display:flex;align-items:center;justify-content:center;font-weight:900;box-shadow:0 6px 20px rgba(15,23,42,0.04)}
-  .catName{width:220px;font-weight:800}
+  .catName{width:260px;font-weight:800}
   .sliderWrap{display:flex;align-items:center;gap:8px;flex:1}
   .valBox{width:88px;text-align:center;padding:8px;border-radius:8px;background:#fbfdfe;border:1px solid rgba(15,23,42,0.04);font-weight:700}
   input[type=range]{width:100%;height:32px;appearance:none;background:transparent}
@@ -60,17 +51,16 @@
   .startWrap{display:flex;align-items:center;justify-content:flex-end;margin-top:12px}
   .btnStart{padding:10px 16px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;border:none;border-radius:10px;font-weight:900;cursor:pointer;box-shadow:0 8px 20px rgba(255,122,24,0.14);transition:transform .14s}
   .btnStart:hover{transform:translateY(-4px)}
-  /* Leaderboard box */
   .leaderCard{margin-top:12px;padding:12px;border-radius:10px}
   .leaderTitle{font-weight:800;margin-bottom:8px}
   .leaderList{display:flex;flex-direction:column;gap:8px}
   .leaderRow{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:linear-gradient(180deg,#fff,#fcfcfc);border:1px solid rgba(15,23,42,0.03);font-weight:700}
-  /* QUIZ */
   #quizScreen{display:none;margin-top:20px}
   .qTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-  .qMid{display:flex;justify-content:center;align-items:center;gap:8px;font-weight:900}
+  .qMid{display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:900}
+  .qHead{display:flex;align-items:center;gap:8px;font-weight:700}
   .qCard{background:transparent;padding:18px;border-radius:12px}
-  .qText{font-size:20px;margin-bottom:12px;line-height:1.3}
+  .qText{font-size:20px;margin-top:18px;margin-bottom:12px;line-height:1.4} /* increased gap above question */
   .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .opt{background:#fff;padding:14px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:transform .12s, box-shadow .12s}
   .opt:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(15,23,42,0.06)}
@@ -82,7 +72,6 @@
   .explain h4{margin:0 0 8px 0}
   .hedges{display:flex;gap:18px;justify-content:center;margin-top:18px}
   .diamond{width:72px;height:72px;transform:rotate(45deg);display:flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;border-radius:10px;box-shadow:0 12px 28px rgba(15,23,42,0.08);cursor:pointer;transition:transform .12s, opacity .12s}
-  .diamond:active{transform:rotate(45deg) scale(0.98)}
   .diamond span{transform:rotate(-45deg);font-weight:900;display:block}
   .diamond.used{background:#e6e7eb;color:#9aa0aa;cursor:default;opacity:0.9}
   .hedgeNotice{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;padding:10px 14px;border-radius:8px;background:var(--accent);color:#fff;display:none;z-index:50;box-shadow:0 8px 20px rgba(15,23,42,0.06)}
@@ -91,7 +80,6 @@
   .dot{width:14px;height:14px;border-radius:50%;background:#e6eef8;border:1px solid rgba(2,6,23,0.06)}
   .dot.correct{background:var(--green)}
   .dot.wrong{background:var(--danger)}
-  /* Username modal */
   .modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(15,23,42,0.4);display:flex;align-items:center;justify-content:center;z-index:60;display:none}
   .modalCard{background:var(--panel);padding:20px;border-radius:12px;min-width:320px;box-shadow:var(--card-shadow)}
   .modalCard input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);margin-top:10px}
@@ -105,16 +93,14 @@
 </head>
 <body>
   <div class="wrap">
-    <header>
+    <div style="text-align:center">
       <div class="logo">TimesMaster</div>
-      <div style="flex:1">
-        <div style="font-weight:900">10 questions • 8 categories based on ET • One-time leverages</div>
-        <div class="sub">Wager, leverage, learn — answer smartly</div>
-      </div>
-    </header>
+      <div class="panelTitle">10 questions • 8 categories based on ET • One-time leverages</div>
+      <div class="subTitle">Wager, leverage, learn — answer smartly</div>
+    </div>
 
     <!-- FRONT / SETUP -->
-    <section id="setup" class="card" aria-label="Setup">
+    <section id="setup" class="card" aria-label="Setup" style="margin-top:18px">
       <div class="introRow">
         <div class="box box--wager">
           <div>WAGER YOUR POINTS</div>
@@ -130,9 +116,9 @@
         </div>
       </div>
 
-      <div style="display:flex;gap:12px;margin-top:18px">
-        <div style="flex:1" class="card">
-          <div style="font-weight:800;margin-bottom:10px">Allocate weights (stops: 50%,100%,150%,200%)</div>
+      <div class="allocArea" style="margin-top:18px">
+        <div class="card" style="padding:14px">
+          <div style="font-weight:800;margin-bottom:8px">Allocate weights</div>
           <div id="allocList" class="allocList"></div>
         </div>
 
@@ -147,8 +133,8 @@
             <div>
               <div style="font-weight:900">Allocation summary</div>
               <div class="sub" style="margin-top:8px">Default: all categories 100% (10 pts)</div>
-              <div class="sumline" style="margin-top:12px">Sum: <span id="sumDisplay">0</span> / 800%</div>
-              <div style="margin-top:10px;color:var(--muted);font-size:13px">Total must equal 800% (8 categories × 100%)</div>
+              <div class="sumline" style="margin-top:12px">Sum: <span id="sumDisplay">0%</span> / 100%</div>
+              <div style="margin-top:10px;color:var(--muted);font-size:13px">Average weight across categories must equal 100% before starting.</div>
             </div>
             <div class="startWrap">
               <button id="startBtn" class="btnStart">Start Quiz</button>
@@ -159,22 +145,31 @@
     </section>
 
     <!-- QUIZ -->
-    <section id="quizScreen" aria-label="Quiz">
-      <div class="qTop">
+    <section id="quizScreen" aria-label="Quiz" style="margin-top:18px">
+      <div style="text-align:center">
+        <div class="panelTitle">TimesMaster</div>
+        <div class="subTitle">10 questions • 8 categories based on ET • One-time leverages</div>
+      </div>
+
+      <div class="qTop" style="margin-top:14px">
         <div class="progressDots" id="progressDots"></div>
         <div class="scoreBox">Score: <span id="score">0</span></div>
       </div>
 
-      <div class="qCard card">
-        <div class="qMid"><div id="qNumber">Q1</div><div style="opacity:0.6">•</div><div id="qCategory">Category</div></div>
+      <div class="qCard card" style="margin-top:12px">
+        <div class="qMid">
+          <div class="qHead"><div id="qNumber">Q1</div><div style="opacity:0.6">•</div><div id="qCategory">Category</div></div>
+        </div>
+
         <div class="qText" id="qText">Question text</div>
+
         <div class="options" id="opts"></div>
 
         <div class="explain" id="explain"><h4>Explainer</h4><div id="explainText"></div></div>
 
         <div class="countdown" id="countdown" style="display:none">Next question loading in 10 seconds</div>
 
-        <div class="hedges" id="hedges">
+        <div class="hedges" id="hedges" style="margin-top:18px">
           <div class="diamond" id="hedHalf" title="1/2x"><span>1/2×</span></div>
           <div class="diamond" id="hed2x" title="2x"><span>2×</span></div>
           <div class="diamond" id="hed3x" title="3x"><span>3×</span></div>
@@ -183,10 +178,8 @@
     </section>
 
     <div class="hedgeNotice" id="hedgeNotice">Hedge applied</div>
-    <footer style="margin-top:18px">
-      <div></div>
-      <div class="sub">Questions sourced from: Economic Times (20 Nov 2025)</div>
-    </footer>
+
+    <footer style="margin-top:18px;text-align:center;color:var(--muted)">Questions sourced from: Economic Times (20 Nov 2025)</footer>
   </div>
 
   <!-- Username modal -->
@@ -203,35 +196,34 @@
   </div>
 
 <script>
-/* TimesMaster — updated JS with leaderboard & UX micro-animations */
+/* TimesMaster — updated JS with the requested corrections */
 
-/* Categories renamed and numbered */
+/* Categories (no leading numbers) */
 const categories = [
-  '1. Domestic developments',
-  '2. Politics',
-  '3. Markets',
-  '4. International developments',
-  '5. Sports',
-  '6. Brands',
-  '7. Startups & Tech',
-  '8. Economy'
+  'Domestic developments',
+  'Politics',
+  'Markets',
+  'International developments',
+  'Sports',
+  'Brands',
+  'Startups & Tech',
+  'Economy'
 ];
 
-/* Snap stops map: slider index 0..3 -> percent */
-const SNAP = [50,100,150,200]; // corresponds to 5/10/15/20 points for base 10
-const BASE = 10; // base points (points = BASE * snap/100)
+/* Snap stops map */
+const SNAP = [50,100,150,200];
+const BASE = 10;
 
-/* weights default */
+/* weights default 100 each */
 const weights = {};
 categories.forEach(c=>weights[c]=100);
 
-/* Build allocation UI */
+/* Build allocation UI (no numeric index) */
 const allocList = document.getElementById('allocList');
-categories.forEach((cat,i)=>{
+categories.forEach((cat)=>{
   const row = document.createElement('div'); row.className='catRow';
   row.style.padding = '8px 0';
   row.innerHTML = `
-    <div class="catIndex">${i+1}</div>
     <div class="catName">${cat}</div>
     <div class="sliderWrap">
       <input type="range" min="0" max="3" step="1" value="1" data-cat="${cat}" class="slider">
@@ -242,145 +234,148 @@ categories.forEach((cat,i)=>{
 });
 
 function updateSum(){
-  let s=0;
+  let total = 0;
   document.querySelectorAll('.slider').forEach(sl=>{
     const v = Number(sl.value);
     const pct = SNAP[v];
     weights[sl.dataset.cat] = pct;
     document.querySelector(`[data-box="${sl.dataset.cat}"]`).innerText = pct + '%';
-    s += pct;
+    total += pct;
   });
-  document.getElementById('sumDisplay').innerText = s + '%';
-  return s;
+  // display average per category (total/8) and compare to 100%
+  const avg = Math.round((total / categories.length) * 100) / 100;
+  document.getElementById('sumDisplay').innerText = avg + '%';
+  return avg;
 }
 allocList.addEventListener('input', updateSum);
 updateSum();
 
-/* QUESTIONS — drawn from ET (20 Nov 2025) PDF (same as previously prepared) */
+/* QUESTIONS (same content as before but category names updated to match new list) */
 let QUESTIONS = [
   {
-    id:1, category:'2. Politics',
-    text: "Operations in Andhra Pradesh around Maredumilli reported the death of several Maoists after back-to-back encounters. Which detail was reported in follow-ups?",
+    id:1, category:'Politics',
+    text: "Operations in Andhra Pradesh around Maredumilli reported the death of several Maoists after back-to-back encounters. Which logistical or reporting detail complicated immediate confirmation?",
     choices:[
-      {t:"Officials said Madvi Hidma and close associates, including some family members, were among the dead", correct:true},
-      {t:"Local media reported the commander had surrendered peacefully and offered to cooperate with authorities", correct:false},
-      {t:"The incident was a cross-border operation coordinated with a foreign army", correct:false},
-      {t:"Subsequent inquiry found the deaths were due to friendly fire with no insurgent casualties", correct:false}
+      {t:"The rugged trijunction terrain and delayed forensic access meant early reports included unverified identities", correct:true},
+      {t:"All state agencies immediately released detailed DNA reports confirming identities", correct:false},
+      {t:"An international monitoring mission had already published its findings", correct:false},
+      {t:"A public broadcast from the insurgent group confirmed the event in real-time", correct:false}
     ],
-    explain:"Coverage described follow-up operations near Maredumilli naming senior insurgents and associates among casualties; police treated it as a continuation of earlier encounters."
+    explain:"Initial coverage noted that rugged terrain and security constraints delayed on-site verification; subsequent police briefings clarified identities after forensic checks (reports emphasised caution in early claims)."
   },
   {
-    id:2, category:'1. Domestic developments',
-    text: "Anmol Bishnoi, linked to a high-profile gang, was recently arrested after deportation from the US. What did reports say about his custody?",
+    id:2, category:'Domestic developments',
+    text: "A deported suspect with transnational links was taken into custody upon arrival. In such cases, what is a common legal step countries often take next?",
     choices:[
-      {t:"He was remanded to NIA custody for further investigation into terror-related charges", correct:true},
-      {t:"He was immediately released as there were no charges against him", correct:false},
-      {t:"He was extradited to another country for trial", correct:false},
-      {t:"He was granted interim bail by a city court within hours", correct:false}
+      {t:"National investigative agencies remand the suspect for questioning while examining international cooperation requests", correct:true},
+      {t:"The suspect is automatically repatriated to a third country without formal charge", correct:false},
+      {t:"All charges are dismissed due to diplomatic immunity", correct:false},
+      {t:"Courts immediately order public trials within 24 hours", correct:false}
     ],
-    explain:"ET reported NIA took custody of Anmol Bishnoi after his deportation for continued probe in terror-linked cases."
+    explain:"When deportees arrive with suspected links to organised crime, agencies like the NIA typically remand them for questioning while coordinating with foreign counterparts to gather evidence; this is standard operational procedure."
   },
   {
-    id:3, category:'3. Markets',
-    text: "Deutsche Bank was reported selling its India retail & wealth business. What was notable about the potential buyer race?",
+    id:3, category:'Markets',
+    text: "When a global bank looks to sell its retail arm in a market, why might domestic bidders offering higher upfront cash be preferred by creditors over higher long-term valuations?",
     choices:[
-      {t:"Kotak Mahindra Bank and Federal Bank were among bidders as the lender sought to exit its India retail franchise", correct:true},
-      {t:"Foreign state-owned banks were the only bidders allowed", correct:false},
-      {t:"The sale was blocked by regulators due to national security concerns", correct:false},
-      {t:"The business was being merged into a government-owned bank instead of sold", correct:false}
+      {t:"Immediate liquidity improves recovery rates for creditors and reduces execution risk compared with speculative future value", correct:true},
+      {t:"Creditors typically prefer lower upfront cash because it leaves room for renegotiation", correct:false},
+      {t:"Regulators always block bidders who offer high upfront cash", correct:false},
+      {t:"Upfront cash is irrelevant to creditor decisions in insolvency sales", correct:false}
     ],
-    explain:"ET noted Kotak and Federal in the race for Deutsche Bank's India retail & wealth business as part of the bank's global restructuring."
+    explain:"Creditors often prioritise higher upfront payments in distress sales because immediate cash improves recoveries and reduces execution risk, even if another bid has a higher long-term NPV."
   },
   {
-    id:4, category:'8. Economy',
-    text: "Indian refiners shifted buying patterns ahead of sanction deadlines on some Russian oil. What market signal did ET note?",
+    id:4, category:'Economy',
+    text: "Refiners adjusted sourcing ahead of potential constraints on some supply lines. How do shifts in tanker bookings act as an early market signal?",
     choices:[
-      {t:"A surge in tanker bookings for Gulf crude suggested refiners were pivoting away from Russian barrels", correct:true},
-      {t:"A complete pause in all crude purchases was ordered by the government", correct:false},
-      {t:"Refiners began buying exclusively from Russian state traders", correct:false},
-      {t:"International freight rates collapsed due to oversupply", correct:false}
+      {t:"A jump in bookings from alternate regions suggests buyers are pre-booking alternative cargoes to hedge supply risk", correct:true},
+      {t:"Tanker bookings are unrelated to refinery purchasing strategies", correct:false},
+      {t:"Fewer bookings always indicate higher demand", correct:false},
+      {t:"Booking patterns only reflect seasonal demand and never policy risk", correct:false}
     ],
-    explain:"ET referenced a rise in bookings for Gulf shipments as refiners secured alternate supplies ahead of deadlines affecting some Russian sellers."
+    explain:"An uptick in tanker bookings from a different region typically indicates refiners are securing alternate cargoes to reduce exposure — a common market hedging practice ahead of supply uncertainty."
   },
   {
-    id:5, category:'4. International developments',
-    text: "PM Modi was scheduled to attend the G20 Leaders' summit in Johannesburg. Which additional meeting was noted alongside the G20?",
+    id:5, category:'International developments',
+    text: "Leaders travelling to summits frequently hold regional group meetings on the sidelines. What is a strategic reason for attending an additional IBSA-style meeting alongside a G20 summit?",
     choices:[
-      {t:"An India–Brazil–South Africa (IBSA) leaders' meeting was also on the agenda during the visit", correct:true},
-      {t:"A bilateral summit with the Japanese Prime Minister was confirmed", correct:false},
-      {t:"He would sign a defence pact transferring aircraft to South Africa", correct:false},
-      {t:"A non-aligned movement conference was planned instead", correct:false}
+      {t:"To strengthen trilateral coordination on regional trade and development priorities among like-minded partners", correct:true},
+      {t:"Because G20 agendas ban bilaterals, so leaders must meet separately", correct:false},
+      {t:"IBSA meetings are ceremonial and have no strategic outcomes", correct:false},
+      {t:"G20 summits automatically dissolve regional groupings", correct:false}
     ],
-    explain:"ET mentioned the PM's attendance at G20 and also the IBSA leaders' meeting in South Africa."
+    explain:"Attending IBSA or similar meetings alongside larger summits helps countries coordinate regional priorities and form concerted positions on trade, development and geopolitical issues."
   },
   {
-    id:6, category:'6. Brands',
-    text: "AgroStar raised new funding as ET reported. What was the stated use for the fresh capital?",
+    id:6, category:'Brands',
+    text: "Startups in agritech often raise capital to build both offline and digital distribution. Why is omnichannel expansion attractive for such firms?",
     choices:[
-      {t:"To scale omnichannel reach, invest in product innovation, and strengthen AI capabilities for farmers", correct:true},
-      {t:"To enter consumer banking services directly", correct:false},
-      {t:"To buy a global FMCG brand and rebrand it", correct:false},
-      {t:"To pivot completely away from agriculture into hardware manufacturing", correct:false}
+      {t:"It combines local retail reach with digital data-driven services, improving farmer trust and unit economics", correct:true},
+      {t:"Omnichannel models are only marketing buzzwords with no measurable impact", correct:false},
+      {t:"Digital-only strategies always outperform omnichannel in rural markets", correct:false},
+      {t:"Omnichannel expansion eliminates all operational complexity", correct:false}
     ],
-    explain:"ET covered that AgroStar planned to use funds to expand omnichannel distribution, product innovation and AI tools."
+    explain:"Omnichannel strategies let agritech firms reach farmers where they shop while using digital tools to personalise offerings and improve economics — a commonly stated use of fresh capital."
   },
   {
-    id:7, category:'7. Startups & Tech',
-    text: "Elevation Capital sold a small stake in Paytm in market trades. What was notable about this divestment?",
+    id:7, category:'Startups & Tech',
+    text: "When early-stage investors partially exit via market trades, what signal can this send to the market and why might it be done?",
     choices:[
-      {t:"It was the first time Elevation sold a significant stake in Paytm since its IPO", correct:true},
-      {t:"Elevation increased its stake via a fresh purchase during the same session", correct:false},
-      {t:"The sale was forced by a regulatory seizure of shares", correct:false},
-      {t:"The transaction was a private placement not visible on exchanges", correct:false}
+      {t:"A small open-market sale can signal profit taking or portfolio rebalancing without implying loss of faith in the company", correct:true},
+      {t:"Such sales are always a sign the investor has lost confidence and will exit fully immediately", correct:false},
+      {t:"It legally forces the company to buy back shares the next day", correct:false},
+      {t:"It requires immediate regulatory approval for the investor to retain any stake", correct:false}
     ],
-    explain:"ET reported Elevation sold ~2% in Paytm via open-market trades — its first sale post-IPO."
+    explain:"Investors may sell small stakes in open markets to realise gains or rebalance portfolios; such moves do not necessarily imply a loss of confidence but are normal liquidity events."
   },
   {
-    id:8, category:'5. Sports',
-    text: "ET's sports coverage highlighted competitive outcomes. Which type of event did the paper report Indian athletes making gains in recently?",
+    id:8, category:'Sports',
+    text: "In multi-nation sporting events, athletes often progress through rounds to medal contention. What does consistent progression to late rounds typically indicate about a country's sporting program?",
     choices:[
-      {t:"Boxing and other international multi-nation tournaments where Indians advanced to medal rounds", correct:true},
-      {t:"A new national football league expansion featuring only foreign players", correct:false},
-      {t:"A discontinued cricket tournament replaced by a chess league", correct:false},
-      {t:"A mass marathon cancelled nationwide", correct:false}
+      {t:"It reflects depth in talent and improving competitive exposure at international levels", correct:true},
+      {t:"It always indicates over-investment in sport funds", correct:false},
+      {t:"It guarantees Olympic medals in the next cycle", correct:false},
+      {t:"It suggests domestic leagues are being cancelled", correct:false}
     ],
-    explain:"Sports briefs covered boxing and international tournaments where Indian athletes advanced to later stages."
+    explain:"Repeated appearances in late rounds often point to better talent pipelines, coaching and international exposure, even if they don't guarantee medals immediately."
   },
   {
-    id:9, category:'1. Domestic developments',
-    text: "The CAG announced steps to integrate ESG reporting criteria. Which sector's reporting did it say it would assess?",
+    id:9, category:'Domestic developments',
+    text: "Integrating ESG measures into audits is becoming common. Why might auditing state-run listed firms against ESG reporting frameworks be useful for stakeholders?",
     choices:[
-      {t:"It would assess listed state-run companies' compliance with Sebi's BRSR (ESG) framework", correct:true},
-      {t:"It would only audit small unlisted start-ups for ESG", correct:false},
-      {t:"It announced no plans to review any government-linked entities", correct:false},
-      {t:"It mandated immediate carbon taxes for all companies", correct:false}
+      {t:"It improves transparency around environmental and governance risks that affect long-term shareholder value", correct:true},
+      {t:"It reduces the need for any corporate reporting at all", correct:false},
+      {t:"It prevents firms from publishing any financial data", correct:false},
+      {t:"It is only relevant to small startups and not to large utilities", correct:false}
     ],
-    explain:"ET reported CAG would benchmark listed state-run companies' compliance with Sebi's BRSR ESG reporting."
+    explain:"ESG benchmarking provides investors and policymakers with information about long-term risks and sustainability practices, helping align public firms with contemporary reporting norms."
   },
   {
-    id:10, category:'3. Markets',
-    text: "Market briefs in ET noted which milestone for Bank Nifty and what implication?",
+    id:10, category:'Markets',
+    text: "Market indices reaching new levels often prompt analyst commentary. What is a balanced interpretation of an index move to a new high?",
     choices:[
-      {t:"Bank Nifty topped 59,000, with analysts noting potential for further upside in the near term", correct:true},
-      {t:"Bank Nifty crashed below 10,000 triggering circuit breakers", correct:false},
-      {t:"Markets closed permanently for a national holiday", correct:false},
-      {t:"All banks were nationalised again by the federal government", correct:false}
+      {t:"It can signal momentum and investor confidence but should be assessed alongside valuations and macro indicators", correct:true},
+      {t:"A new high always means the market is undervalued", correct:false},
+      {t:"Once a new high is reached, markets never correct", correct:false},
+      {t:"New highs automatically trigger circuit breakers", correct:false}
     ],
-    explain:"ET markets desk highlighted Bank Nifty near 59k, with commentary suggesting potential further gains."
+    explain:"Analysts view new highs as evidence of momentum or optimism; prudent interpretation combines that with valuations, flows and macro context to judge sustainability."
   }
 ];
 
-/* shuffle choices & questions to avoid same-order biases */
+/* shuffle choices & questions */
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } }
 QUESTIONS.forEach(q=>shuffle(q.choices));
 shuffle(QUESTIONS);
 
-/* --- Quiz state --- */
+/* Quiz state */
 let current = 0;
 let score = 0;
 let used = {hHalf:false,h2:false,h3:false};
 let currentHedge = null;
 let countdownTimer = null;
+let questionAnswered = false;
 
 /* DOM refs */
 const progressDots = document.getElementById('progressDots');
@@ -396,24 +391,23 @@ const leaderBoardEl = document.getElementById('leaderBoard');
 
 function buildDots(){
   progressDots.innerHTML = '';
-  for(let i=0;i<QUESTIONS.length;i++){
-    const d = document.createElement('div'); d.className='dot'; d.id='dot'+i; progressDots.appendChild(d);
-  }
+  for(let i=0;i<QUESTIONS.length;i++){ const d=document.createElement('div'); d.className='dot'; d.id='dot'+i; progressDots.appendChild(d); }
 }
 buildDots();
 
+/* Points calc */
 function calculatePoints(cat){
-  const pct = weights[cat] || 100; // 50/100/150/200
+  const pct = weights[cat] || 100;
   return Math.round(BASE * (pct/100));
 }
 
-/* render question */
+/* show question */
 function showQuestion(){
-  if(countdownTimer){ clearInterval(countdownTimer); countdownTimer = null; countdownEl.style.display='none'; }
-  if(current >= QUESTIONS.length){
-    endQuiz();
-    return;
-  }
+  // reset flags and timers
+  questionAnswered = false;
+  currentHedge = null;
+  if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; countdownEl.style.display='none'; }
+  if(current >= QUESTIONS.length){ endQuiz(); return; }
   const q = QUESTIONS[current];
   qNumber.innerText = `Q${current+1}`;
   qCategory.innerText = q.category;
@@ -421,20 +415,27 @@ function showQuestion(){
   optsBox.innerHTML = '';
   explainBox.style.display = 'none';
   explainText.innerText = '';
+  document.getElementById('dot'+current).classList.remove('correct','wrong');
+
+  // re-enable hedge UI (but keep used ones grey)
+  ['hedHalf','hed2x','hed3x'].forEach(id=>{
+    document.getElementById(id).classList.remove('active');
+  });
 
   q.choices.forEach((ch, idx)=>{
-    const o = document.createElement('div'); o.className = 'opt';
+    const o = document.createElement('div'); o.className='opt';
     o.innerHTML = `<div class="optLabel">${String.fromCharCode(65+idx)}</div><div>${ch.t}</div>`;
     o.addEventListener('click', ()=> selectOption(o, idx, q));
     optsBox.appendChild(o);
   });
   scoreBox.innerText = score;
-  document.getElementById('dot'+current).classList.remove('correct','wrong');
 }
 
 /* select option */
 function selectOption(el, idx, q){
-  if(el.classList.contains('correct')||el.classList.contains('wrong')) return;
+  if(questionAnswered) return; // prevent double selection
+  questionAnswered = true; // lock hedges now
+  // compute pts and apply currentHedge
   const pts = calculatePoints(q.category);
   let multiplier = 1;
   if(currentHedge === 'half'){ multiplier = 0.5; used.hHalf = true; document.getElementById('hedHalf').classList.add('used'); }
@@ -445,7 +446,7 @@ function selectOption(el, idx, q){
   const finalPts = Math.round(pts * multiplier);
 
   const all = document.querySelectorAll('.opt');
-  all.forEach((o, i)=>{ if(q.choices[i].correct) o.classList.add('correct'); else if(o !== el) o.style.opacity = '0.6'; });
+  all.forEach((o,i)=>{ if(q.choices[i].correct) o.classList.add('correct'); else if(o!==el) o.style.opacity='0.6'; });
 
   if(q.choices[idx].correct){
     el.classList.add('correct');
@@ -463,7 +464,7 @@ function selectOption(el, idx, q){
   explainText.innerText = q.explain;
   explainBox.style.display = 'block';
 
-  // countdown 10s
+  // start 10s countdown
   let sec = 10;
   countdownEl.style.display = 'block';
   countdownEl.innerText = `Next question loading in ${sec} seconds`;
@@ -477,36 +478,49 @@ function selectOption(el, idx, q){
   }, 1000);
 }
 
-/* helper UI updates */
-function updateDot(i, state){ const d = document.getElementById('dot'+i); if(d){ d.classList.remove('correct','wrong'); d.classList.add(state); } }
+/* update dot */
+function updateDot(i, state){ const d = document.getElementById('dot'+i); if(d){ d.classList.remove('correct','wrong'); d.classList.add(state);} }
+
+/* show delta */
 function showDelta(txt){
   const el = document.createElement('div'); el.style.marginTop='8px'; el.style.fontWeight='900'; el.style.fontSize='15px';
   el.style.color = txt.startsWith('+') ? 'var(--green)' : 'var(--danger)';
   el.innerText = `${txt} pts`;
   document.querySelector('.qCard').appendChild(el);
-  setTimeout(()=>{ try{ el.remove() } catch(e){} }, 2400);
+  setTimeout(()=>{ try{ el.remove() }catch(e){} }, 2400);
 }
 
-/* hedges handlers */
+/* Hedge handlers: register only if question not answered.
+   Clicking immediately greys the diamond (consumes it) and shows notice. */
 document.getElementById('hedHalf').addEventListener('click', ()=>{
-  if(used.hHalf) return;
+  if(used.hHalf) return; // already used overall
+  if(questionAnswered) return; // too late
+  // consume immediately: mark used and active for this question
+  used.hHalf = true;
   currentHedge = 'half';
-  document.getElementById('hedHalf').classList.add('active');
+  const el = document.getElementById('hedHalf'); el.classList.add('used');
+  showHedgeNotice();
 });
 document.getElementById('hed2x').addEventListener('click', ()=>{
   if(used.h2) return;
+  if(questionAnswered) return;
+  used.h2 = true;
   currentHedge = '2';
-  document.getElementById('hed2x').classList.add('active');
+  const el = document.getElementById('hed2x'); el.classList.add('used');
+  showHedgeNotice();
 });
 document.getElementById('hed3x').addEventListener('click', ()=>{
   if(used.h3) return;
+  if(questionAnswered) return;
+  used.h3 = true;
   currentHedge = '3';
-  document.getElementById('hed3x').classList.add('active');
+  const el = document.getElementById('hed3x'); el.classList.add('used');
+  showHedgeNotice();
 });
 
 function showHedgeNotice(){ const n = document.getElementById('hedgeNotice'); n.style.display='block'; setTimeout(()=>n.style.display='none',2000); }
 
-/* START flow: show username modal */
+/* START flow with username modal and average-based validation */
 const startBtn = document.getElementById('startBtn');
 const usernameModal = document.getElementById('usernameModal');
 const usernameInput = document.getElementById('usernameInput');
@@ -515,72 +529,42 @@ const usernameCancel = document.getElementById('usernameCancel');
 let currentUser = null;
 
 startBtn.addEventListener('click', ()=>{
-  // validate allocation sum (must equal 800)
-  const s = updateSum();
-  if(s !== 800){ alert('Please ensure total weights equal 800% (8 categories × 100%). Current: ' + s + '%'); return; }
-  // open username modal
+  const avg = updateSum(); // avg %
+  if(Number(avg) !== 100){ alert('Please ensure average weight across categories equals 100%. Current: ' + avg + '%'); return; }
   usernameModal.style.display = 'flex';
   usernameInput.value = localStorage.getItem('timesmaster_lastuser') || '';
   usernameInput.focus();
 });
-
-usernameCancel.addEventListener('click', ()=>{
-  usernameModal.style.display = 'none';
-});
-
+usernameCancel.addEventListener('click', ()=>{ usernameModal.style.display='none'; });
 usernameSave.addEventListener('click', ()=>{
   const name = usernameInput.value.trim() || 'Guest';
   currentUser = name.substring(0,20);
   localStorage.setItem('timesmaster_lastuser', currentUser);
-  usernameModal.style.display = 'none';
-  // hide setup, show quiz
-  document.getElementById('setup').style.display = 'none';
-  document.getElementById('quizScreen').style.display = 'block';
+  usernameModal.style.display='none';
+  document.getElementById('setup').style.display='none';
+  document.getElementById('quizScreen').style.display='block';
   buildDots();
-  current = 0; score = 0; scoreBox.innerText = '0';
-  // reset hedges UI and used flags
-  used = {hHalf:false,h2:false,h3:false}; currentHedge = null;
-  document.getElementById('hedHalf').classList.remove('used'); document.getElementById('hed2x').classList.remove('used'); document.getElementById('hed3x').classList.remove('used');
-  // show first question
+  current = 0; score = 0; scoreBox.innerText='0';
+  // reset used hedges UI if they were marked used earlier
+  if(used.hHalf) document.getElementById('hedHalf').classList.add('used');
+  if(used.h2) document.getElementById('hed2x').classList.add('used');
+  if(used.h3) document.getElementById('hed3x').classList.add('used');
   showQuestion();
 });
 
-/* Leaderboard: localStorage key: 'timesmaster_leaderboard' - array of {name,score,date} sorted desc */
-function getLeaderboard(){
-  try{
-    const raw = localStorage.getItem('timesmaster_leaderboard');
-    if(!raw) return [];
-    const parsed = JSON.parse(raw);
-    if(!Array.isArray(parsed)) return [];
-    return parsed;
-  }catch(e){ return []; }
-}
+/* Leaderboard functions (unchanged) */
+function getLeaderboard(){ try{ const raw = localStorage.getItem('timesmaster_leaderboard'); if(!raw) return []; const parsed = JSON.parse(raw); if(!Array.isArray(parsed)) return []; return parsed; }catch(e){ return []; } }
 function saveToLeaderboard(entry){
-  const list = getLeaderboard();
-  list.push(entry);
-  list.sort((a,b)=>b.score - a.score);
-  const top = list.slice(0,5);
-  localStorage.setItem('timesmaster_leaderboard', JSON.stringify(top));
-  renderLeaderboard();
+  const list = getLeaderboard(); list.push(entry); list.sort((a,b)=>b.score - a.score); const top = list.slice(0,5); localStorage.setItem('timesmaster_leaderboard', JSON.stringify(top)); renderLeaderboard();
 }
 function renderLeaderboard(){
-  const list = getLeaderboard();
-  leaderBoardEl.innerHTML = '';
-  if(list.length === 0){
-    leaderBoardEl.innerHTML = '<div style="color:var(--muted)">No scores yet — be the first!</div>';
-    return;
-  }
-  list.forEach((it, idx)=>{
-    const r = document.createElement('div'); r.className = 'leaderRow';
-    r.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><div style="width:28px;height:28;border-radius:6px;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-weight:900">${idx+1}</div><div>${it.name}</div></div><div style="font-weight:900">${it.score}</div>`;
-    leaderBoardEl.appendChild(r);
-  });
+  const list = getLeaderboard(); leaderBoardEl.innerHTML=''; if(list.length===0){ leaderBoardEl.innerHTML = '<div style="color:var(--muted)">No scores yet — be the first!</div>'; return; }
+  list.forEach((it, idx)=>{ const r = document.createElement('div'); r.className='leaderRow'; r.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><div style="width:28px;height:28;border-radius:6px;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-weight:900">${idx+1}</div><div>${it.name}</div></div><div style="font-weight:900">${it.score}</div>`; leaderBoardEl.appendChild(r); });
 }
 renderLeaderboard();
 
-/* End quiz: show final screen and ask to save score */
+/* End quiz behavior (unchanged) */
 function endQuiz(){
-  // clear UI and show completion card with option to save
   const container = document.getElementById('quizScreen');
   container.innerHTML = `<div class="card" style="padding:20px"><h2 style="margin-top:0">Quiz complete</h2><p>Your final score: <b>${score}</b></p>
     <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
@@ -588,42 +572,31 @@ function endQuiz(){
       <button id="playAgainBtn" class="btn btnCancel">Play again</button>
     </div>
   </div>`;
-  // hook buttons
   document.getElementById('saveScoreBtn').addEventListener('click', ()=>{
-    // require username (if not present prompt again)
-    if(!currentUser){
-      usernameModal.style.display='flex';
-      usernameInput.focus();
-      return;
-    }
+    if(!currentUser){ usernameModal.style.display='flex'; usernameInput.focus(); return; }
     saveToLeaderboard({name:currentUser, score:score, date:(new Date()).toISOString()});
     alert('Saved to leaderboard!');
-    // return to setup
     setTimeout(()=>{ location.reload(); }, 700);
   });
-  document.getElementById('playAgainBtn').addEventListener('click', ()=>{
-    location.reload();
-  });
+  document.getElementById('playAgainBtn').addEventListener('click', ()=>{ location.reload(); });
 }
 
-/* helper: updateSum helper used earlier; re-declared for scope */
+/* updateSum (avg version) used everywhere */
 function updateSum(){
-  let s=0;
+  let total = 0;
   document.querySelectorAll('.slider').forEach(sl=>{
     const pct = SNAP[Number(sl.value)];
     weights[sl.dataset.cat] = pct;
     document.querySelector(`[data-box="${sl.dataset.cat}"]`).innerText = pct + '%';
-    s += pct;
+    total += pct;
   });
-  document.getElementById('sumDisplay').innerText = s + '%';
-  return s;
+  const avg = Math.round((total / categories.length) * 100) / 100;
+  document.getElementById('sumDisplay').innerText = avg + '%';
+  return avg;
 }
 
-/* On load: small micro animation hint for hedges */
-setTimeout(()=>{
-  const h = document.querySelectorAll('.diamond');
-  h.forEach(d => { d.style.transform = 'rotate(45deg) translateY(-6px)'; setTimeout(()=>d.style.transform='rotate(45deg)', 260); });
-}, 700);
+/* small UI hint */
+setTimeout(()=>{ const h = document.querySelectorAll('.diamond'); h.forEach(d => { d.style.transform = 'rotate(45deg) translateY(-6px)'; setTimeout(()=>d.style.transform='rotate(45deg)', 260); }); }, 700);
 
 </script>
 </body>
