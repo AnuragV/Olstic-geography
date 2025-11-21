@@ -247,146 +247,168 @@ updateSum();
 
 /* QUESTIONS (same content as before but category names updated to match new list) */
 let QUESTIONS = [
-  // 1 — Politics (factual)
-  {
-    id: 1,
-    category: 'Politics',
-    text: "A series of encounters near Maredumilli led to media reports about multiple Maoist fatalities. In which state did these encounters take place?",
-    choices: [
-      { t: "Andhra Pradesh", correct: true },
-      { t: "Chhattisgarh", correct: false },
-      { t: "Telangana", correct: false },
-      { t: "Odisha", correct: false }
-    ],
-    explain: "The Maredumilli encounters were reported in Andhra Pradesh; the area is near the trijunction with Chhattisgarh and Telangana, which complicated immediate reporting."
-  },
+/* 1 — Aviation & Cybersecurity (Factual) */
+{
+  id: 1,
+  category: "Aviation & Cybersecurity",
+  text:
+    "A major cyberattack forced several Indian airports to shut down check-in systems temporarily on 21 November. Which airline’s passengers faced the most disruption due to the outage?",
+  choices: [
+    { t: "Air India", correct: true },
+    { t: "IndiGo", correct: false },
+    { t: "Vistara", correct: false },
+    { t: "Akasa Air", correct: false }
+  ],
+  explain:
+    "The ET Nov 21 edition reported that a cyber incident affecting a global airline IT vendor disrupted Air India’s check-in and boarding systems at multiple airports, causing large queues and flight delays."
+},
 
-  // 2 — Domestic developments (factual)
-  {
-    id: 2,
-    category: 'Domestic developments',
-    text: "A deported suspect with alleged transnational links was taken into custody on arrival. Which central investigative agency is typically tasked with such cases in India?",
-    choices: [
-      { t: "National Investigation Agency (NIA)", correct: true },
-      { t: "Enforcement Directorate (ED)", correct: false },
-      { t: "Central Bureau of Investigation (CBI)", correct: false },
-      { t: "National Crime Records Bureau (NCRB)", correct: false }
-    ],
-    explain: "The NIA investigates terrorism and related transnational security threats; deportees with such links are often handed to national investigative agencies for follow-up."
-  },
+/* 2 — Law Enforcement & Security (Factual) */
+{
+  id: 2,
+  category: "Security & Policing",
+  text:
+    "Police operations under ‘Operation Sadbhavana’ led to the detention of undocumented foreign nationals from which country in northeastern states?",
+  choices: [
+    { t: "Bangladesh", correct: false },
+    { t: "Myanmar", correct: true },
+    { t: "Nepal", correct: false },
+    { t: "Sri Lanka", correct: false }
+  ],
+  explain:
+    "Reports said undocumented migrants from Myanmar were identified in parts of the Northeast during coordinated verification drives. Authorities cited border proximity and recent cross-border movements."
+},
 
-  // 3 — Markets (factual + reason)
-  {
-    id: 3,
-    category: 'Markets',
-    text: "In a recent bank/asset distress sale, creditors picked a bidder who offered higher immediate cash. Which practical advantage explains that choice most directly?",
-    choices: [
-      { t: "Higher upfront cash improves immediate recovery certainty for creditors", correct: true },
-      { t: "Higher cash offers reduce the need for regulatory approvals", correct: false },
-      { t: "Immediate cash automatically reduces the buyer's tax bill", correct: false },
-      { t: "Upfront cash guarantees better long-term synergies", correct: false }
-    ],
-    explain: "Creditors prioritise certainty and speed of recovery; immediate cash reduces execution risk compared with offers that promise higher but uncertain future payments."
-  },
+/* 3 — Banking & Corporates (Factual) */
+{
+  id: 3,
+  category: "Banking & Finance",
+  text:
+    "IndusInd Bank’s MD commented that credit demand remained strong in November. Which sector did he cite as showing particularly resilient loan growth?",
+  choices: [
+    { t: "Commercial vehicles", correct: true },
+    { t: "Aviation financing", correct: false },
+    { t: "Real estate luxury projects", correct: false },
+    { t: "Oil & gas exploration", correct: false }
+  ],
+  explain:
+    "The bank chief said demand for commercial vehicle financing remained healthy, driven by logistics, fleet expansion and goods movement, even as other retail categories softened slightly."
+},
 
-  // 4 — Economy (factual)
-  {
-    id: 4,
-    category: 'Economy',
-    text: "Reports said Indian refiners sharply cut loadings of Russian crude in early November. What was the commonly reported reason for that decline?",
-    choices: [
-      { t: "Logistical uncertainty and caution over sanctions-related risks", correct: true },
-      { t: "Domestic refinery closures due to maintenance", correct: false },
-      { t: "A sudden drop in domestic demand for crude", correct: false },
-      { t: "A formal ban on Russian crude imports", correct: false }
-    ],
-    explain: "Coverage attributed the fall to refiners' caution around logistics and potential sanctions exposure, not to a formal import ban or immediate demand collapse."
-  },
+/* 4 — Economy & Markets (Factual) */
+{
+  id: 4,
+  category: "Markets",
+  text:
+    "Indian benchmark indices moved in line with global tech optimism on 21 November. Which international company’s earnings rally was widely cited as boosting sentiment?",
+  choices: [
+    { t: "Nvidia", correct: true },
+    { t: "Tesla", correct: false },
+    { t: "Alibaba", correct: false },
+    { t: "Shell Plc", correct: false }
+  ],
+  explain:
+    "A surge in Nvidia shares after strong quarterly results lifted global tech indices, and Indian markets mirrored this optimism with broad-based gains across IT and growth stocks."
+},
 
-  // 5 — International developments (factual)
-  {
-    id: 5,
-    category: 'International developments',
-    text: "A G20 sideline was used to hold a small trilateral meeting (IBSA-style). What is the usual diplomatic purpose of such side-group meetings?",
-    choices: [
-      { t: "To coordinate positions and build support on regional priorities ahead of larger negotiations", correct: true },
-      { t: "To replace the core summit documents with smaller agreements", correct: false },
-      { t: "To indicate member withdrawal from the larger summit", correct: false },
-      { t: "To elect the summit's permanent secretariat", correct: false }
-    ],
-    explain: "Smaller meetings let like-minded countries align on trade, development or security issues and form coordinated positions for the broader summit discussions."
-  },
+/* 5 — Governance (Factual) */
+{
+  id: 5,
+  category: "Governance & Policy",
+  text:
+    "A Cabinet Secretary–chaired meeting reviewed administrative preparedness across ministries. What key agenda was highlighted as a priority?",
+  choices: [
+    { t: "Readiness for December’s nationwide implementation reviews", correct: true },
+    { t: "Creation of a new national airline regulator", correct: false },
+    { t: "Merger of central universities", correct: false },
+    { t: "Acceleration of crypto-asset licenses", correct: false }
+  ],
+  explain:
+    "ET reported that the Cabinet Secretariat assessed ministry-level readiness for scheduled reviews in December, focusing on project monitoring and administrative coordination."
+},
 
-  // 6 — Sports (factual)
-  {
-    id: 6,
-    category: 'Sports',
-    text: "An Indian boxer (Preeti Pawar) upset a top-seeded opponent to reach a major final. Which country was the opponent reported to be from?",
-    choices: [
-      { t: "Chinese Taipei", correct: true },
-      { t: "Kazakhstan", correct: false },
-      { t: "England", correct: false },
-      { t: "USA", correct: false }
-    ],
-    explain: "Reports described the opponent as a highly credentialed boxer from Chinese Taipei — an Olympic medallist — whom Preeti Pawar defeated to advance."
-  },
+/* 6 — Politics (Factual) */
+{
+  id: 6,
+  category: "Politics",
+  text:
+    "A political face-off intensified after clashes near the India–Myanmar border. Which state’s opposition leaders demanded a central inquiry into the security situation?",
+  choices: [
+    { t: "Manipur", correct: true },
+    { t: "Assam", correct: false },
+    { t: "Arunachal Pradesh", correct: false },
+    { t: "Nagaland", correct: false }
+  ],
+  explain:
+    "Political leaders in Manipur demanded central intervention and a structured inquiry following fresh tensions near the border and ongoing public unrest."
+},
 
-  // 7 — Brands (factual)
-  {
-    id: 7,
-    category: 'Brands',
-    text: "An international beverage company was reported to be exploring an exit from an Indian brewer (B9/Bira). Which investor was named in those reports?",
-    choices: [
-      { t: "Kirin Holdings (Japan)", correct: true },
-      { t: "Diageo (UK)", correct: false },
-      { t: "Heineken (Netherlands)", correct: false },
-      { t: "Molson Coors (Canada)", correct: false }
-    ],
-    explain: "Coverage identified Kirin Holdings as the investor in discussions about an exit from the brewer, reflecting strategic re-evaluations in the sector."
-  },
+/* 7 — Investigations (Factual) */
+{
+  id: 7,
+  category: "Investigations & Enforcement",
+  text:
+    "The Enforcement Directorate questioned several individuals in connection with alleged ‘Al-Falah’ linked transactions. What was the core allegation under review?",
+  choices: [
+    { t: "Suspected routing of funds through shell entities", correct: true },
+    { t: "Stock market manipulation via penny stocks", correct: false },
+    { t: "Cyber intrusion into government servers", correct: false },
+    { t: "Misuse of export incentives", correct: false }
+  ],
+  explain:
+    "ED officials probed whether money was moved through front entities associated with the ‘Al-Falah’ network, examining transaction trails and potential laundering patterns."
+},
 
-  // 8 — Startups & Tech (factual)
-  {
-    id: 8,
-    category: 'Startups & Tech',
-    text: "A report stated an early-stage investor had sold a portion of its stake in a large startup via market trades. What is a neutral, fact-based interpretation of such partial sales?",
-    choices: [
-      { t: "They can represent portfolio rebalancing or partial liquidity rather than a full loss of confidence", correct: true },
-      { t: "They legally force the startup to appoint new directors immediately", correct: false },
-      { t: "They mandate that the startup must go public within 30 days", correct: false },
-      { t: "They are proof the company is insolvent", correct: false }
-    ],
-    explain: "Small open-market sales by investors typically provide liquidity or rebalance holdings; context and scale determine whether they signal concern or normal portfolio management."
-  },
+/* 8 — Opinion & Analysis (Conceptual) */
+{
+  id: 8,
+  category: "Economic Analysis",
+  text:
+    "The newspaper highlighted that global liquidity conditions remain uneven. What is a key reason analysts warn against assuming a broad-based rally from isolated tech stock surges?",
+  choices: [
+    { t: "Sector-specific rallies may not reflect overall macro fundamentals", correct: true },
+    { t: "Tech rallies automatically trigger interest-rate cuts", correct: false },
+    { t: "Tech stock movements determine commodity prices directly", correct: false },
+    { t: "Isolated rallies legally require index rebalancing", correct: false }
+  ],
+  explain:
+    "Analysts noted that a surge in one sector—such as semiconductors—doesn’t guarantee a market-wide breakout unless supported by macro indicators like liquidity, inflation and earnings breadth."
+},
 
-  // 9 — Domestic developments (factual)
-  {
-    id: 9,
-    category: 'Domestic developments',
-    text: "Policy reports said the government planned to set up a selection panel by December for which new board created under the digital personal data framework?",
-    choices: [
-      { t: "Data Protection Board of India (DPBI)", correct: true },
-      { t: "National Cybersecurity Council", correct: false },
-      { t: "Digital Economy Authority", correct: false },
-      { t: "Central Data Tribunal", correct: false }
-    ],
-    explain: "Policy updates indicated a panel would be formed to select members for the Data Protection Board envisaged under the draft digital personal data rules."
-  },
+/* 9 — Governance & Policy (Factual) */
+{
+  id: 9,
+  category: "Infrastructure & Public Systems",
+  text:
+    "A brief operational advisory highlighted disruptions in the Central Secretariat Complex. Which issue triggered temporary shutdowns?",
+  choices: [
+    { t: "A fire alert in one of the utility blocks", correct: true },
+    { t: "A structural fault reported by CPWD", correct: false },
+    { t: "A chemical leak in the parking basement", correct: false },
+    { t: "An electrical grid-level failure across Delhi", correct: false }
+  ],
+  explain:
+    "The ET edition noted a fire alarm incident in part of the Central Secretariat, which prompted precautionary shutdown procedures and safety checks before normal operations resumed."
+},
 
-  // 10 — Markets (factual)
-  {
-    id: 10,
-    category: 'Markets',
-    text: "A market commentary noted an index hitting a new high. Which is the most balanced factual takeaway from a new-index-high story?",
-    choices: [
-      { t: "It signals momentum but should be evaluated with valuations, flows and macro data before concluding durability", correct: true },
-      { t: "It proves all stocks in the index are undervalued", correct: false },
-      { t: "It means regulators will always intervene", correct: false },
-      { t: "It guarantees dividends will rise next quarter", correct: false }
-    ],
-    explain: "New highs indicate momentum and sentiment; prudent analysis weighs them against valuations, capital flows and macro context rather than assuming permanence."
-  }
+/* 10 — International Affairs (Conceptual) */
+{
+  id: 10,
+  category: "Global Affairs",
+  text:
+    "Commentary noted that geopolitical tensions continue to affect trade routes. Why do analysts remain cautious despite short-term tactical improvements in shipping flows?",
+  choices: [
+    { t: "Underlying geopolitical risks can reverse gains quickly", correct: true },
+    { t: "Short-term improvements eliminate tariff barriers permanently", correct: false },
+    { t: "Shipping flows determine global interest rates directly", correct: false },
+    { t: "Tactical improvements guarantee multi-year stability", correct: false }
+  ],
+  explain:
+    "Trade analysts emphasise that while shipping disruptions may ease temporarily, geopolitical factors—border tensions, sanctions, and chokepoint risks—can rapidly alter route economics."
+}
+
 ];
+
 
 
 /* shuffle choices & questions */
