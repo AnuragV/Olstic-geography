@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Capture Photo (consent required)</title>
+<style>
+  body{font-family:system-ui;margin:40px;background:#f6f8fb}
+  .btn{padding:12px 18px;border-radius:8px;background:#2563eb;color:#fff;border:none;cursor:pointer}
+  .note{color:#334155;margin-top:12px}
+  #video, #canvas{max-width:100%;border-radius:8px;margin-top:12px}
+  #consentModal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5)}
+  .modalCard{background:#fff;padding:20px;border-radius:10px;max-width:420px}
+</style>
+</head>
+<body>
+  <h2>Secure Photo Capture</h2>
+  <p class="note">Click the button below to start. You will be asked to explicitly consent before any photo or IP is recorded.</p>
+
+  <button id="startLink" class="btn">Take Photo & Continue</button>
+
+  <div id="consentModal" style="display:none">
+    <div class="modalCard">
+      <h3>Consent to capture photo</h3>
+      <p>By clicking <strong>Allow & Capture</strong> you agree that we will: (1) capture a photo using your camera, and (2) record the IP address of the device for [reason]. The photo will be stored for <em>X days</em> and used only for [purpose].</p>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button id="allowBtn" class="btn">Allow & Capture</button>
+        <button id="denyBtn" style="padding:12px 18px;border-radius:8px;background:#e5e7eb;border:none;cursor:pointer">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <video id="video" autoplay playsinline style="display:none"></video>
+  <canvas id="canvas" style="display:none"></canvas>
+
+<script>
+const startLink = document.getElementById('startLink');
+const consentModal = document.getElementById('consentModal');
+const allowBtn = document.getElementById('allowBtn');
+const denyBtn = document.getElementById('denyBtn');
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+
+startLink.addEventListener('click', () => {
+  consentModal.style.display = 'flex';
+});
+
+denyBtn.addEventListener('click', () => {
+  consentModal.style.display = 'none';
+});
+
+allowBtn.addEventListener('click', async () => {
+  consentModal.style.display = 'none';
+  // request camera
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+    video.srcObject = stream;
+    video.style.display = 'block';
+
+    // short timer to allow camera to warm up then capture
+    await new Promise(r => setTimeout(r, 700));
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // stop camera
+    stream.getTracks().forEach(t => t.stop());
+    video.style.display = 'none';
+
+    // convert to blob
+    canvas.toBlob(async (blob) => {
+      // upload to server
+      const fd = new FormData();
+      fd.append('photo', blob, 'photo.jpg');
+      // include explicit consent text & timestamp for audit
+      fd.append('consent', 'user-consented-to-capture');
+      fd.append('consent_time', new Date().toISOString());
+
+      const resp = await fetch('/upload-photo', { method: 'POST', body: fd });
+      const json = await resp.json();
+      alert(json.message || 'Uploaded');
+    }, 'image/jpeg', 0.85);
+  } catch (err) {
+    alert('Camera access denied or unavailable: ' + err.message);
+  }
+});
+</script>
+</body>
+</html>
